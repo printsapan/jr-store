@@ -552,7 +552,7 @@ function startApp(){
   document.getElementById('nb-list').style.display=isAdmin?'':'none';
   document.getElementById('nb-users').style.display=currentRole==='owner'?'':'none';
   document.getElementById('nb-product').style.display=isSales?'':'none';
-  document.getElementById('nb-weight').style.display=(isStore||isSales)?'':'none';
+  document.getElementById('nb-weight').style.display=(isStore||isSales||isAdmin)?'':'none';
   document.getElementById('salesFilter').style.display=isSales?'block':'none';
   var si=document.getElementById('si');
   if(si) si.placeholder=isSales?'ค้นหากระเบื้องปูพื้น,ผนัง':'พิมพ์ชื่อสินค้า';
@@ -1063,12 +1063,51 @@ loadUsersOnStart();
 
 // ── WEIGHT CALCULATOR ──
 var STEEL_ITEMS=[
-  {cat:'เหล็กกลม',items:[{name:'เหล็กกลม 6 มม',w:0.222,unit:'เส้น'},{name:'เหล็กกลม 8 มม',w:0.395,unit:'เส้น'},{name:'เหล็กกลม 9 มม',w:0.499,unit:'เส้น'}]},
-  {cat:'เหล็กข้ออ้อย',items:[{name:'เหล็กข้ออ้อย 10 มม',w:0.617,unit:'เส้น'},{name:'เหล็กข้ออ้อย 12 มม',w:0.888,unit:'เส้น'},{name:'เหล็กข้ออ้อย 16 มม',w:1.578,unit:'เส้น'},{name:'เหล็กข้ออ้อย 20 มม',w:2.466,unit:'เส้น'},{name:'เหล็กข้ออ้อย 25 มม',w:3.853,unit:'เส้น'},{name:'ลวดผูกเหล็ก',w:25,unit:'ม้วน'}]},
-  {cat:'เหล็ก C ดำ',items:[{name:'C3 หนา 1.6 มม',w:12.8,unit:'แผ่น'},{name:'C3 หนา 2 มม',w:16,unit:'แผ่น'},{name:'C4 หนา 1.6 มม',w:19.7,unit:'แผ่น'},{name:'C4 หนา 2 มม',w:19.7,unit:'แผ่น'},{name:'C5 หนา 1.6 มม',w:22.5,unit:'แผ่น'},{name:'C5 หนา 2 มม',w:28.1,unit:'แผ่น'},{name:'C6 หนา 1.6 มม',w:26.0,unit:'แผ่น'},{name:'C6 หนา 2 มม',w:32.5,unit:'แผ่น'}]},
-  {cat:'เหล็ก C กาวาไน',items:[{name:'C4 กาวาไน 1.6 มม',w:19.7,unit:'แผ่น'},{name:'C4 กาวาไน 2 มม',w:24.6,unit:'แผ่น'},{name:'C5 กาวาไน 1.6 มม',w:22.5,unit:'แผ่น'},{name:'C5 กาวาไน 2 มม',w:28.1,unit:'แผ่น'}]},
-  {cat:'แป๊ปแบน กาวาไน',items:[{name:'แป๊ปแบน 1"×2"',w:6.5,unit:'แผ่น'},{name:'แป๊ปแบน 1"×3"',w:9.0,unit:'แผ่น'},{name:'แป๊ปแบน 1"×4"',w:11.5,unit:'แผ่น'}]},
-  {cat:'ปูนถุง',items:[{name:'ปูน 50 กก',w:50,unit:'ถุง'},{name:'Super 40 กก',w:40,unit:'ถุง'},{name:'ปูนกาว 20 กก',w:20,unit:'ถุง'}]},
+  {cat:'เหล็กกลม',items:[
+    {name:'เหล็กกลม 6 มม',w:2.22,unit:'เส้น'},
+    {name:'เหล็กกลม 8 มม',w:3.95,unit:'เส้น'},
+    {name:'เหล็กกลม 9 มม',w:4.99,unit:'เส้น'},
+  ]},
+  {cat:'เหล็กข้ออ้อย',items:[
+    {name:'เหล็กข้ออ้อย 10 มม (10ม)',w:6.16,unit:'เส้น'},
+    {name:'เหล็กข้ออ้อย 12 มม (10ม)',w:8.88,unit:'เส้น'},
+    {name:'เหล็กข้ออ้อย 12 มม (12ม)',w:10.656,unit:'เส้น'},
+    {name:'เหล็กข้ออ้อย 16 มม (10ม)',w:15.78,unit:'เส้น'},
+    {name:'เหล็กข้ออ้อย 16 มม (12ม)',w:18.93,unit:'เส้น'},
+    {name:'เหล็กข้ออ้อย 20 มม (10ม)',w:24.66,unit:'เส้น'},
+    {name:'เหล็กข้ออ้อย 20 มม (12ม)',w:29.59,unit:'เส้น'},
+    {name:'เหล็กข้ออ้อย 25 มม (10ม)',w:38.53,unit:'เส้น'},
+    {name:'เหล็กข้ออ้อย 25 มม (12ม)',w:46.23,unit:'เส้น'},
+    {name:'ลวดผูกเหล็ก',w:2.4,unit:'ม้วน'},
+  ]},
+  {cat:'เหล็ก C ดำ',items:[
+    {name:'C3 หนา 1.6 (🟠ส้ม)',w:12.8,unit:'แผ่น'},
+    {name:'C3 หนา 2.3 (🟢เขียว)',w:17.8,unit:'แผ่น'},
+    {name:'C4 หนา 1.6 (🟠ส้ม)',w:15.9,unit:'แผ่น'},
+    {name:'C4 หนา 2.0 (🟡เหลือง)',w:19.7,unit:'แผ่น'},
+    {name:'C4 หนา 2.3 (🟢เขียว)',w:22.3,unit:'แผ่น'},
+    {name:'C4 หนา 3.2 (⚪ขาว)',w:30,unit:'แผ่น'},
+    {name:'C5 หนา 2.3 (🟢เขียว)',w:24.7,unit:'แผ่น'},
+    {name:'C5 หนา 3.2 (⚪ขาว)',w:33.5,unit:'แผ่น'},
+    {name:'C6 หนา 2.3 (🟢เขียว)',w:24.7,unit:'แผ่น'},
+    {name:'C6 หนา 3.2 (⚪ขาว)',w:33.5,unit:'แผ่น'},
+  ]},
+  {cat:'เหล็ก C กาวาไน',items:[
+    {name:'C4 หนา 1.5 (🟠ส้ม/🟡เหลือง)',w:13.3,unit:'แผ่น'},
+    {name:'C4 หนา 1.6 (🩷ชมพู)',w:15.5,unit:'แผ่น'},
+    {name:'C4 หนา 2.0 (🟢เขียว)',w:18.5,unit:'แผ่น'},
+    {name:'C4 หนา 2.3 (⚪ขาว)',w:21.2,unit:'แผ่น'},
+    {name:'C5 หนา 2.3 (🟢เขียว)',w:23.5,unit:'แผ่น'},
+  ]},
+  {cat:'แป๊ปแบน กาวาไน',items:[
+    {name:'6x2 หนา 1.6 (🟡เหลือง)',w:25,unit:'แผ่น'},
+    {name:'6x2 หนา 1.8 (🟢เขียว)',w:28,unit:'แผ่น'},
+  ]},
+  {cat:'ปูนถุง',items:[
+    {name:'ปูน 50 กก',w:50,unit:'ถุง'},
+    {name:'Super 40 กก',w:40,unit:'ถุง'},
+    {name:'ปูนกาว 20 กก',w:20,unit:'ถุง'},
+  ]},
 ];
 var _wOpen={};
 
@@ -1089,12 +1128,11 @@ function renderWeight(){
   }
   h+='<div class="acc-item"><div class="acc-hdr" data-sec="custom" onclick="toggleW(this.dataset.sec)"><div class="acc-hdr-title">กรอกเอง (สินค้าอื่นๆ)</div><div style="font-size:16px;color:#ea580c;">'+(!!_wOpen['custom']?'▲':'▼')+'</div></div>';
   h+='<div class="acc-body'+(!!_wOpen['custom']?' open':'')+'" id="wacc_custom">';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:4px;padding:6px 0 4px;"><div style="font-size:10px;color:#6b7280;font-weight:700;">ชื่อ</div><div style="font-size:10px;color:#6b7280;font-weight:700;text-align:center;">กก/ชิ้น</div><div style="font-size:10px;color:#6b7280;font-weight:700;text-align:center;">จำนวน</div></div>';
-  for(var ci=0;ci<3;ci++){
-    h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px;">';
-    h+='<input id="wcn_'+ci+'" type="text" placeholder="ชื่อ" oninput="calcWeight()" style="background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 6px;font-family:Sarabun,sans-serif;font-size:12px;outline:none;"/>';
-    h+='<input id="wcw_'+ci+'" type="number" min="0" step="0.1" placeholder="กก" oninput="calcWeight()" style="background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 6px;font-family:Sarabun,sans-serif;font-size:13px;text-align:center;outline:none;"/>';
-    h+='<input id="wcq_'+ci+'" type="number" min="0" placeholder="0" oninput="calcWeight()" style="background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 6px;font-family:Sarabun,sans-serif;font-size:13px;text-align:center;outline:none;"/></div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;padding:6px 0 4px;"><div style="font-size:10px;color:#6b7280;font-weight:700;text-align:center;">น้ำหนัก (กก/ชิ้น)</div><div style="font-size:10px;color:#6b7280;font-weight:700;text-align:center;">จำนวน</div></div>';
+  for(var ci=0;ci<5;ci++){
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">';
+    h+='<input id="wcw_'+ci+'" type="number" min="0" step="0.01" placeholder="กก" oninput="calcWeight()" style="background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:7px;padding:10px 8px;font-family:Sarabun,sans-serif;font-size:14px;text-align:center;outline:none;"/>';
+    h+='<input id="wcq_'+ci+'" type="number" min="0" placeholder="จำนวน" oninput="calcWeight()" style="background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:7px;padding:10px 8px;font-family:Sarabun,sans-serif;font-size:14px;text-align:center;outline:none;"/></div>';
   }
   h+='</div></div>';
   // result
@@ -1120,7 +1158,7 @@ function toggleW(sec){_wOpen[sec]=!_wOpen[sec];var body=document.getElementById(
 function calcWeight(){
   var total=0,details=[];
   for(var si=0;si<STEEL_ITEMS.length;si++){for(var ii=0;ii<STEEL_ITEMS[si].items.length;ii++){var item=STEEL_ITEMS[si].items[ii];var el=document.getElementById('wi_'+si+'_'+ii);if(!el)continue;var qty=+el.value||0;if(qty>0){var wt=item.w*qty;total+=wt;details.push(item.name+' × '+qty+' = '+wt.toFixed(3)+' กก');}}}
-  for(var ci=0;ci<3;ci++){var wEl=document.getElementById('wcw_'+ci),qEl=document.getElementById('wcq_'+ci),nEl=document.getElementById('wcn_'+ci);if(wEl&&qEl){var w2=+wEl.value||0,q2=+qEl.value||0;if(w2>0&&q2>0){var wt2=w2*q2;total+=wt2;details.push((nEl&&nEl.value?nEl.value:'กรอกเอง')+' × '+q2+' = '+wt2.toFixed(3)+' กก');}}}
+  for(var ci=0;ci<5;ci++){var wEl=document.getElementById('wcw_'+ci),qEl=document.getElementById('wcq_'+ci);if(wEl&&qEl){var w2=+wEl.value||0,q2=+qEl.value||0;if(w2>0&&q2>0){var wt2=w2*q2;total+=wt2;details.push('กรอกเอง ('+w2+' กก) × '+q2+' = '+wt2.toFixed(2)+' กก');}}}
   var res=document.getElementById('weightResult');
   if(total>0){
     res.style.display='block';
