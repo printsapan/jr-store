@@ -482,6 +482,9 @@ function saveUsers(){
 }
 
 function showLoadingOverlay(msg){
+  // แสดง overlay เฉพาะหลัง login แล้วเท่านั้น
+  var loginScreen=document.getElementById('loginScreen');
+  if(loginScreen&&loginScreen.style.display!=='none') return;
   var ov=document.getElementById('loadingOverlay');
   if(!ov){
     ov=document.createElement('div');ov.id='loadingOverlay';
@@ -830,10 +833,13 @@ function openEdit(){
   for(var i=0;i<tiles.length;i++){
     var t=tiles[i];
     h+='<div style="background:#f7f7f4;border-radius:12px;padding:12px;margin-bottom:10px;">';
-    h+='<div style="font-weight:700;color:#2563eb;margin-bottom:8px;font-size:14px;">'+t.name+'</div>';
+    h+='<div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">ชื่อสินค้า</div>';
+    h+='<input id="en_'+t.id+'" type="text" value="'+t.name+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;margin-bottom:8px;"/>';
     h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">แบรนด์</div>'+makeBrandSelect('eb_'+t.id,t.brand,'toggleBrandOther("eb_'+t.id+'")')+'</div>';
+    h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">ขนาด</div><select id="ed2_'+t.id+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;">'+Object.keys(SIZE_MAP).map(function(v){return '<option value="'+v+'"'+(v===t.desc?' selected':'')+'>'+SIZE_MAP[v]+'</option>';}).join('')+'</select></div>';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">สต็อก (กล่อง)</div><input id="eq_'+t.id+'" type="number" value="'+(t.qty||0)+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;"/></div>';
+    h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">จำนวนต่อแพ็ก (แผ่น)</div><input id="epp_'+t.id+'" type="number" value="'+(t.customTpb||'')+'" placeholder="ตามขนาด" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;"/></div>';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">ผิวหน้า</div><select id="es_'+t.id+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;">'+['','High Gloss','เงา','เรียบ','Matt','Matt R10','Matt R11'].map(function(v){return '<option'+(v===t.surface?' selected':'')+'>'+v+'</option>';}).join('')+'</select></div>';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">รูปภาพ</div><input id="ep_'+t.id+'" type="file" accept="image/*" style="width:100%;background:#fff;border:1.5px dashed #e5e7eb;border-radius:7px;padding:6px 8px;font-family:Sarabun,sans-serif;font-size:11px;"/></div>';
     h+='</div><div style="margin-top:8px;"><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">สี/หมายเหตุ</div><textarea id="ed_'+t.id+'" rows="2" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;resize:none;">'+(t.detail||'')+'</textarea></div>';
@@ -857,8 +863,14 @@ function saveEdit(tiles){
     var t=tiles[i];var it=null;
     for(var j=0;j<items.length;j++) if(items[j].id===t.id){it=items[j];break;}
     if(!it) continue;
+    var nameEl=document.getElementById('en_'+t.id);
+    if(nameEl&&nameEl.value.trim()) it.name=nameEl.value.trim();
     it.brand=getBrandVal('eb_'+t.id);
+    var descEl=document.getElementById('ed2_'+t.id);
+    if(descEl) it.desc=descEl.value;
     it.qty=+document.getElementById('eq_'+t.id).value||0;
+    var ppEl=document.getElementById('epp_'+t.id);
+    if(ppEl&&ppEl.value) it.customTpb=+ppEl.value; else if(ppEl&&!ppEl.value) delete it.customTpb;
     it.surface=document.getElementById('es_'+t.id).value;
     it.detail=document.getElementById('ed_'+t.id).value.trim();
     var pf=document.getElementById('ep_'+t.id).files[0];
