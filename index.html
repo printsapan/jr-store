@@ -434,41 +434,35 @@ var defaultUsers=[
 ];
 var users=[];
 
-// โหลดข้อมูลจาก Firestore
-function loadFromFirestore(cb){
+// โหลด users ตอนเปิดหน้าเว็บ
+function loadUsersOnStart(){
+  users=JSON.parse(JSON.stringify(defaultUsers)); // ใช้ default ก่อน
+  db.collection('users').get().then(function(snap){
+    if(snap.empty){
+      var batch=db.batch();
+      users.forEach(function(u){batch.set(db.collection('users').doc(u.id),u);});
+      batch.commit().catch(function(e){console.error(e);});
+    } else {
+      users=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    }
+  }).catch(function(e){console.error('loadUsers error',e);});
+}
+
+// โหลด tiles หลัง login
+function loadItemsFromFirestore(cb){
   showLoadingOverlay('⏳ กำลังโหลดข้อมูล...');
-  var loaded={items:false,users:false};
-  function checkDone(){if(loaded.items&&loaded.users){hideLoadingOverlay();if(cb)cb();}}
-  
   db.collection('tiles').get().then(function(snap){
     if(snap.empty){
-      // ครั้งแรก: upload DEMO data
       items=JSON.parse(JSON.stringify(DEMO));
-      uploadDemoToFirestore(function(){loaded.items=true;checkDone();});
+      uploadDemoToFirestore(function(){hideLoadingOverlay();if(cb)cb();});
     } else {
       items=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-      loaded.items=true;checkDone();
+      hideLoadingOverlay();if(cb)cb();
     }
   }).catch(function(e){
     console.error(e);
     items=JSON.parse(JSON.stringify(DEMO));
-    loaded.items=true;checkDone();
-  });
-
-  db.collection('users').get().then(function(snap){
-    if(snap.empty){
-      users=JSON.parse(JSON.stringify(defaultUsers));
-      var batch=db.batch();
-      users.forEach(function(u){batch.set(db.collection('users').doc(u.id),u);});
-      batch.commit().then(function(){loaded.users=true;checkDone();});
-    } else {
-      users=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-      loaded.users=true;checkDone();
-    }
-  }).catch(function(e){
-    console.error(e);
-    users=JSON.parse(JSON.stringify(defaultUsers));
-    loaded.users=true;checkDone();
+    hideLoadingOverlay();if(cb)cb();
   });
 }
 
@@ -526,7 +520,7 @@ function doLogin(){
     currentRole=found.role;currentUser=found;
     document.getElementById('loginUser').value='';
     document.getElementById('loginPass').value='';
-    loadFromFirestore(function(){startApp();});
+    loadItemsFromFirestore(function(){startApp();});
   } else {
     document.getElementById('loginErr').textContent='❌ User ID หรือ Password ไม่ถูกต้อง';
     document.getElementById('loginPass').value='';
@@ -1064,6 +1058,9 @@ function showToast(msg,type){
   el.textContent=msg;el.className='toast show '+(type||'ok');
   clearTimeout(el._t);el._t=setTimeout(function(){el.className='toast';},2800);
 }
+// โหลด users ตอนเปิดหน้า
+loadUsersOnStart();
+
 // ── WEIGHT CALCULATOR ──
 var STEEL_ITEMS=[
   {cat:'เหล็กกลม',items:[{name:'เหล็กกลม 6 มม',w:0.222,unit:'เส้น'},{name:'เหล็กกลม 8 มม',w:0.395,unit:'เส้น'},{name:'เหล็กกลม 9 มม',w:0.499,unit:'เส้น'}]},
