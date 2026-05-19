@@ -147,7 +147,7 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
       </div>
       <div style="margin-bottom:16px;">
         <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">Password</div>
-        <input type="password" maxlength="6" id="loginPass" placeholder="• • • • • •"
+        <input type="password" id="loginPass" placeholder="• • • • • •"
           style="width:100%;border:2px solid #e5e7eb;border-radius:12px;padding:13px;font-size:20px;text-align:center;letter-spacing:8px;font-family:'Sarabun',sans-serif;outline:none;background:#f9fafb;"
           oninput="this.style.borderColor='#ea580c';document.getElementById('loginErr').textContent=''"
           onkeydown="if(event.key==='Enter')doLogin()"/>
@@ -1132,7 +1132,7 @@ function openAddUser(){
     '<div style="margin-bottom:10px;"><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">ชื่อ</div><input id="nu_name" type="text" placeholder="เช่น JOB" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;"/></div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">'+
     '<div><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">User ID</div><input id="nu_uid" type="text" maxlength="20" placeholder="ตัวอักษรหรือตัวเลข" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:16px;text-align:center;letter-spacing:6px;outline:none;"/></div>'+
-    '<div><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Password (6 หลัก)</div><input id="nu_pwd" type="password" maxlength="6" placeholder="••••••" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:16px;text-align:center;letter-spacing:6px;outline:none;"/></div>'+
+    '<div><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Password</div><input id="nu_pwd" type="password" placeholder="••••••" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:16px;text-align:center;letter-spacing:6px;outline:none;"/></div>'+
     '</div>'+
     '<div style="margin-bottom:16px;"><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">สิทธิ์</div><select id="nu_role" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;"><option value="store">👤 พนักงานสโตร์</option><option value="sales">🛍️ พนักงานขาย</option><option value="admin">🔐 Admin</option><option value="owner">⭐ Owner</option></select></div>';
   var saveBtn=document.createElement('button');saveBtn.textContent='💾 บันทึก';
