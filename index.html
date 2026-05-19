@@ -470,8 +470,13 @@ function tryAutoLogin(){
     if(found){
       currentRole=found.role;currentUser=found;
       loadItemsFromFirestore(function(){startApp();});
+    } else {
+      // session เก่าใช้ไม่ได้แล้ว ลบทิ้ง
+      localStorage.removeItem('jr_session');
     }
-  }catch(e){}
+  }catch(e){
+    try{localStorage.removeItem('jr_session');}catch(e2){}
+  }
 }
 
 // โหลด tiles หลัง login
