@@ -540,8 +540,8 @@ function saveItem(item){
 function deleteItem(id){
   db.collection('tiles').doc(id).delete().catch(function(e){console.error('deleteItem error',e);});
 }
-function tilesAt(row,col,floor){return items.filter(function(x){return x.row===row&&x.col==col&&x.floor==floor;});}
-function realTilesAt(row,col,floor){return tilesAt(row,col,floor).filter(function(x){return !isVacant(x);});}
+function tilesAt(row,col,floor){return items.filter(function(x){return x.row===row&&+x.col===+col&&+x.floor===+floor;});}
+function realTilesAt(row,col,floor){return tilesAt(row,+col,+floor).filter(function(x){return !isVacant(x);});}
 
 function doLogin(){
   try{
@@ -873,7 +873,7 @@ function getBrandVal(selId){
 
 function openEdit(){
   var s=window._sheet;
-  var tiles=realTilesAt(s.row,s.col,s.floor);
+  var tiles=realTilesAt(s.row,+s.col,+s.floor);
   if(!tiles.length){openAdd();return;}
   var ov=document.createElement('div');ov.id='editOv';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;';
@@ -892,7 +892,7 @@ function openEdit(){
     var isOtherSize=!!(t.desc&&!SIZE_MAP[t.desc]);
     var sizeInputDisplay=isOtherSize?'block':'none';
     var sizeOtherVal=isOtherSize?(t.desc||''):'';
-    h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">ขนาด</div><select id="ed2_'+t.id+'" onchange="(function(){var o=document.getElementById(\"ed2oth_'+t.id+'\");if(o)o.style.display=this.value===\"__other__\"?\"block\":\"none\";var pp=document.getElementById(\"epp_'+t.id+'\");if(pp&&TILES_PER_BOX[this.value]){pp.placeholder=TILES_PER_BOX[this.value]+\" แผ่น (ค่าเริ่มต้น)\";pp.value=\"\";}}).call(this)" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;">'+SIZE_KEYS.map(function(v){return '<option value="'+v+'"'+(v===t.desc?' selected':'')+'>'+SIZE_MAP[v]+'</option>';}).join('')+'<option value="__other__"'+(isOtherSize?' selected':'')+'>อื่นๆ (ระบุ)</option></select><input id="ed2oth_'+t.id+'" type="text" placeholder="ระบุขนาด เช่น 20x20" value="'+sizeOtherVal+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;margin-top:4px;display:'+sizeInputDisplay+';"/></div>';
+    h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">ขนาด</div><select id="ed2_'+t.id+'" data-tid="'+t.id+'" class="size-sel" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;">'+SIZE_KEYS.map(function(v){return '<option value="'+v+'"'+(v===t.desc?' selected':'')+'>'+SIZE_MAP[v]+'</option>';}).join('')+'<option value="__other__"'+(isOtherSize?' selected':'')+'>อื่นๆ (ระบุ)</option></select><input id="ed2oth_'+t.id+'" type="text" placeholder="ระบุขนาด เช่น 20x20" value="'+sizeOtherVal+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;margin-top:4px;display:'+sizeInputDisplay+';"/></div>';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">สต็อก (กล่อง)</div><input id="eq_'+t.id+'" type="number" value="'+(t.qty||0)+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;"/></div>';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">จำนวนต่อแพ็ก (แผ่น)</div><input id="epp_'+t.id+'" type="number" value="'+(t.customTpb||'')+'" placeholder="'+(TILES_PER_BOX[t.desc]?TILES_PER_BOX[t.desc]+' แผ่น':'กรอกเอง')+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;"/></div>';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">ผิวหน้า</div><select id="es_'+t.id+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;">'+['','High Gloss','เงา','เรียบ','Matt','Matt R10','Matt R11'].map(function(v){return '<option'+(v===t.surface?' selected':'')+'>'+v+'</option>';}).join('')+'</select></div>';
