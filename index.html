@@ -902,7 +902,7 @@ function openEdit(){
     var isOtherSize=!!(t.desc&&!SIZE_MAP[t.desc]);
     var sizeInputDisplay=isOtherSize?'block':'none';
     var sizeOtherVal=isOtherSize?(t.desc||''):'';
-    h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">ขนาด</div><select id="ed2_'+t.id+'" onchange="toggleSizeOther(this.id,\"epp_'+t.id+'\")" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;">'+SIZE_KEYS.map(function(v){return '<option value="'+v+'"'+(v===t.desc?' selected':'')+'>'+SIZE_MAP[v]+'</option>';}).join('')+'<option value="__other__"'+(isOtherSize?' selected':'')+'>อื่นๆ (ระบุ)</option></select></div>';
+    h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">ขนาด</div><select id="ed2_'+t.id+'" data-szid="'+t.id+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;">'+SIZE_KEYS.map(function(v){return '<option value="'+v+'"'+(v===t.desc?' selected':'')+'>'+SIZE_MAP[v]+'</option>';}).join('')+'<option value="__other__"'+(isOtherSize?' selected':'')+'>อื่นๆ (ระบุ)</option></select></div>';
     h+='<div style="grid-column:span 2"><input id="ed2oth_'+t.id+'" type="text" placeholder="ระบุขนาด เช่น 20x20" value="'+sizeOtherVal+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;display:'+sizeInputDisplay+';"/></div>';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">สต็อก (กล่อง)</div><input id="eq_'+t.id+'" type="number" value="'+(t.qty||0)+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;"/></div>';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">จำนวนต่อแพ็ก (แผ่น)</div><input id="epp_'+t.id+'" type="number" value="'+(t.customTpb||'')+'" placeholder="'+(TILES_PER_BOX[t.desc]?TILES_PER_BOX[t.desc]+' แผ่น':'กรอกเอง')+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;"/></div>';
@@ -913,18 +913,20 @@ function openEdit(){
     h+='</div>';
   }
   inner.innerHTML=h;
-  // Add event listeners for size selects (fix iOS onchange in innerHTML)
-  for(var k=0;k<tiles.length;k++){
-    (function(tid,tdesc){
-      var sel=document.getElementById('ed2_'+tid);
-      if(sel) sel.addEventListener('change',function(){
-        var o=document.getElementById('ed2oth_'+tid);
-        if(o) o.style.display=this.value==='__other__'?'block':'none';
-        var pp=document.getElementById('epp_'+tid);
-        if(pp&&TILES_PER_BOX[this.value]){pp.placeholder=TILES_PER_BOX[this.value]+' แผ่น';pp.value='';}
-      });
-    })(tiles[k].id,tiles[k].desc);
-  }
+  // Event delegation for ALL selects in edit form (iOS safe)
+  inner.addEventListener('change',function(e){
+    var el=e.target;
+    if(el.dataset&&el.dataset.szid){
+      var tid=el.dataset.szid;
+      var o=document.getElementById('ed2oth_'+tid);
+      if(o) o.style.display=el.value==='__other__'?'block':'none';
+      var pp=document.getElementById('epp_'+tid);
+      if(pp){
+        if(TILES_PER_BOX[el.value]){pp.placeholder=TILES_PER_BOX[el.value]+' แผ่น';pp.value='';}
+        else if(el.value==='__other__'){pp.placeholder='กรอกเอง';}
+      }
+    }
+  });
   var saveBtn=document.createElement('button');saveBtn.textContent='💾 บันทึก';
   saveBtn.style.cssText='width:100%;padding:13px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;border-radius:11px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:4px;';
   saveBtn.onclick=function(){saveEdit(tiles);};
