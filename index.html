@@ -874,7 +874,7 @@ function getBrandVal(selId){
 function openEdit(){
   var s=window._sheet;
   var tiles=realTilesAt(s.row,s.col,s.floor);
-  if(!tiles.length){showToast('ไม่มีสินค้าในช่องนี้','err');return;}
+  if(!tiles.length){openAdd();return;}
   var ov=document.createElement('div');ov.id='editOv';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;';
   var inner=document.createElement('div');
@@ -902,6 +902,18 @@ function openEdit(){
     h+='</div>';
   }
   inner.innerHTML=h;
+  // Add event listeners for size selects (fix iOS onchange in innerHTML)
+  for(var k=0;k<tiles.length;k++){
+    (function(tid,tdesc){
+      var sel=document.getElementById('ed2_'+tid);
+      if(sel) sel.addEventListener('change',function(){
+        var o=document.getElementById('ed2oth_'+tid);
+        if(o) o.style.display=this.value==='__other__'?'block':'none';
+        var pp=document.getElementById('epp_'+tid);
+        if(pp&&TILES_PER_BOX[this.value]){pp.placeholder=TILES_PER_BOX[this.value]+' แผ่น';pp.value='';}
+      });
+    })(tiles[k].id,tiles[k].desc);
+  }
   var saveBtn=document.createElement('button');saveBtn.textContent='💾 บันทึก';
   saveBtn.style.cssText='width:100%;padding:13px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;border-radius:11px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:4px;';
   saveBtn.onclick=function(){saveEdit(tiles);};
@@ -1112,7 +1124,7 @@ function openAddUser(){
     var uid=document.getElementById('nu_uid').value.trim();
     var pwd=document.getElementById('nu_pwd').value.trim();
     var role=document.getElementById('nu_role').value;
-    if(!name||uid.length!==4||pwd.length!==4){showToast('❌ กรอกให้ครบ UID และ PW ต้อง 4 หลัก','err');return;}
+    if(!name||!uid||pwd.length<1){showToast('❌ กรอกให้ครบ UID และ PW','err');return;}
     if(users.find(function(u){return u.userId===uid;})){showToast('❌ User ID นี้มีอยู่แล้ว','err');return;}
     var newUser={id:'u'+Date.now(),name:name,userId:uid,password:pwd,role:role};
     users.push(newUser);
