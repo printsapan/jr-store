@@ -441,6 +441,9 @@ var users=[];
 // โหลด users ตอนเปิดหน้าเว็บ
 function loadUsersOnStart(){
   users=JSON.parse(JSON.stringify(defaultUsers)); // ใช้ default ก่อนเสมอ
+  // แสดงหน้า login ได้ทันทีด้วย default users
+  tryAutoLogin();
+  // โหลด Firestore ใน background
   db.collection('users').get().then(function(snap){
     if(snap.empty){
       var batch=db.batch();
@@ -449,13 +452,7 @@ function loadUsersOnStart(){
     } else {
       users=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
     }
-    // ลอง auto-login จาก session
-    tryAutoLogin();
-  }).catch(function(e){
-    console.error('loadUsers error',e);
-    // ถ้า Firestore fail ลอง auto-login จาก default users
-    tryAutoLogin();
-  });
+  }).catch(function(e){console.error('loadUsers error',e);});
 }
 
 function tryAutoLogin(){
