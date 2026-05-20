@@ -689,16 +689,18 @@ function doLogout(){
 function startApp(){
   // Save session
   try{localStorage.setItem('jr_session',JSON.stringify({userId:currentUser.userId,password:currentUser.password}));}catch(e){}
-  // Register Face ID if not yet registered
-  try{
-    var bio=localStorage.getItem('jr_biometric');
-    var bioData=bio?JSON.parse(bio):null;
-    if(!bioData||bioData.userId.toLowerCase()!==currentUser.userId.toLowerCase()){
-      registerFaceId(currentUser.userId,currentUser.password);
-    }
-  }catch(e){}
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='block';
+  // Register Face ID หลังจากแอปเปิดแล้ว 3 วินาที (ไม่บล็อก)
+  setTimeout(function(){
+    try{
+      var bio=localStorage.getItem('jr_biometric');
+      var bioData=bio?JSON.parse(bio):null;
+      if(!bioData||bioData.userId.toLowerCase()!==currentUser.userId.toLowerCase()){
+        registerFaceId(currentUser.userId,currentUser.password);
+      }
+    }catch(e){}
+  },3000);
   var tag=document.getElementById('roleTag');
   var nameEl=document.getElementById('headerName');
   if(nameEl&&currentUser) nameEl.textContent=currentUser.name;
