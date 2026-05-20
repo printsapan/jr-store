@@ -156,6 +156,9 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
       <button onclick="doLogin()" style="width:100%;padding:15px;background:linear-gradient(135deg,#f97316,#ea580c);color:white;border:none;border-radius:12px;font-family:'Sarabun',sans-serif;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(234,88,12,0.35);">
         เข้าสู่ระบบ
       </button>
+      <button id="faceIdBtn" onclick="doFaceId()" style="display:none;width:100%;padding:13px;background:#f0f0eb;color:#374151;border:none;border-radius:12px;font-family:'Sarabun',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;">
+        🔐 เข้าสู่ระบบด้วย Face ID / ลายนิ้วมือ
+      </button>
     </div>
   </div>
 </div>
@@ -439,11 +442,96 @@ var defaultUsers=[
 var users=[];
 
 // โหลด users ตอนเปิดหน้าเว็บ
+function initFaceId(){
+  try{
+    if(!window.PublicKeyCredential) return;
+    var sess=localStorage.getItem('jr_biometric');
+    if(sess) document.getElementById('faceIdBtn').style.display='block';
+  }catch(e){}
+}
+
+async function doFaceId(){
+  try{
+    var sess=localStorage.getItem('jr_biometric');
+    if(!sess){showToast('❌ ยังไม่ได้ตั้งค่า Face ID','err');return;}
+    var s=JSON.parse(sess);
+    var ok=await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+    if(!ok){showToast('❌ อุปกรณ์ไม่รองรับ','err');return;}
+    // Use credential to verify
+    var getOpts={
+      publicKey:{
+        challenge:new Uint8Array(32),
+        allowCredentials:[{type:'public-key',id:base64ToBuffer(s.credId)}],
+        userVerification:'required',
+        timeout:60000
+      }
+    };
+    await navigator.credentials.get(getOpts);
+    // Success - login with cached credentials
+    var found=null;
+    for(var i=0;i<users.length;i++){
+      if(users[i].userId.toLowerCase()===s.userId.toLowerCase()&&users[i].password===s.password){found=users[i];break;}
+    }
+    if(found){
+      currentRole=found.role;currentUser=found;
+      loadItemsFromFirestore(function(){startApp();});
+    } else {
+      showToast('❌ ไม่พบผู้ใช้ กรุณา login ด้วยรหัสก่อน','err');
+      localStorage.removeItem('jr_biometric');
+      document.getElementById('faceIdBtn').style.display='none';
+    }
+  }catch(e){
+    if(e.name!=='NotAllowedError') showToast('❌ Face ID ล้มเหลว: '+e.message,'err');
+  }
+}
+
+async function registerFaceId(userId,password){
+  try{
+    if(!window.PublicKeyCredential) return;
+    var ok=await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+    if(!ok) return;
+    var challenge=new Uint8Array(32);
+    crypto.getRandomValues(challenge);
+    var createOpts={
+      publicKey:{
+        challenge:challenge,
+        rp:{name:'JR Store',id:location.hostname},
+        user:{id:new TextEncoder().encode(userId),name:userId,displayName:userId},
+        pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+        authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},
+        timeout:60000
+      }
+    };
+    var cred=await navigator.credentials.create(createOpts);
+    var credId=bufferToBase64(cred.rawId);
+    localStorage.setItem('jr_biometric',JSON.stringify({userId:userId,password:password,credId:credId}));
+    document.getElementById('faceIdBtn').style.display='block';
+    showToast('✅ ตั้งค่า Face ID สำเร็จ!','ok');
+  }catch(e){
+    if(e.name!=='NotAllowedError') console.log('FaceID register:',e.message);
+  }
+}
+
+function bufferToBase64(buf){
+  return btoa(String.fromCharCode(...new Uint8Array(buf)));
+}
+function base64ToBuffer(b64){
+  var bin=atob(b64);
+  var buf=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i);
+  return buf.buffer;
+}
+
 function loadUsersOnStart(){
-  users=JSON.parse(JSON.stringify(defaultUsers)); // ใช้ default ก่อนเสมอ
-  // แสดงหน้า login ได้ทันทีด้วย default users
+  // โหลด users จาก localStorage cache ก่อน (เร็วที่สุด)
+  try{
+    var cached=localStorage.getItem('jr_users');
+    if(cached) users=JSON.parse(cached);
+    else users=JSON.parse(JSON.stringify(defaultUsers));
+  }catch(e){users=JSON.parse(JSON.stringify(defaultUsers));}
+  // auto-login ทันที
   tryAutoLogin();
-  // โหลด Firestore ใน background (ไม่บล็อก UI)
+  // sync Firestore ใน background
   try{
     db.collection('users').get().then(function(snap){
       if(snap.empty){
@@ -452,6 +540,8 @@ function loadUsersOnStart(){
         batch.commit().catch(function(e){console.error(e);});
       } else {
         users=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+        // อัพเดท cache
+        try{localStorage.setItem('jr_users',JSON.stringify(users));}catch(e){}
       }
     }).catch(function(e){console.error('loadUsers error',e);});
   }catch(e){console.error('Firestore init error:',e);}
@@ -464,7 +554,7 @@ function tryAutoLogin(){
     var s=JSON.parse(sess);
     var found=null;
     for(var i=0;i<users.length;i++){
-      if(users[i].userId===s.userId&&users[i].password===s.password){found=users[i];break;}
+      if(users[i].userId.toLowerCase()===s.userId.toLowerCase()&&users[i].password===s.password){found=users[i];break;}
     }
     if(found){
       currentRole=found.role;currentUser=found;
@@ -549,7 +639,7 @@ function doLogin(){
     var pwd=document.getElementById('loginPass').value.trim();
     if(!uid||!pwd){document.getElementById('loginErr').textContent='กรอก User ID และ Password ด้วยครับ';return;}
     var found=null;
-    for(var i=0;i<users.length;i++){if(users[i].userId===uid&&users[i].password===pwd){found=users[i];break;}}
+    for(var i=0;i<users.length;i++){if(users[i].userId.toLowerCase()===uid.toLowerCase()&&users[i].password===pwd){found=users[i];break;}}
     if(found){
       currentRole=found.role;currentUser=found;
       document.getElementById('loginUser').value='';
@@ -578,6 +668,14 @@ function doLogout(){
 function startApp(){
   // Save session
   try{localStorage.setItem('jr_session',JSON.stringify({userId:currentUser.userId,password:currentUser.password}));}catch(e){}
+  // Register Face ID if not yet registered
+  try{
+    var bio=localStorage.getItem('jr_biometric');
+    var bioData=bio?JSON.parse(bio):null;
+    if(!bioData||bioData.userId.toLowerCase()!==currentUser.userId.toLowerCase()){
+      registerFaceId(currentUser.userId,currentUser.password);
+    }
+  }catch(e){}
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='block';
   var tag=document.getElementById('roleTag');
@@ -1164,6 +1262,7 @@ function showToast(msg,type){
 }
 // โหลด users ตอนเปิดหน้า
 loadUsersOnStart();
+initFaceId();
 
 // ── WEIGHT CALCULATOR ──
 var STEEL_ITEMS=[
