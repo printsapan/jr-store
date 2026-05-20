@@ -568,14 +568,7 @@ function tryAutoLogin(){
     }
     if(found){
       currentRole=found.role;currentUser=found;
-      // แสดงหน้าแอปทันที แล้วค่อย load data
-      document.getElementById('loginScreen').style.display='none';
-      document.getElementById('app').style.display='block';
-      loadItemsFromFirestore(function(){
-        var tag=document.getElementById('roleTag');
-        if(tag)tag.textContent=(currentRole==='owner'?'⭐ Owner':currentRole==='admin'?'🔐 Admin':currentRole==='store'?'👤 สโตร์':'🛍️ Sales');
-        renderList();renderMap();
-      });
+      loadItemsFromFirestore(function(){startApp();});
     } else {
       localStorage.removeItem('jr_session');
     }
@@ -586,40 +579,26 @@ function tryAutoLogin(){
 
 // โหลด tiles หลัง login
 function loadItemsFromFirestore(cb){
-  // โหลดจาก cache ก่อน เพื่อเปิดแอปเร็ว
-  try{
-    var cached=localStorage.getItem('jr_items');
-    if(cached){
-      items=JSON.parse(cached);
-      hideLoadingOverlay();
-      if(cb)cb();
-      // sync Firestore ใน background
-      db.collection('tiles').get().then(function(snap){
-        if(!snap.empty){
-          items=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-          renderList();renderMap();
-        }
-      }).catch(function(e){console.error(e);});
-      return;
-    }
-  }catch(e){}
-  // ไม่มี cache โหลดจาก Firestore ปกติ
   showLoadingOverlay('⏳ กำลังโหลดข้อมูล...');
   db.collection('tiles').get().then(function(snap){
     if(snap.empty){
       items=JSON.parse(JSON.stringify(DEMO));
-      uploadDemoToFirestore(function(){
-        hideLoadingOverlay();if(cb)cb();
-      });
+      uploadDemoToFirestore(function(){hideLoadingOverlay();if(cb)cb();});
     } else {
       items=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
       hideLoadingOverlay();if(cb)cb();
     }
   }).catch(function(e){
     console.error(e);
-    items=JSON.parse(JSON.stringify(DEMO));
+    if(!items||!items.length) items=JSON.parse(JSON.stringify(DEMO));
     hideLoadingOverlay();if(cb)cb();
   });
+}
+
+function loadPhotoForItem(itemId,callback){
+  var item=items.find(function(x){return x.id===itemId;});
+  if(item&&item.photo){if(callback)callback(item.photo);}
+  else{if(callback)callback('');}
 }
 
 function uploadDemoToFirestore(cb){
@@ -674,6 +653,8 @@ function doLogin(){
     var uid=document.getElementById('loginUser').value.trim();
     var pwd=document.getElementById('loginPass').value.trim();
     if(!uid||!pwd){document.getElementById('loginErr').textContent='กรอก User ID และ Password ด้วยครับ';return;}
+    // ถ้า users ว่าง ให้ใช้ defaultUsers ทันที
+    if(!users||users.length===0) users=JSON.parse(JSON.stringify(defaultUsers));
     var found=null;
     for(var i=0;i<users.length;i++){if(users[i].userId.toLowerCase()===uid.toLowerCase()&&users[i].password===pwd){found=users[i];break;}}
     if(found){
@@ -1228,7 +1209,7 @@ function renderList(){
     '<div class="sc o"><div class="n">'+(120-nSlots)+'</div><div class="l">ช่องว่าง</div></div>';
   var sorted=realItems.slice().sort(function(a,b){return ROW_ORDER[a.row]-ROW_ORDER[b.row]||a.col-b.col||a.floor-b.floor;});
   document.getElementById('allList').innerHTML='<div class="lcard">'+
-    sorted.map(function(it){var hasImg=!!(it.photo||it.img);var locStyle=hasImg?'':'background:#d1d5db;color:#6b7280;';return '<div class="lrow" data-row="'+it.row+'" data-col="'+it.col+'" data-floor="'+it.floor+'" onclick="openSheet(this.dataset.row,+this.dataset.col,+this.dataset.floor)"><div class="lloc" style="'+locStyle+'">'+it.row+it.col+'-F'+it.floor+'</div><div class="linfo"><div class="lnm">'+it.name+'</div><div class="lsub">'+fmtSize(it.desc)+(it.qty?' · '+it.qty+' กล่อง':'')+'</div></div><div class="larr">›</div></div>';}).join('')+
+    sorted.map(function(it){var hasImg=!!(it.photo||it.img||it._hasPhoto);var locStyle=hasImg?'':'background:#d1d5db;color:#6b7280;';return '<div class="lrow" data-row="'+it.row+'" data-col="'+it.col+'" data-floor="'+it.floor+'" onclick="openSheet(this.dataset.row,+this.dataset.col,+this.dataset.floor)"><div class="lloc" style="'+locStyle+'">'+it.row+it.col+'-F'+it.floor+'</div><div class="linfo"><div class="lnm">'+it.name+'</div><div class="lsub">'+fmtSize(it.desc)+(it.qty?' · '+it.qty+' กล่อง':'')+'</div></div><div class="larr">›</div></div>';}).join('')+
   '</div>';
 }
 
