@@ -523,37 +523,38 @@ function base64ToBuffer(b64){
 }
 
 function loadUsersOnStart(){
-  // โหลด users จาก localStorage cache ก่อน (เร็วที่สุด)
-  // เริ่มจาก defaultUsers เสมอ (รับประกันรหัสถูกต้อง)
+  // 1. defaultUsers เสมอ (รหัสถูกต้อง 100%)
   users=JSON.parse(JSON.stringify(defaultUsers));
-  // merge กับ cached users (เพิ่มเติม users ที่สร้างใหม่)
+  // 2. เพิ่ม users ใหม่จาก cache
   try{
-    var cached=localStorage.getItem('jr_users');
-    if(cached){
-      var cachedUsers=JSON.parse(cached);
-      // เพิ่มเฉพาะ users ที่ไม่มีใน defaultUsers
-      cachedUsers.forEach(function(cu){
-        var isDefault=defaultUsers.some(function(d){return d.id===cu.id;});
-        if(!isDefault) users.push(cu);
-      });
-    }
+    var extra=JSON.parse(localStorage.getItem('jr_users')||'[]');
+    extra.forEach(function(cu){
+      if(!defaultUsers.some(function(d){return d.id===cu.id;})) users.push(cu);
+    });
   }catch(e){}
-  // auto-login ทันที
+  // 3. auto-login ทันที ไม่รอ
   tryAutoLogin();
-  // sync Firestore ใน background
-  try{
-    db.collection('users').get().then(function(snap){
-      if(snap.empty){
-        var batch=db.batch();
-        users.forEach(function(u){batch.set(db.collection('users').doc(u.id),u);});
-        batch.commit().catch(function(e){console.error(e);});
-      } else {
-        users=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-        // อัพเดท cache
-        try{localStorage.setItem('jr_users',JSON.stringify(users));}catch(e){}
-      }
-    }).catch(function(e){console.error('loadUsers error',e);});
-  }catch(e){console.error('Firestore init error:',e);}
+  // 4. sync Firestore background
+  setTimeout(function(){
+    try{
+      db.collection('users').get().then(function(snap){
+        if(!snap.empty){
+          var extras=snap.docs
+            .map(function(d){return Object.assign({id:d.id},d.data());})
+            .filter(function(u){return !defaultUsers.some(function(d){return d.id===u.id;});});
+          // merge extras เข้า users
+          users=JSON.parse(JSON.stringify(defaultUsers));
+          extras.forEach(function(u){users.push(u);});
+          try{localStorage.setItem('jr_users',JSON.stringify(extras));}catch(e){}
+        } else {
+          // upload defaultUsers ขึ้น Firestore
+          var batch=db.batch();
+          defaultUsers.forEach(function(u){batch.set(db.collection('users').doc(u.id),u);});
+          batch.commit().catch(function(){});
+        }
+      }).catch(function(){});
+    }catch(e){}
+  },500);
 }
 
 function tryAutoLogin(){
@@ -567,9 +568,15 @@ function tryAutoLogin(){
     }
     if(found){
       currentRole=found.role;currentUser=found;
-      loadItemsFromFirestore(function(){startApp();});
+      // แสดงหน้าแอปทันที แล้วค่อย load data
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('app').style.display='block';
+      loadItemsFromFirestore(function(){
+        var tag=document.getElementById('roleTag');
+        if(tag)tag.textContent=(currentRole==='owner'?'⭐ Owner':currentRole==='admin'?'🔐 Admin':currentRole==='store'?'👤 สโตร์':'🛍️ Sales');
+        renderList();renderMap();
+      });
     } else {
-      // session เก่าใช้ไม่ได้แล้ว ลบทิ้ง
       localStorage.removeItem('jr_session');
     }
   }catch(e){
@@ -590,7 +597,6 @@ function loadItemsFromFirestore(cb){
       db.collection('tiles').get().then(function(snap){
         if(!snap.empty){
           items=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-          try{localStorage.setItem('jr_items',JSON.stringify(items));}catch(e){}
           renderList();renderMap();
         }
       }).catch(function(e){console.error(e);});
@@ -603,12 +609,10 @@ function loadItemsFromFirestore(cb){
     if(snap.empty){
       items=JSON.parse(JSON.stringify(DEMO));
       uploadDemoToFirestore(function(){
-        try{localStorage.setItem('jr_items',JSON.stringify(items));}catch(e){}
         hideLoadingOverlay();if(cb)cb();
       });
     } else {
       items=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-      try{localStorage.setItem('jr_items',JSON.stringify(items));}catch(e){}
       hideLoadingOverlay();if(cb)cb();
     }
   }).catch(function(e){
