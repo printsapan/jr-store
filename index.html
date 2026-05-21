@@ -742,6 +742,73 @@ function go(id,el){
   if(id==='product') renderProduct();
 }
 
+async function doImageSearch(input){
+  var file=input.files[0];
+  if(!file) return;
+  var resultDiv=document.getElementById('imgSearchResult');
+  resultDiv.style.display='block';
+  resultDiv.textContent='';
+  var loading=document.createElement('div');
+  loading.style.cssText='text-align:center;padding:16px;color:#6b7280;font-size:13px;';
+  loading.textContent='⏳ กำลังวิเคราะห์รูป...';
+  resultDiv.appendChild(loading);
+
+  try{
+    var b64=await new Promise(function(res,rej){
+      var r=new FileReader();
+      r.onload=function(e){res(e.target.result.split(',')[1]);};
+      r.onerror=rej;
+      r.readAsDataURL(file);
+    });
+
+    var nameSet={};
+    items.filter(function(x){return !isVacant(x);}).forEach(function(x){
+      nameSet[x.name+(x.brand?' ('+x.brand+')':'')]=1;
+    });
+    var itemNames=Object.keys(nameSet).slice(0,60).join(', ');
+
+    var resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:300,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:file.type||'image/jpeg',data:b64}},
+          {type:'text',text:'ดูรูปนี้ แล้วบอกว่าน่าจะเป็นสินค้าไหนจากรายการนี้: '+itemNames+' ตอบภาษาไทย สั้นๆ'}
+        ]}]
+      })
+    });
+
+    var data=await resp.json();
+    if(data.error) throw new Error(data.error.message);
+    var answer=data.content&&data.content[0]?data.content[0].text:'ไม่สามารถวิเคราะห์ได้';
+
+    resultDiv.textContent='';
+    var title=document.createElement('div');
+    title.style.cssText='font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px;';
+    title.textContent='🤖 ผลการวิเคราะห์';
+    var body=document.createElement('div');
+    body.style.cssText='font-size:13px;line-height:1.6;color:#374151;';
+    body.textContent=answer;
+    var closeBtn=document.createElement('button');
+    closeBtn.textContent='✕ ปิด';
+    closeBtn.style.cssText='font-size:11px;color:#6b7280;background:none;border:1px solid #e5e7eb;border-radius:8px;padding:4px 10px;cursor:pointer;margin-top:8px;';
+    closeBtn.onclick=function(){resultDiv.style.display='none';};
+    resultDiv.appendChild(title);
+    resultDiv.appendChild(body);
+    resultDiv.appendChild(closeBtn);
+
+  }catch(e){
+    resultDiv.textContent='';
+    var err=document.createElement('div');
+    err.style.cssText='color:#ef4444;font-size:13px;padding:8px;';
+    err.textContent='❌ '+e.message;
+    resultDiv.appendChild(err);
+  }
+  input.value='';
+}
+
 function doSearch(q){
   if(q.trim()==='__export__'){
     document.getElementById('sr').innerHTML='<div style="background:#f7f7f4;border-radius:12px;padding:14px;"><div style="font-size:12px;font-weight:700;color:#ea580c;margin-bottom:8px;">📦 Export</div><textarea readonly style="width:100%;height:120px;font-size:10px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px;font-family:monospace;resize:none;" onclick="this.select()">'+JSON.stringify(items)+'</textarea></div>';
