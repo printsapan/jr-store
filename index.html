@@ -720,6 +720,8 @@ function startApp(){
   document.getElementById('nb-add').style.display=isAdmin?'':'none';
   document.getElementById('nb-list').style.display=isAdmin?'':'none';
   document.getElementById('nb-users').style.display=currentRole==='owner'?'':'none';
+  var imgBtn=document.getElementById('imgSearchBtn');
+  if(imgBtn) imgBtn.style.display=currentRole==='owner'?'block':'none';
   document.getElementById('nb-product').style.display=isSales?'':'none';
   document.getElementById('nb-weight').style.display=(isStore||isSales||isAdmin)?'':'none';
   document.getElementById('salesFilter').style.display=isSales?'block':'none';
