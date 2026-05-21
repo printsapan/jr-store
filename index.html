@@ -191,8 +191,8 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
       <span class="sico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.2" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></svg></span>
     </div>
     <div id="imgSearchBtn" style="display:none;margin-bottom:10px;">
-      <label for="imgSearchInput" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:linear-gradient(135deg,#f97316,#ea580c);color:white;border-radius:12px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">📷 ค้นหาด้วยรูปถ่าย</label>
-      <input id="imgSearchInput" type="file" accept="image/*" capture="environment" style="display:none;" onchange="doImageSearch(this)"/>
+      <button onclick="document.getElementById('imgSearchInput').click()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:linear-gradient(135deg,#f97316,#ea580c);color:white;border-radius:12px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:700;cursor:pointer;border:none;">📷 ค้นหาด้วยรูปถ่าย</button>
+      <input id="imgSearchInput" type="file" accept="image/*" style="display:none;"/>
     </div>
     <div id="imgSearchResult" style="display:none;margin-bottom:10px;padding:12px;background:#fff;border-radius:12px;border:1.5px solid #e5e7eb;"></div>
     <div id="salesFilter" style="display:none;margin-bottom:12px;">
@@ -1428,6 +1428,13 @@ function showToast(msg,type){
 // โหลด users ตอนเปิดหน้า
 loadUsersOnStart();
 initFaceId();
+// Image search file input listener
+var imgInput=document.getElementById('imgSearchInput');
+if(imgInput){
+  imgInput.addEventListener('change',function(){
+    if(this.files&&this.files[0]) doImageSearch(this);
+  });
+}
 
 // ── WEIGHT CALCULATOR ──
 var STEEL_ITEMS=[
