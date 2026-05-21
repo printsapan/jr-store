@@ -268,7 +268,8 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
         </select>
       </div>
       <div class="fg" id="fg_surf_other" style="display:none"><label>ระบุผิวหน้า</label><input id="fsurface_other" type="text" placeholder="ระบุ..."></div>
-      <div class="fg"><label>จำนวนสต็อก (กล่อง)</label><input id="fqty" type="number" placeholder="0" min="0"></div>
+      <div class="fg"><label>จำนวนสต็อก</label><input id="fqty" type="number" placeholder="0" min="0"></div>
+      <div class="fg"><label>หน่วย</label><select id="funit" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:15px;outline:none;"><option>กล่อง</option><option>แพ็ก</option><option>ม้วน</option><option>เส้น</option><option>แผ่น</option><option>ชิ้น</option><option>ถุง</option></select></div>
       <div class="fg"><label>รูปภาพ</label><input id="fphoto" type="file" accept="image/*" style="background:#f0f0eb;border:1.5px dashed var(--border);border-radius:9px;padding:10px 12px;font-family:'Sarabun',sans-serif;font-size:13px;width:100%;"></div>
       <div class="fg"><label>สี / หมายเหตุ</label><textarea id="fdetail" rows="2" placeholder="เช่น ขาว, เทา, ครีม..."></textarea></div>
       <button class="btn-save" onclick="addItem()">💾 บันทึกสินค้า</button>
@@ -417,7 +418,8 @@ var ROW_ORDER={D:0,C:1,B:2,A:3};
 var SIZE_MAP={'4x4':'4×4 สระว่ายน้ำ','8x8':'8×8','8x10':'8×10','8x12':'8×12','10x12':'10×12','12':'12×12','16':'16×16','30x60':'30×60','60x60':'60×60'};
 var SIZE_KEYS=['4x4','8x8','8x10','8x12','10x12','12','16','30x60','60x60'];
 var TILES_PER_BOX={'4x4':90,'8x8':25,'8x10':20,'8x12':16,'10x12':20,'12':11,'16':6,'30x60':8,'60x60':4};
-var BRANDS=['Sosuco','Campana','TOA','Cotto','Kera','Conwood','Shera','ตราเพชร'];
+var UNITS=['กล่อง','แพ็ก','ม้วน','เส้น','แผ่น','ชิ้น','ถุง'];
+var BRANDS=['Sosuco','Campana','TOA','Cotto','Kera','Conwood','Shera','ตราเพชร','5ห่วง'];
 var items=[], currentRole=null, currentUser=null, currentFloor=1;
 
 // ── Firebase Config ──
@@ -779,7 +781,7 @@ function doSearchWithFilter(q,sf,surface,color){
   for(var i=0;i<items.length;i++){
     var it=items[i];if(isVacant(it))continue;
     var mQ=true,mF=true;
-    if(ql){var ft=(it.name+' '+fmtSize(it.desc)+' '+(it.desc||'')+' '+(it.brand||'')+' '+(it.detail||'')).toLowerCase();mQ=ft.indexOf(ql)>=0;}
+    if(ql){var ft=(it.name+' '+fmtSize(it.desc)+' '+(it.desc||'')+' '+(it.brand||'')+' '+(it.detail||'')+' '+(it.desc||'').replace('x','×')+' '+(it.desc||'').replace('×','x')).toLowerCase();mQ=ft.indexOf(ql.replace('×','x').replace('x','×'))>=0||ft.indexOf(ql)>=0;}
     if(sf) mF=(it.desc===sf);
     if(surface&&mF) mF=(it.surface===surface);
     if(color&&mF) mF=((it.detail||'').toLowerCase().indexOf(color.toLowerCase())>=0);
@@ -1025,7 +1027,8 @@ function openEdit(){
     var sizeOtherVal=isOtherSize?(t.desc||''):'';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">ขนาด</div><select id="ed2_'+t.id+'" data-szid="'+t.id+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;">'+SIZE_KEYS.map(function(v){return '<option value="'+v+'"'+(v===t.desc?' selected':'')+'>'+SIZE_MAP[v]+'</option>';}).join('')+'<option value="__other__"'+(isOtherSize?' selected':'')+'>อื่นๆ (ระบุ)</option></select></div>';
     h+='<div style="grid-column:span 2"><input id="ed2oth_'+t.id+'" type="text" placeholder="ระบุขนาด เช่น 20x20" value="'+sizeOtherVal+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;display:'+sizeInputDisplay+';"/></div>';
-    h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">สต็อก (กล่อง)</div><input id="eq_'+t.id+'" type="number" value="'+(t.qty||0)+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;"/></div>';
+    h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">สต็อก</div><input id="eq_'+t.id+'" type="number" value="'+(t.qty||0)+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;"/></div>';
+    h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">หน่วย</div><select id="eu_'+t.id+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;">'+UNITS.map(function(u){return '<option value="'+u+'"'+(u===(t.unit||'กล่อง')?' selected':'')+'>'+u+'</option>';}).join('')+'</select></div>';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">จำนวนต่อแพ็ก (แผ่น)</div><input id="epp_'+t.id+'" type="number" value="'+(t.customTpb||'')+'" placeholder="'+(TILES_PER_BOX[t.desc]?TILES_PER_BOX[t.desc]+' แผ่น':'กรอกเอง')+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;"/></div>';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">ผิวหน้า</div><select id="es_'+t.id+'" style="width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:7px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;">'+['','High Gloss','เงา','เรียบ','Matt','Matt R10','Matt R11'].map(function(v){return '<option'+(v===t.surface?' selected':'')+'>'+v+'</option>';}).join('')+'</select></div>';
     h+='<div><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:3px;">รูปภาพ</div><input id="ep_'+t.id+'" type="file" accept="image/*" style="width:100%;background:#fff;border:1.5px dashed #e5e7eb;border-radius:7px;padding:6px 8px;font-family:Sarabun,sans-serif;font-size:11px;"/></div>';
@@ -1077,6 +1080,8 @@ function saveEdit(tiles){
       }
     }
     it.qty=+document.getElementById('eq_'+t.id).value||0;
+    var euEl=document.getElementById('eu_'+t.id);
+    if(euEl) it.unit=euEl.value;
     var ppEl=document.getElementById('epp_'+t.id);
     if(ppEl&&ppEl.value) it.customTpb=+ppEl.value; else if(ppEl&&!ppEl.value) delete it.customTpb;
     it.surface=document.getElementById('es_'+t.id).value;
@@ -1215,7 +1220,7 @@ function renderList(){
     '<div class="sc o"><div class="n">'+(120-nSlots)+'</div><div class="l">ช่องว่าง</div></div>';
   var sorted=realItems.slice().sort(function(a,b){return ROW_ORDER[a.row]-ROW_ORDER[b.row]||a.col-b.col||a.floor-b.floor;});
   document.getElementById('allList').innerHTML='<div class="lcard">'+
-    sorted.map(function(it){var hasImg=!!(it.photo||it.img||it._hasPhoto);var locStyle=hasImg?'':'background:#d1d5db;color:#6b7280;';return '<div class="lrow" data-row="'+it.row+'" data-col="'+it.col+'" data-floor="'+it.floor+'" onclick="openSheet(this.dataset.row,+this.dataset.col,+this.dataset.floor)"><div class="lloc" style="'+locStyle+'">'+it.row+it.col+'-F'+it.floor+'</div><div class="linfo"><div class="lnm">'+it.name+'</div><div class="lsub">'+fmtSize(it.desc)+(it.qty?' · '+it.qty+' กล่อง':'')+'</div></div><div class="larr">›</div></div>';}).join('')+
+    sorted.map(function(it){var hasImg=!!(it.photo||it.img||it._hasPhoto);var locStyle=hasImg?'':'background:#d1d5db;color:#6b7280;';return '<div class="lrow" data-row="'+it.row+'" data-col="'+it.col+'" data-floor="'+it.floor+'" onclick="openSheet(this.dataset.row,+this.dataset.col,+this.dataset.floor)"><div class="lloc" style="'+locStyle+'">'+it.row+it.col+'-F'+it.floor+'</div><div class="linfo"><div class="lnm">'+it.name+'</div><div class="lsub">'+fmtSize(it.desc)+(it.qty?' · '+it.qty+' '+(it.unit||'กล่อง'):'')+'</div></div><div class="larr">›</div></div>';}).join('')+
   '</div>';
 }
 
