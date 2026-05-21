@@ -217,7 +217,7 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
       <button class="ftab" onclick="setFloor(3,this)">ชั้น 3 (บน)</button>
     </div>
     <div class="mlegend" id="mapLegend"></div>
-    <div class="wh-scroll" id="wmapScroll"><div class="wh-map" id="wmap" style="transform-origin:top left;touch-action:none;"></div></div>
+    <div class="wh-scroll" id="wmapScroll" style="overflow:auto;"><div class="wh-map" id="wmap" style="transform-origin:top left;"></div></div>
   </div>
 
   <div class="page" id="pg-product"><div id="productContent"></div></div>
@@ -246,7 +246,7 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
       <div class="fg" id="fg_brand_other" style="display:none"><label>ระบุแบรนด์</label><input id="fbrand_other" type="text" placeholder="ระบุ..."></div>
       <div class="fg"><label>ขนาด</label>
         <select id="fd" onchange="document.getElementById('fg_size_other').style.display=this.value==='other'?'block':'none'">
-          <option value="">-- เลือกขนาด --</option>
+          <option value="none">ไม่ระบุ</option>
           <option value="4x4">4×4 สระว่ายน้ำ (กล่องละ 90 แผ่น)</option>
           <option value="8x8">8×8 (กล่องละ 25 แผ่น)</option><option value="8x10">8×10 (กล่องละ 20 แผ่น)</option>
           <option value="8x12">8×12 (กล่องละ 16 แผ่น)</option><option value="10x12">10×12 (กล่องละ 20 แผ่น)</option>
@@ -886,30 +886,48 @@ function makeGrid2D(row,col,floor){
 function initMapZoom(){
   var el=document.getElementById('wmap');
   var scroll=document.getElementById('wmapScroll');
-  if(!el||!scroll||el._zoomInit) return;
+  if(!el||!scroll) return;
+  if(el._zoomInit){el._scale=el._scale||1;return;}
   el._zoomInit=true;
-  var scale=1,lastDist=0,startScale=1;
+  el._scale=1;
+  var lastDist=0,startScale=1;
+
   scroll.addEventListener('touchstart',function(e){
     if(e.touches.length===2){
       e.preventDefault();
-      lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-      startScale=scale;
+      lastDist=Math.hypot(
+        e.touches[0].clientX-e.touches[1].clientX,
+        e.touches[0].clientY-e.touches[1].clientY
+      );
+      startScale=el._scale;
     }
   },{passive:false});
+
   scroll.addEventListener('touchmove',function(e){
     if(e.touches.length===2){
       e.preventDefault();
-      var dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-      scale=Math.min(3,Math.max(0.5,startScale*(dist/lastDist)));
-      el.style.transform='scale('+scale+')';
-      el.style.marginBottom=(scale-1)*el.offsetHeight+'px';
+      var dist=Math.hypot(
+        e.touches[0].clientX-e.touches[1].clientX,
+        e.touches[0].clientY-e.touches[1].clientY
+      );
+      el._scale=Math.min(3,Math.max(0.5,startScale*(dist/lastDist)));
+      el.style.transform='scale('+el._scale+')';
+      el.style.width=(100/el._scale)+'%';
+      scroll.style.height=(el.offsetHeight*el._scale+40)+'px';
     }
   },{passive:false});
-  // Double tap to reset
+
+  // Double tap = reset zoom
   var lastTap=0;
   scroll.addEventListener('touchend',function(e){
+    if(e.touches.length>0) return;
     var now=Date.now();
-    if(now-lastTap<300){scale=1;el.style.transform='scale(1)';el.style.marginBottom='0';}
+    if(now-lastTap<300){
+      el._scale=1;
+      el.style.transform='scale(1)';
+      el.style.width='';
+      scroll.style.height='';
+    }
     lastTap=now;
   });
 }
@@ -1218,7 +1236,7 @@ function addItem(){
   if(!name){showToast('❌ ใส่ชื่อสินค้าด้วย','err');return;}
   var row=document.getElementById('fr').value,col=+document.getElementById('fc').value,fl=+document.getElementById('ff').value;
   var sizeVal=document.getElementById('fd').value,customTpb=null;
-  if(sizeVal==='other'){sizeVal=document.getElementById('fd_other').value.trim();var tpbEl=document.getElementById('fd_tpb');if(tpbEl&&tpbEl.value)customTpb=+tpbEl.value;}
+  if(sizeVal==='none'){sizeVal='none';}else if(sizeVal==='other'){sizeVal=document.getElementById('fd_other').value.trim();var tpbEl=document.getElementById('fd_tpb');if(tpbEl&&tpbEl.value)customTpb=+tpbEl.value;}
   var surfVal=document.getElementById('fsurface').value;
   if(surfVal==='other') surfVal=document.getElementById('fsurface_other').value.trim();
   var brandVal=getBrandVal('fbrand');
