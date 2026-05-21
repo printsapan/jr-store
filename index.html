@@ -190,11 +190,7 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
       <input id="si" type="text" placeholder="พิมพ์ชื่อสินค้า" oninput="doSearch(this.value)" autocomplete="off">
       <span class="sico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.2" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></svg></span>
     </div>
-    <div id="imgSearchBtn" style="display:none;margin-bottom:10px;">
-      <button onclick="document.getElementById('imgSearchInput').click()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:linear-gradient(135deg,#f97316,#ea580c);color:white;border-radius:12px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:700;cursor:pointer;border:none;">📷 ค้นหาด้วยรูปถ่าย</button>
-      <input id="imgSearchInput" type="file" accept="image/*" style="display:none;"/>
-    </div>
-    <div id="imgSearchResult" style="display:none;margin-bottom:10px;padding:12px;background:#fff;border-radius:12px;border:1.5px solid #e5e7eb;"></div>
+
     <div id="salesFilter" style="display:none;margin-bottom:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;">🔎 กรองสินค้า</span><button onclick="clearFilter()" style="font-size:11px;color:var(--accent);background:none;border:1px solid rgba(234,88,12,.3);border-radius:50px;padding:3px 10px;cursor:pointer;font-family:'Sarabun',sans-serif;">✕ ล้างทั้งหมด</button></div>
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
@@ -698,7 +694,7 @@ function startApp(){
   try{localStorage.setItem('jr_session',JSON.stringify({userId:currentUser.userId,password:currentUser.password}));}catch(e){}
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='block';
-  // Register Face ID หลังจากแอปเปิดแล้ว 3 วินาที (ไม่บล็อก)
+  // Register Face ID หลังจากแอปเปิดแล้ว 8 วินาที
   setTimeout(function(){
     try{
       var bio=localStorage.getItem('jr_biometric');
@@ -707,7 +703,7 @@ function startApp(){
         registerFaceId(currentUser.userId,currentUser.password);
       }
     }catch(e){}
-  },3000);
+  },8000);
   var tag=document.getElementById('roleTag');
   var nameEl=document.getElementById('headerName');
   if(nameEl&&currentUser) nameEl.textContent=currentUser.name;
@@ -720,8 +716,6 @@ function startApp(){
   document.getElementById('nb-add').style.display=isAdmin?'':'none';
   document.getElementById('nb-list').style.display=isAdmin?'':'none';
   document.getElementById('nb-users').style.display=currentRole==='owner'?'':'none';
-  var imgBtn=document.getElementById('imgSearchBtn');
-  if(imgBtn) imgBtn.style.display=currentRole==='owner'?'block':'none';
   document.getElementById('nb-product').style.display=isSales?'':'none';
   document.getElementById('nb-weight').style.display=(isStore||isSales||isAdmin)?'':'none';
   document.getElementById('salesFilter').style.display=isSales?'block':'none';
@@ -740,73 +734,6 @@ function go(id,el){
   if(id==='users') renderUsers();
   if(id==='weight') renderWeight();
   if(id==='product') renderProduct();
-}
-
-async function doImageSearch(input){
-  var file=input.files[0];
-  if(!file) return;
-  var resultDiv=document.getElementById('imgSearchResult');
-  resultDiv.style.display='block';
-  resultDiv.textContent='';
-  var loading=document.createElement('div');
-  loading.style.cssText='text-align:center;padding:16px;color:#6b7280;font-size:13px;';
-  loading.textContent='⏳ กำลังวิเคราะห์รูป...';
-  resultDiv.appendChild(loading);
-
-  try{
-    var b64=await new Promise(function(res,rej){
-      var r=new FileReader();
-      r.onload=function(e){res(e.target.result.split(',')[1]);};
-      r.onerror=rej;
-      r.readAsDataURL(file);
-    });
-
-    var nameSet={};
-    items.filter(function(x){return !isVacant(x);}).forEach(function(x){
-      nameSet[x.name+(x.brand?' ('+x.brand+')':'')]=1;
-    });
-    var itemNames=Object.keys(nameSet).slice(0,60).join(', ');
-
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:300,
-        messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:file.type||'image/jpeg',data:b64}},
-          {type:'text',text:'ดูรูปนี้ แล้วบอกว่าน่าจะเป็นสินค้าไหนจากรายการนี้: '+itemNames+' ตอบภาษาไทย สั้นๆ'}
-        ]}]
-      })
-    });
-
-    var data=await resp.json();
-    if(data.error) throw new Error(data.error.message);
-    var answer=data.content&&data.content[0]?data.content[0].text:'ไม่สามารถวิเคราะห์ได้';
-
-    resultDiv.textContent='';
-    var title=document.createElement('div');
-    title.style.cssText='font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px;';
-    title.textContent='🤖 ผลการวิเคราะห์';
-    var body=document.createElement('div');
-    body.style.cssText='font-size:13px;line-height:1.6;color:#374151;';
-    body.textContent=answer;
-    var closeBtn=document.createElement('button');
-    closeBtn.textContent='✕ ปิด';
-    closeBtn.style.cssText='font-size:11px;color:#6b7280;background:none;border:1px solid #e5e7eb;border-radius:8px;padding:4px 10px;cursor:pointer;margin-top:8px;';
-    closeBtn.onclick=function(){resultDiv.style.display='none';};
-    resultDiv.appendChild(title);
-    resultDiv.appendChild(body);
-    resultDiv.appendChild(closeBtn);
-
-  }catch(e){
-    resultDiv.textContent='';
-    var err=document.createElement('div');
-    err.style.cssText='color:#ef4444;font-size:13px;padding:8px;';
-    err.textContent='❌ '+e.message;
-    resultDiv.appendChild(err);
-  }
-  input.value='';
 }
 
 function doSearch(q){
@@ -1229,7 +1156,7 @@ function saveEdit(tiles){
       (function(item,f){
         var r=new FileReader();
         r.onload=function(e2){
-          compressImage(e2.target.result,800,800,0.75,function(compressed){
+          compressImage(e2.target.result,600,600,0.6,function(compressed){
             item.photo=compressed;pending--;
             if(pending===0){
               tiles.forEach(function(tt){var ii=items.find(function(x){return x.id===tt.id;});if(ii)saveItem(ii);});
@@ -1341,7 +1268,7 @@ function addItem(){
     document.getElementById('fg_brand_other').style.display='none';
     showToast('✅ เพิ่ม "'+name+'" ที่ '+row+col+'-F'+fl,'ok');
   }
-  if(photoFile){var r=new FileReader();r.onload=function(e){compressImage(e.target.result,800,800,0.75,function(compressed){doSave(compressed);});};r.readAsDataURL(photoFile);}
+  if(photoFile){var r=new FileReader();r.onload=function(e){compressImage(e.target.result,600,600,0.6,function(compressed){doSave(compressed);});};r.readAsDataURL(photoFile);}
   else doSave('');
 }
 
@@ -1428,13 +1355,6 @@ function showToast(msg,type){
 // โหลด users ตอนเปิดหน้า
 loadUsersOnStart();
 initFaceId();
-// Image search file input listener
-var imgInput=document.getElementById('imgSearchInput');
-if(imgInput){
-  imgInput.addEventListener('change',function(){
-    if(this.files&&this.files[0]) doImageSearch(this);
-  });
-}
 
 // ── WEIGHT CALCULATOR ──
 var STEEL_ITEMS=[
