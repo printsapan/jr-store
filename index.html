@@ -197,7 +197,7 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
         <select id="flt_size" onchange="doFilter()" style="width:100%;background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-family:'Sarabun',sans-serif;font-size:14px;color:#1a1a1a;outline:none;">
           <option value="">📐 ขนาด (ทั้งหมด)</option>
           <option value="4x4">4×4 สระว่ายน้ำ</option><option value="8x8">8×8</option><option value="8x10">8×10</option>
-          <option value="8x12">8×12</option><option value="10x12">10×12</option><option value="12">12×12</option>
+          <option value="8x12">8×12</option><option value="10x12">10×12</option><option value="10x16">10×16</option><option value="12">12×12</option>
           <option value="16">16×16</option><option value="30x60">30×60</option><option value="60x60">60×60</option>
         </select>
         <select id="flt_surface" onchange="doFilter()" style="width:100%;background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-family:'Sarabun',sans-serif;font-size:14px;color:#1a1a1a;outline:none;">
@@ -251,6 +251,7 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
           <option value="4x4">4×4 สระว่ายน้ำ (กล่องละ 90 แผ่น)</option>
           <option value="8x8">8×8 (กล่องละ 25 แผ่น)</option><option value="8x10">8×10 (กล่องละ 20 แผ่น)</option>
           <option value="8x12">8×12 (กล่องละ 16 แผ่น)</option><option value="10x12">10×12 (กล่องละ 20 แผ่น)</option>
+          <option value="10x16">10×16 (กล่องละ 10 แผ่น)</option>
           <option value="12">12×12 (กล่องละ 11 แผ่น)</option><option value="16">16×16 (กล่องละ 6 แผ่น)</option>
           <option value="30x60">30×60 (กล่องละ 8 แผ่น)</option><option value="60x60">60×60 (กล่องละ 4 แผ่น)</option>
           <option value="other">อื่นๆ (ระบุ)</option>
@@ -416,9 +417,9 @@ var DEMO = [
 
 var ROW_DESC={D:'แถว D',C:'แถว C',B:'แถว B',A:'แถว A'};
 var ROW_ORDER={D:0,C:1,B:2,A:3};
-var SIZE_MAP={'none':'ไม่ระบุ','4x4':'4×4 สระว่ายน้ำ','8x8':'8×8','8x10':'8×10','8x12':'8×12','10x12':'10×12','12':'12×12','16':'16×16','30x60':'30×60','60x60':'60×60'};
+var SIZE_MAP={'none':'ไม่ระบุ','4x4':'4×4 สระว่ายน้ำ','8x8':'8×8','8x10':'8×10','8x12':'8×12','10x12':'10×12','10x16':'10×16','12':'12×12','16':'16×16','30x60':'30×60','60x60':'60×60'};
 var SIZE_KEYS=['none','4x4','8x8','8x10','8x12','10x12','12','16','30x60','60x60'];
-var TILES_PER_BOX={'4x4':90,'8x8':25,'8x10':20,'8x12':16,'10x12':20,'12':11,'16':6,'30x60':8,'60x60':4};
+var TILES_PER_BOX={'4x4':90,'8x8':25,'8x10':20,'8x12':16,'10x12':20,'10x16':10,'12':11,'16':6,'30x60':8,'60x60':4};
 var UNITS=['กล่อง','แพ็ก','ม้วน','เส้น','แผ่น','ชิ้น','ถุง'];
 var BRANDS=['Sosuco','Campana','TOA','Cotto','Kera','Conwood','Shera','5ห่วง','ตราเพชร'];
 var items=[], currentRole=null, currentUser=null, currentFloor=1;
