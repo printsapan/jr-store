@@ -1412,13 +1412,14 @@ function renumberProductItems(){
 }
 
 function openProductForm(editId){
+  if(!productsLoaded){showToast('⚠️ ข้อมูลยังโหลดไม่ครบ ปิดเปิดแอปใหม่ก่อนนะ','err');return;}
   var p=editId?products.find(function(x){return x.id===editId;}):null;
   var inputCss='width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;box-sizing:border-box;';
   var lblCss='font-size:11px;color:#6b7280;font-weight:700;margin-bottom:4px;display:block;';
   var ov=document.createElement('div');ov.id='prodFormOv';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:flex;align-items:flex-end;justify-content:center;';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
-  var addMoreBtn=p?'':'<button onclick="addProductItemBlock()" style="width:100%;background:#fff;color:#ea580c;border:1.5px dashed #ea580c;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:14px;">➕ เพิ่มรายการสินค้าอีก (รูปเดียวกัน)</button>';
+  var addMoreBtn='<button onclick="addProductItemBlock()" style="width:100%;background:#fff;color:#ea580c;border:1.5px dashed #ea580c;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:14px;">➕ เพิ่มรายการสินค้าอีก (รูปเดียวกัน)</button>';
   ov.innerHTML='<div style="background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:18px;font-family:Sarabun,sans-serif;box-sizing:border-box;">'
     +'<div style="font-size:16px;font-weight:800;color:#ea580c;margin-bottom:14px;">'+(p?'✏️ แก้ไขรูปสินค้า':'➕ เพิ่มรูปสินค้า')+'</div>'
     +'<div style="margin-bottom:14px;"><label style="'+lblCss+'">รูปภาพ'+(p?' (เลือกใหม่ถ้าต้องการเปลี่ยน)':' * (ใช้ร่วมกันทุกรายการด้านล่าง)')+'</label>'
@@ -1475,6 +1476,10 @@ function saveProductForm(editId){
       p.w=e.w;p.l=e.l;p.h=e.h;p.unit=e.unit;p.size=e.size;
       if(photoData)p.photo=photoData;
       saveProductRow(p);
+      for(var j=1;j<entries.length;j++){
+        var extra=Object.assign({id:newProductId(),photo:photoData||p.photo},entries[j]);
+        products.push(extra);saveProductRow(extra);
+      }
     }else{
       for(var i=0;i<entries.length;i++){
         var np=Object.assign({id:newProductId(),photo:photoData},entries[i]);
