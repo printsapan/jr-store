@@ -1638,7 +1638,7 @@ function renderUsers(){
 }
 
 function openEditUserRole(id){
-  var u=users.find(function(x){return x.id===id;});if(!u)return;
+  var u=users.find(function(x){return String(x.id)===String(id);});if(!u){showToast('❌ ไม่พบผู้ใช้ ลองรีเฟรชหน้า','err');return;}
   var roleNames={'store':'👤 พนักงานสโตร์','sales':'🛍️ พนักงานขาย','manager':'💼 ผู้จัดการ','graphic':'🎨 กราฟฟิก','admin':'🔐 Admin','owner':'⭐ Owner'};
   var opts='';Object.keys(roleNames).forEach(function(r){opts+='<option value="'+r+'"'+(u.role===r?' selected':'')+'>'+roleNames[r]+'</option>';});
   var ov=document.createElement('div');
@@ -1670,7 +1670,7 @@ function openEditUserRole(id){
 }
 
 async function deleteUser(id){
-  var u=users.find(function(x){return x.id===id;});if(!u) return;
+  var u=users.find(function(x){return String(x.id)===String(id);});if(!u){showToast('❌ ไม่พบผู้ใช้ ลองรีเฟรชหน้า','err');return;}
   if(!confirm('ลบผู้ใช้ "'+u.name+'" ?')) return;
   var r=await sb.from('staff').delete().eq('id',id);
   if(r.error){showToast('❌ ลบไม่สำเร็จ: '+r.error.message,'err');return;}
