@@ -297,7 +297,7 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
     <div id="allList"></div>
   </div>
 
-  <div class="page" id="pg-users"><div style="margin-bottom:14px;"><button id="backupBtn" onclick="downloadFullBackup()" style="width:100%;background:#1d4ed8;color:#fff;border:none;border-radius:11px;padding:13px;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:800;cursor:pointer;">📦 สำรองข้อมูลทั้งหมด (คลังสินค้า + รูปสินค้า)</button><div style="font-size:11px;color:#9ca3af;text-align:center;margin-top:6px;">ดาวน์โหลดเก็บไว้สม่ำเสมอ เผื่อกู้คืนข้อมูล</div></div><div id="usersList"></div></div>
+  <div class="page" id="pg-users"><div style="margin-bottom:14px;"><button id="backupBtn" onclick="downloadFullBackup()" style="width:100%;background:#1d4ed8;color:#fff;border:none;border-radius:11px;padding:13px;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:800;cursor:pointer;">📦 สำรองข้อมูลทั้งหมด (คลังสินค้า + รูปสินค้า)</button><div style="font-size:11px;color:#9ca3af;text-align:center;margin-top:6px;">ดาวน์โหลดเก็บไว้สม่ำเสมอ เผื่อกู้คืนข้อมูล</div><label style="display:block;width:100%;background:#fff;color:#1d4ed8;border:1.5px dashed #1d4ed8;border-radius:11px;padding:12px;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:800;cursor:pointer;text-align:center;margin-top:8px;box-sizing:border-box;" id="restoreLbl">♻️ กู้คืนจากไฟล์สำรอง<input type="file" accept=".text,.txt,.json" style="display:none;" onchange="restoreFromBackup(this)"></label></div><div id="usersList"></div></div>
 </div>
 
 <div class="overlay" id="ov" onclick="sheetBg(event)">
@@ -617,14 +617,32 @@ function fmtSize(d){if(!d||d==='none')return '—';return SIZE_MAP[d]||d||'—';
 function save(){
   // ไม่ต้องทำอะไร — ใช้ saveItem() / deleteItem() แทน
 }
+
+function logTileAction(action,item){
+  try{
+    sb.from('tile_logs').insert({
+      action:action,
+      tile_id:item&&item.id||'',
+      tile_name:item&&item.name||'',
+      location:item?((item.row||'')+(item.col||'')+'-F'+(item.floor||'')):'',
+      qty:item&&item.qty||0,
+      by_name:(currentUser&&currentUser.name)||'',
+      by_role:currentRole||''
+    }).then(function(r){if(r.error)console.warn('log',r.error.message);});
+  }catch(e){}
+}
+
 function saveItem(item){
   if(!dataLoaded){showToast('⚠️ ข้อมูลยังโหลดไม่ครบ กรุณาเปิดแอปใหม่ก่อนแก้ไข','err');return;}
+  logTileAction('save',item);
   var data=Object.assign({},item);
   sb.from('tiles').upsert({id:item.id,data:data,updated_at:new Date().toISOString()})
     .then(function(r){if(r.error){console.error('saveItem error',r.error);showToast('❌ บันทึกไม่สำเร็จ ลองอีกครั้ง','err');}});
 }
 function deleteItem(id){
   if(!dataLoaded){showToast('⚠️ ข้อมูลยังโหลดไม่ครบ กรุณาเปิดแอปใหม่ก่อนลบ','err');return;}
+  var it=items.find(function(x){return x.id===id;});
+  logTileAction('delete',it||{id:id});
   sb.from('tiles').delete().eq('id',id)
     .then(function(r){if(r.error){console.error('deleteItem error',r.error);showToast('❌ ลบไม่สำเร็จ ลองอีกครั้ง','err');}});
 }
@@ -1668,6 +1686,72 @@ function renderUsers(){
   h+='</div>';el.innerHTML=h;
 }
 
+
+
+async function restoreFromBackup(input){
+  var f=input.files[0];input.value='';if(!f)return;
+  var lbl=document.getElementById('restoreLbl');
+  function setLbl(t){if(lbl)lbl.firstChild.textContent=t;}
+  try{
+    setLbl('⏳ กำลังอ่านไฟล์...');
+    var text=await new Promise(function(res,rej){var r=new FileReader();r.onload=function(e){res(e.target.result);};r.onerror=function(){rej(new Error('อ่านไฟล์ไม่ได้'));};r.readAsText(f);});
+    var bk=JSON.parse(text);
+    var bkTiles=bk.tiles||[];var bkProducts=bk.products||[];
+    if(!bkTiles.length&&!bkProducts.length)throw new Error('ไฟล์นี้ไม่มีข้อมูลสำรอง');
+
+    setLbl('⏳ กำลังเทียบกับฐานข้อมูล...');
+    var curT=await sb.from('tiles').select('id').limit(20000);
+    if(curT.error)throw new Error('อ่านฐานข้อมูลไม่ได้: '+curT.error.message);
+    var curTIds={};(curT.data||[]).forEach(function(r){curTIds[r.id]=1;});
+    var missT=bkTiles.filter(function(r){return r.id&&!curTIds[r.id];});
+
+    var missP=[];
+    try{
+      var curP=await sb.from('products').select('id').limit(20000);
+      if(!curP.error){
+        var curPIds={};(curP.data||[]).forEach(function(r){curPIds[r.id]=1;});
+        missP=bkProducts.filter(function(r){return r.id&&!curPIds[r.id];});
+      }
+    }catch(_e){}
+
+    if(!missT.length&&!missP.length){
+      setLbl('♻️ กู้คืนจากไฟล์สำรอง');
+      alert('เทียบแล้วไม่มีรายการที่หายไป\n\nในไฟล์: คลัง '+bkTiles.length+' / รูปสินค้า '+bkProducts.length+'\nในฐานข้อมูล: ครบทุกรายการที่อยู่ในไฟล์');
+      return;
+    }
+    var msg='ไฟล์สำรอง: '+(bk.exportedAt||'ไม่ทราบเวลา')+'\n\n'
+      +'คลังสินค้า — ในไฟล์ '+bkTiles.length+' / หายไป '+missT.length+' รายการ\n'
+      +'รูปสินค้า — ในไฟล์ '+bkProducts.length+' / หายไป '+missP.length+' รายการ\n\n'
+      +'จะเติมเฉพาะรายการที่หายไปกลับเข้าฐานข้อมูล\n(รายการที่มีอยู่แล้วจะไม่ถูกแตะต้อง)\n\nยืนยันกู้คืน?';
+    if(!confirm(msg)){setLbl('♻️ กู้คืนจากไฟล์สำรอง');return;}
+
+    var doneT=0,doneP=0,failed=0;
+    async function upsertChunks(table,rows,onProgress){
+      var ok=0;
+      for(var i=0;i<rows.length;i+=8){
+        var chunk=rows.slice(i,i+8).map(function(r){return {id:r.id,data:r.data,updated_at:new Date().toISOString()};});
+        var res=await sb.from(table).upsert(chunk);
+        if(res.error){console.error('restore '+table,res.error);failed+=chunk.length;}
+        else ok+=chunk.length;
+        if(onProgress)onProgress(Math.min(i+8,rows.length),rows.length);
+      }
+      return ok;
+    }
+    doneT=await upsertChunks('tiles',missT,function(d,t){setLbl('⏳ กู้คืนคลัง '+d+'/'+t+'...');});
+    if(missP.length)doneP=await upsertChunks('products',missP,function(d,t){setLbl('⏳ กู้คืนรูปสินค้า '+d+'/'+t+'...');});
+
+    setLbl('♻️ กู้คืนจากไฟล์สำรอง');
+    if(failed)showToast('⚠️ กู้คืนได้บางส่วน: คลัง '+doneT+' / รูปสินค้า '+doneP+' (พลาด '+failed+') ลองกู้ซ้ำได้','err');
+    else showToast('✅ กู้คืนสำเร็จ: คลัง '+doneT+' / รูปสินค้า '+doneP+' รายการ','ok');
+    // โหลดข้อมูลใหม่ให้เห็นทันที
+    loadItems(function(){renderList();renderMap();});
+    productsLoaded=false;
+  }catch(e){
+    console.error('restore',e);
+    setLbl('♻️ กู้คืนจากไฟล์สำรอง');
+    showToast('❌ กู้คืนไม่สำเร็จ: '+(e.message||e),'err');
+  }
+}
 
 async function downloadFullBackup(){
   var btn=document.getElementById('backupBtn');
