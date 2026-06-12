@@ -1630,9 +1630,25 @@ function openAddUser(){
     if(users.find(function(u){return u.userId.toLowerCase()===uid.toLowerCase();})){showToast('❌ User ID นี้มีอยู่แล้ว','err');return;}
     saveBtn.disabled=true;saveBtn.textContent='⏳ กำลังบันทึก...';
     try{
+      var authUid=null;
       var su=await sbAdmin.auth.signUp({email:emailFor(uid),password:authPw(pwd)});
-      if(su.error){showToast('❌ สร้างบัญชีไม่สำเร็จ: '+su.error.message,'err');saveBtn.disabled=false;saveBtn.textContent='💾 บันทึก';return;}
-      var authUid=(su.data&&su.data.user)?su.data.user.id:null;
+      if(su.error){
+        if(/already/i.test(su.error.message||'')){
+          // บัญชีนี้เคยถูกสร้างไว้แล้ว (เช่น เคยลบพนักงานแต่บัญชีล็อกอินยังอยู่)
+          // ลองเข้าสู่ระบบด้วยรหัสที่กรอก ถ้าตรงกับรหัสเดิม = เชื่อมบัญชีเดิมกลับมาใช้ได้เลย
+          var si=await sbAdmin.auth.signInWithPassword({email:emailFor(uid),password:authPw(pwd)});
+          if(si.error||!si.data||!si.data.user){
+            showToast('❌ User ID นี้เคยมีบัญชีอยู่ ต้องใช้รหัสผ่านเดิมเท่านั้น (รหัสที่กรอกไม่ตรงกับของเดิม)','err');
+            saveBtn.disabled=false;saveBtn.textContent='💾 บันทึก';return;
+          }
+          authUid=si.data.user.id;
+          try{await sbAdmin.auth.signOut();}catch(_e){}
+        }else{
+          showToast('❌ สร้างบัญชีไม่สำเร็จ: '+su.error.message,'err');saveBtn.disabled=false;saveBtn.textContent='💾 บันทึก';return;
+        }
+      }else{
+        authUid=(su.data&&su.data.user)?su.data.user.id:null;
+      }
       var ins=await sb.from('staff').insert({user_id:uid,name:name,role:role,auth_uid:authUid}).select().single();
       if(ins.error){showToast('❌ บันทึกพนักงานไม่สำเร็จ: '+ins.error.message,'err');saveBtn.disabled=false;saveBtn.textContent='💾 บันทึก';return;}
       users.push({id:ins.data.id,name:name,userId:uid,role:role});
