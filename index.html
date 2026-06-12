@@ -693,10 +693,10 @@ function startApp(){
   var tag=document.getElementById('roleTag');
   var nameEl=document.getElementById('headerName');
   if(nameEl&&currentUser) nameEl.textContent=currentUser.name;
-  var roleLabels={'store':'👤 พนักงาน','sales':'🛍️ ขาย','graphic':'🎨 กราฟฟิก','admin':'🔐 Admin','owner':'⭐ Owner'};
+  var roleLabels={'store':'👤 พนักงาน','sales':'🛍️ ขาย','manager':'💼 ผู้จัดการ','graphic':'🎨 กราฟฟิก','admin':'🔐 Admin','owner':'⭐ Owner'};
   tag.textContent=roleLabels[currentRole]||currentRole;
   var isAdmin=currentRole==='admin'||currentRole==='owner';
-  var isSales=currentRole==='sales';
+  var isSales=currentRole==='sales'||currentRole==='manager';
   var isStore=currentRole==='store';
   var isGraphic=currentRole==='graphic';
   document.getElementById('nb-map').style.display=isAdmin?'':'none';
@@ -705,9 +705,9 @@ function startApp(){
   document.getElementById('nb-users').style.display=currentRole==='owner'?'':'none';
   document.getElementById('nb-product').style.display=isSales?'':'none';
   document.getElementById('nb-photo').style.display=(isSales||isAdmin||isGraphic)?'':'none';
+  document.getElementById('lbl-photo').textContent=isSales?'\u0e04\u0e49\u0e19\u0e2b\u0e32\u0e23\u0e39\u0e1b\u0e20\u0e32\u0e1e':'\u0e23\u0e39\u0e1b\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32';
   document.getElementById('nb-search').style.display=isGraphic?'none':'';
   document.getElementById('lbl-search').textContent=isSales?'\u0e04\u0e49\u0e19\u0e2b\u0e32\u0e01\u0e23\u0e30\u0e40\u0e1a\u0e37\u0e49\u0e2d\u0e07':'\u0e04\u0e49\u0e19\u0e2b\u0e32';
-  document.getElementById('lbl-photo').textContent=isSales?'\u0e04\u0e49\u0e19\u0e2b\u0e32\u0e23\u0e39\u0e1b\u0e20\u0e32\u0e1e':'\u0e23\u0e39\u0e1b\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32';
   document.getElementById('lbl-product').textContent=isSales?'\u0e04\u0e33\u0e19\u0e27\u0e13':'\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32';
   document.getElementById('nb-weight').style.display=(isStore||isSales||isAdmin)?'':'none';
   document.getElementById('salesFilter').style.display=isSales?'block':'none';
@@ -1244,9 +1244,10 @@ function compressImage(dataUrl,maxW,maxH,quality,cb){
 // ════════ ระบบค้นหารูปสินค้า (ตาราง products แยกจาก tiles) ════════
 var PRODUCT_CATEGORIES=['หินทราย','อิฐ','ปูน','เครื่องมือช่างใหญ่','ฮาร์ดแวร์','น้ำยา','ประตู','หน้าต่าง','วงกบ','สี','หลังคา','ไม้สังเคราะห์','ถัง','ไฟฟ้า'];
 var PRODUCT_BRANDS=['Insee','จระเข้','Sika','Lanko','Dos','Wave','Marton','Bosch','Pumpkin','Shera','เพชร','Conwood','TOA'];
-var products=[];var productsLoaded=false;
+var products=[];var productsLoaded=false;var pfPhotos=[];
 
 function newProductId(){return 'p'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10);}
+function productPhotos(p){if(p.photos&&p.photos.length)return p.photos;if(p.photo)return [p.photo];return [];}
 
 async function loadProducts(cb){
   try{
@@ -1259,24 +1260,24 @@ async function loadProducts(cb){
     console.error('loadProducts',e);
     productsLoaded=false;
     var c=document.getElementById('psr');
-    if(c)c.innerHTML='<div class="hint-area"><p>❌ โหลดรูปสินค้าไม่ได้ ลองปิดเปิดแอปใหม่</p></div>';
+    if(c)c.innerHTML='<div class="hint-area"><p>❌ โหลดรูปสินค้าไม่ได้<br><span style="font-size:11px;color:#ef4444;">'+esc(e.message||e)+'</span><br><span style="font-size:11px;">ถ้าขึ้นคำว่า "does not exist" แปลว่ายังไม่ได้สร้างตาราง products ใน Supabase</span></p></div>';
   }
 }
 function saveProductRow(p){
   if(!productsLoaded){showToast('⚠️ ข้อมูลยังโหลดไม่ครบ กรุณาลองใหม่','err');return;}
   sb.from('products').upsert({id:p.id,data:Object.assign({},p),updated_at:new Date().toISOString()})
-    .then(function(r){if(r.error){console.error('saveProduct',r.error);showToast('❌ บันทึกไม่สำเร็จ ลองอีกครั้ง','err');}});
+    .then(function(r){if(r.error){console.error('saveProduct',r.error);showToast('❌ บันทึกไม่สำเร็จ: '+(r.error.message||''),'err');}});
 }
 function deleteProductRow(id){
   if(!productsLoaded){showToast('⚠️ ข้อมูลยังโหลดไม่ครบ กรุณาลองใหม่','err');return;}
   sb.from('products').delete().eq('id',id)
-    .then(function(r){if(r.error){console.error('deleteProduct',r.error);showToast('❌ ลบไม่สำเร็จ ลองอีกครั้ง','err');}});
+    .then(function(r){if(r.error){console.error('deleteProduct',r.error);showToast('❌ ลบไม่สำเร็จ: '+(r.error.message||''),'err');}});
 }
 
-function canManageProducts(){return currentRole==='admin'||currentRole==='owner'||currentRole==='graphic';}
+function canManageProducts(){return currentRole==='admin'||currentRole==='owner'||currentRole==='graphic'||currentRole==='manager';}
+
 function renderPhotoPage(){
-  var isAdmin=canManageProducts();
-  document.getElementById('photoAdminBar').style.display=isAdmin?'block':'none';
+  document.getElementById('photoAdminBar').style.display=canManageProducts()?'block':'none';
   if(!productsLoaded){
     document.getElementById('psr').innerHTML='<div class="hint-area"><p>⏳ กำลังโหลด...</p></div>';
     loadProducts(function(){doPhotoSearch(document.getElementById('psi').value);});
@@ -1284,7 +1285,6 @@ function renderPhotoPage(){
     doPhotoSearch(document.getElementById('psi').value);
   }
 }
-
 
 function fmtProductSize(p){
   var parts=[];
@@ -1304,7 +1304,7 @@ function doPhotoSearch(q){
   var ql=(q||'').toLowerCase().trim();
   var list=products.filter(function(p){
     if(!ql)return true;
-    var ft=((p.name||'')+' '+(p.category||'')+' '+(p.size||'')+' '+fmtProductSize(p)+' '+(p.brand||'')).toLowerCase();
+    var ft=((p.name||'')+' '+(p.category||'')+' '+(p.size||'')+' '+fmtProductSize(p)+' '+(p.brand||'')+' '+(p.note||'')).toLowerCase();
     var words=ql.split(/\s+/);
     for(var i=0;i<words.length;i++){if(ft.indexOf(words[i])<0)return false;}
     return true;
@@ -1313,13 +1313,16 @@ function doPhotoSearch(q){
   list.sort(function(a,b){return (a.name||'').localeCompare(b.name||'','th');});
   var h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
   for(var i=0;i<list.length;i++){
-    var p=list[i];
-    var img=p.photo?'<img src="'+p.photo+'" style="width:100%;height:130px;object-fit:cover;display:block;">':'<div style="width:100%;height:130px;display:flex;align-items:center;justify-content:center;background:#f3f4f6;color:#9ca3af;font-size:32px;">📦</div>';
-    h+='<div data-pid="'+p.id+'" onclick="openProductView(this.dataset.pid)" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:pointer;">'
+    var p=list[i];var ph=productPhotos(p);
+    var badge=ph.length>1?'<div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;">📷 '+ph.length+'</div>':'';
+    var img=ph.length?'<div style="position:relative;"><img src="'+ph[0]+'" style="width:100%;height:130px;object-fit:cover;display:block;">'+badge+'</div>':'<div style="width:100%;height:130px;display:flex;align-items:center;justify-content:center;background:#f3f4f6;color:#9ca3af;font-size:32px;">📦</div>';
+    var sp=!!p.special;
+    h+='<div data-pid="'+p.id+'" onclick="openProductView(this.dataset.pid)" style="background:#fff;border:1px solid '+(sp?'#dc2626':'#e5e7eb')+';border-radius:12px;overflow:hidden;cursor:pointer;">'
       +img
-      +'<div style="padding:8px 10px;">'
-      +'<div style="font-size:13px;font-weight:800;line-height:1.3;">'+esc(p.name)+'</div>'
-      +'<div style="font-size:10px;color:#6b7280;margin-top:3px;">'+esc(p.category||'')+(fmtProductSize(p)?' · '+esc(fmtProductSize(p)):'')+(p.brand?' · '+esc(p.brand):'')+'</div>'
+      +'<div style="padding:8px 10px;'+(sp?'background:#dc2626;':'')+'">'
+      +(sp?'<div style="font-size:9px;font-weight:800;color:#fff;background:rgba(255,255,255,.2);display:inline-block;padding:1px 7px;border-radius:20px;margin-bottom:3px;">🔴 สั่งพิเศษ รอของ</div>':'')
+      +'<div style="font-size:13px;font-weight:800;line-height:1.3;'+(sp?'color:#fff;':'')+'">'+esc(p.name)+'</div>'
+      +'<div style="font-size:10px;margin-top:3px;color:'+(sp?'#fecaca':'#6b7280')+';">'+esc(p.category||'')+(fmtProductSize(p)?' · '+esc(fmtProductSize(p)):'')+(p.brand?' · '+esc(p.brand):'')+'</div>'
       +'</div></div>';
   }
   h+='</div><div style="font-size:11px;color:#9ca3af;text-align:center;margin-top:12px;">'+list.length+' รายการ</div>';
@@ -1329,21 +1332,30 @@ function doPhotoSearch(q){
 function openProductView(id){
   var p=products.find(function(x){return x.id===id;});if(!p)return;
   var isAdmin=canManageProducts();
+  var ph=productPhotos(p);
   var ov=document.createElement('div');ov.id='prodViewOv';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
-  var img=p.photo?'<img src="'+p.photo+'" style="max-width:100%;max-height:55vh;border-radius:12px;display:block;margin:0 auto;">':'';
+  var imgs='';
+  if(ph.length===1){imgs='<img src="'+ph[0]+'" style="max-width:100%;max-height:50vh;border-radius:12px;display:block;margin:0 auto;">';}
+  else if(ph.length>1){
+    imgs='<div style="display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;">';
+    for(var i=0;i<ph.length;i++){imgs+='<img src="'+ph[i]+'" style="height:42vh;border-radius:12px;flex-shrink:0;max-width:88vw;object-fit:contain;background:#111;">';}
+    imgs+='</div><div style="color:#fff;font-size:11px;text-align:center;margin-top:4px;opacity:.7;">📷 '+ph.length+' รูป — เลื่อนซ้ายขวาเพื่อดู</div>';
+  }
   var btns='<button onclick="document.getElementById(\'prodViewOv\').remove()" style="flex:1;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">ปิด</button>';
   if(isAdmin){
     btns+='<button data-pid="'+p.id+'" onclick="document.getElementById(\'prodViewOv\').remove();openProductForm(this.dataset.pid)" style="flex:1;background:#ea580c;color:#fff;border:none;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">✏️ แก้ไข</button>';
     btns+='<button data-pid="'+p.id+'" onclick="confirmDeleteProduct(this.dataset.pid)" style="flex:1;background:rgba(239,68,68,.9);color:#fff;border:none;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">🗑️ ลบ</button>';
   }
-  ov.innerHTML='<div style="width:100%;max-width:420px;">'+img
+  ov.innerHTML='<div style="width:100%;max-width:420px;">'+imgs
     +'<div style="background:#fff;border-radius:12px;padding:14px;margin-top:12px;font-family:Sarabun,sans-serif;">'
+    +(p.special?'<div style="background:#dc2626;color:#fff;font-size:12px;font-weight:800;padding:6px 12px;border-radius:8px;margin-bottom:8px;text-align:center;">🔴 สินค้าสั่งพิเศษ รอของ — ไม่มีสต็อก</div>':'')
     +'<div style="font-size:16px;font-weight:800;">'+esc(p.name)+'</div>'
     +'<div style="font-size:12px;color:#6b7280;margin-top:4px;">หมวดหมู่: '+esc(p.category||'—')+'</div>'
     +'<div style="font-size:12px;color:#6b7280;">ขนาด: '+esc(fmtProductSize(p)||'—')+'</div>'
     +'<div style="font-size:12px;color:#6b7280;">ยี่ห้อ: '+esc(p.brand||'—')+'</div>'
+    +(p.note?'<div style="font-size:12px;color:#6b7280;">หมายเหตุ: '+esc(p.note)+'</div>':'')
     +'</div><div style="display:flex;gap:8px;margin-top:12px;">'+btns+'</div></div>';
   document.body.appendChild(ov);
 }
@@ -1373,14 +1385,15 @@ function productItemBlockHTML(idx,p){
   var cats=productCategoryList(),brands=productBrandList();
   var catOpts='';cats.forEach(function(c){catOpts+='<option'+(p&&p.category===c?' selected':'')+'>'+esc(c)+'</option>';});
   catOpts+='<option value="__new__">➕ เพิ่มหมวดหมู่ใหม่...</option>';
-  var brandOpts='';brands.forEach(function(b){brandOpts+='<option'+(p&&p.brand===b?' selected':'')+'>'+esc(b)+'</option>';});
+  var brandOpts='<option value=""'+(p&&!p.brand?' selected':'')+'>— ไม่ระบุยี่ห้อ —</option>';
+  brands.forEach(function(b){brandOpts+='<option'+(p&&p.brand===b?' selected':'')+'>'+esc(b)+'</option>';});
   brandOpts+='<option value="__new__">อื่นๆ ระบุ...</option>';
   var units=['ซม.','มม.','ม.','นิ้ว'];var unitOpts='';
   units.forEach(function(u){unitOpts+='<option'+(p&&p.unit===u?' selected':'')+'>'+u+'</option>';});
   var inputCss='width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;box-sizing:border-box;';
   var lblCss='font-size:11px;color:#6b7280;font-weight:700;margin-bottom:4px;display:block;';
   var dimLbl='font-size:11px;font-weight:800;margin-bottom:3px;display:block;text-align:center;';
-  var removeBtn=idx>0?'<button onclick="this.closest(\'.pitem\').remove()" style="background:none;border:none;color:#ef4444;font-size:12px;font-weight:700;cursor:pointer;font-family:Sarabun,sans-serif;">✕ ลบรายการนี้</button>':'';
+  var removeBtn=idx>0?'<button onclick="this.closest(\'.pitem\').remove();renumberProductItems()" style="background:none;border:none;color:#ef4444;font-size:12px;font-weight:700;cursor:pointer;font-family:Sarabun,sans-serif;">✕ ลบรายการนี้</button>':'';
   return '<div class="pitem" style="border:1.5px solid #fde0cc;border-radius:12px;padding:12px;margin-bottom:12px;background:#fffaf6;">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><span style="font-size:12px;font-weight:800;color:#ea580c;">📦 รายการที่ <span class="pitem-no">'+(idx+1)+'</span></span>'+removeBtn+'</div>'
     +'<div style="margin-bottom:12px;"><label style="'+lblCss+'">ชื่อสินค้า *</label><input class="pi_name" type="text" value="'+esc(p?p.name:'')+'" placeholder="เช่น ปูนก่อสำเร็จรูป" style="'+inputCss+'"></div>'
@@ -1394,8 +1407,10 @@ function productItemBlockHTML(idx,p){
     +'<div><span style="'+dimLbl+'color:#6b7280;">หน่วย</span><select class="pi_unit" style="'+inputCss+'padding:10px 4px;">'+unitOpts+'</select></div>'
     +'</div>'
     +'<input class="pi_sizetext" type="text" value="'+esc(p?(p.size||''):'')+'" placeholder="หรือพิมพ์ขนาดอื่น เช่น 50 กก. / 5 ลิตร" style="'+inputCss+'margin-top:8px;"></div>'
-    +'<div><label style="'+lblCss+'">ยี่ห้อ</label><select class="pi_brand" style="'+inputCss+'" onchange="this.parentNode.querySelector(\'.pi_brand_new\').style.display=this.value===\'__new__\'?\'block\':\'none\'">'+brandOpts+'</select>'
+    +'<div style="margin-bottom:12px;"><label style="'+lblCss+'">ยี่ห้อ</label><select class="pi_brand" style="'+inputCss+'" onchange="this.parentNode.querySelector(\'.pi_brand_new\').style.display=this.value===\'__new__\'?\'block\':\'none\'">'+brandOpts+'</select>'
     +'<input class="pi_brand_new" type="text" placeholder="พิมพ์ชื่อยี่ห้อ" style="'+inputCss+'display:none;margin-top:8px;"></div>'
+    +'<div style="margin-bottom:12px;"><label style="'+lblCss+'">📝 หมายเหตุ / คีย์เวิร์ดค้นหา</label><input class="pi_note" type="text" value="'+esc(p?(p.note||''):'')+'" placeholder="เช่น อิฐมอญ อิฐก่อผนัง ทนไฟ" style="'+inputCss+'"></div>'
+    +'<label style="display:flex;align-items:center;gap:8px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:9px;padding:10px 12px;cursor:pointer;"><input class="pi_special" type="checkbox"'+(p&&p.special?' checked':'')+' style="width:18px;height:18px;accent-color:#dc2626;flex-shrink:0;"><span style="font-size:13px;font-weight:800;color:#dc2626;">🔴 สินค้าสั่งพิเศษ รอของ (ไม่มีสต็อก)</span></label>'
     +'</div>';
 }
 
@@ -1411,33 +1426,63 @@ function renumberProductItems(){
   for(var i=0;i<blocks.length;i++){var no=blocks[i].querySelector('.pitem-no');if(no)no.textContent=i+1;}
 }
 
+function renderPfPreview(){
+  var c=document.getElementById('pf_preview');if(!c)return;
+  if(!pfPhotos.length){c.innerHTML='<div style="font-size:11px;color:#9ca3af;text-align:center;padding:8px;">ยังไม่มีรูป</div>';return;}
+  var h='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">';
+  for(var i=0;i<pfPhotos.length;i++){
+    h+='<div style="position:relative;"><img src="'+pfPhotos[i]+'" style="width:100%;height:90px;object-fit:cover;border-radius:8px;background:#f3f4f6;display:block;">'
+      +'<button data-i="'+i+'" onclick="removePfPhoto(this.dataset.i)" style="position:absolute;top:4px;right:4px;background:rgba(239,68,68,.95);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;font-weight:800;cursor:pointer;line-height:1;">✕</button></div>';
+  }
+  h+='</div><div style="font-size:11px;color:#6b7280;text-align:center;margin-top:6px;">📷 '+pfPhotos.length+' รูป</div>';
+  c.innerHTML=h;
+}
+function removePfPhoto(i){pfPhotos.splice(Number(i),1);renderPfPreview();}
+
+function addProductPhotos(input){
+  var files=Array.prototype.slice.call(input.files||[]);
+  if(!files.length)return;
+  var done=0;
+  showToast('⏳ กำลังย่อรูป...','ok');
+  files.forEach(function(f){
+    var r=new FileReader();
+    r.onload=function(e){
+      compressImage(e.target.result,800,800,0.65,function(c){
+        pfPhotos.push(c);done++;
+        renderPfPreview();
+        if(done===files.length)showToast('✅ เพิ่มรูปแล้ว','ok');
+      });
+    };
+    r.readAsDataURL(f);
+  });
+  input.value='';
+}
+
 function openProductForm(editId){
   if(!productsLoaded){showToast('⚠️ ข้อมูลยังโหลดไม่ครบ ปิดเปิดแอปใหม่ก่อนนะ','err');return;}
   var p=editId?products.find(function(x){return x.id===editId;}):null;
+  pfPhotos=p?productPhotos(p).slice():[];
   var inputCss='width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;box-sizing:border-box;';
   var lblCss='font-size:11px;color:#6b7280;font-weight:700;margin-bottom:4px;display:block;';
   var ov=document.createElement('div');ov.id='prodFormOv';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:flex;align-items:flex-end;justify-content:center;';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
-  var addMoreBtn='<button onclick="addProductItemBlock()" style="width:100%;background:#fff;color:#ea580c;border:1.5px dashed #ea580c;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:14px;">➕ เพิ่มรายการสินค้าอีก (รูปเดียวกัน)</button>';
-  ov.innerHTML='<div style="background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:18px;font-family:Sarabun,sans-serif;box-sizing:border-box;">'
+  var addMoreBtn='<button onclick="addProductItemBlock()" style="width:100%;background:#fff;color:#ea580c;border:1.5px dashed #ea580c;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:14px;">➕ เพิ่มรายการสินค้าอีก (ใช้รูปชุดเดียวกัน)</button>';
+  ov.innerHTML='<div style="background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:480px;max-height:88vh;display:flex;flex-direction:column;font-family:Sarabun,sans-serif;box-sizing:border-box;overflow:hidden;">'
+    +'<div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 18px 8px;">'
     +'<div style="font-size:16px;font-weight:800;color:#ea580c;margin-bottom:14px;">'+(p?'✏️ แก้ไขรูปสินค้า':'➕ เพิ่มรูปสินค้า')+'</div>'
-    +'<div style="margin-bottom:14px;"><label style="'+lblCss+'">รูปภาพ'+(p?' (เลือกใหม่ถ้าต้องการเปลี่ยน)':' * (ใช้ร่วมกันทุกรายการด้านล่าง)')+'</label>'
-    +'<input id="pf_photo" type="file" accept="image/*" style="'+inputCss+'" onchange="previewProductPhoto(this)">'
-    +'<div id="pf_preview" style="margin-top:8px;">'+(p&&p.photo?'<img src="'+p.photo+'" style="width:100%;max-height:200px;object-fit:contain;border-radius:10px;background:#f3f4f6;">':'')+'</div></div>'
+    +'<div style="margin-bottom:14px;"><label style="'+lblCss+'">รูปภาพ (เลือกได้หลายรูปพร้อมกัน)</label>'
+    +'<div id="pf_preview" style="margin-bottom:8px;"></div>'
+    +'<label style="display:block;background:#fff7ed;color:#ea580c;border:1.5px dashed #ea580c;border-radius:10px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;text-align:center;">📷 เพิ่มรูปภาพ<input id="pf_photo" type="file" accept="image/*" multiple style="display:none;" onchange="addProductPhotos(this)"></label></div>'
     +'<div id="pf_items">'+productItemBlockHTML(0,p)+'</div>'
     +addMoreBtn
-    +'<div style="display:flex;gap:8px;"><button onclick="document.getElementById(\'prodFormOv\').remove()" style="flex:1;background:#f3f4f6;color:#374151;border:none;border-radius:10px;padding:13px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">ยกเลิก</button>'
+    +'</div>'
+    +'<div style="flex-shrink:0;display:flex;gap:8px;padding:12px 18px;padding-bottom:calc(12px + env(safe-area-inset-bottom));border-top:1px solid #eee;background:#fff;">'
+    +'<button onclick="document.getElementById(\'prodFormOv\').remove()" style="flex:1;background:#f3f4f6;color:#374151;border:none;border-radius:10px;padding:13px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">ยกเลิก</button>'
     +'<button onclick="saveProductForm(\''+(p?p.id:'')+'\')" style="flex:2;background:#ea580c;color:#fff;border:none;border-radius:10px;padding:13px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:800;cursor:pointer;">💾 บันทึก</button></div>'
     +'</div>';
   document.body.appendChild(ov);
-}
-
-function previewProductPhoto(input){
-  var f=input.files[0];if(!f)return;
-  var r=new FileReader();
-  r.onload=function(e){document.getElementById('pf_preview').innerHTML='<img src="'+e.target.result+'" style="width:100%;max-height:200px;object-fit:contain;border-radius:10px;background:#f3f4f6;">';};
-  r.readAsDataURL(f);
+  renderPfPreview();
 }
 
 function readProductItemBlock(block){
@@ -1452,7 +1497,9 @@ function readProductItemBlock(block){
     l:block.querySelector('.pi_l').value.trim(),
     h:block.querySelector('.pi_h').value.trim(),
     unit:block.querySelector('.pi_unit').value,
-    size:block.querySelector('.pi_sizetext').value.trim()
+    size:block.querySelector('.pi_sizetext').value.trim(),
+    note:block.querySelector('.pi_note').value.trim(),
+    special:block.querySelector('.pi_special').checked
   };
 }
 
@@ -1462,39 +1509,31 @@ function saveProductForm(editId){
   for(var i=0;i<blocks.length;i++){
     var e=readProductItemBlock(blocks[i]);
     if(!e.name){showToast('❌ ใส่ชื่อสินค้าให้ครบทุกรายการ (รายการที่ '+(i+1)+' ยังว่าง)','err');return;}
-    if(e.category==='')e.category='';
     entries.push(e);
   }
   if(!entries.length){showToast('❌ ไม่มีรายการสินค้า','err');return;}
-  var f=document.getElementById('pf_photo').files[0];
+  if(!pfPhotos.length){showToast('❌ เพิ่มรูปภาพอย่างน้อย 1 รูป','err');return;}
   var p=editId?products.find(function(x){return x.id===editId;}):null;
-  if(!p&&!f){showToast('❌ เลือกรูปภาพด้วย','err');return;}
-  function done(photoData){
-    if(p){
-      var e=entries[0];
-      p.name=e.name;p.category=e.category;p.brand=e.brand;
-      p.w=e.w;p.l=e.l;p.h=e.h;p.unit=e.unit;p.size=e.size;
-      if(photoData)p.photo=photoData;
-      saveProductRow(p);
-      for(var j=1;j<entries.length;j++){
-        var extra=Object.assign({id:newProductId(),photo:photoData||p.photo},entries[j]);
-        products.push(extra);saveProductRow(extra);
-      }
-    }else{
-      for(var i=0;i<entries.length;i++){
-        var np=Object.assign({id:newProductId(),photo:photoData},entries[i]);
-        products.push(np);saveProductRow(np);
-      }
+  var photos=pfPhotos.slice();
+  if(p){
+    var e0=entries[0];
+    p.name=e0.name;p.category=e0.category;p.brand=e0.brand;
+    p.w=e0.w;p.l=e0.l;p.h=e0.h;p.unit=e0.unit;p.size=e0.size;p.note=e0.note;p.special=e0.special;
+    p.photos=photos;delete p.photo;
+    saveProductRow(p);
+    for(var j=1;j<entries.length;j++){
+      var extra=Object.assign({id:newProductId(),photos:photos},entries[j]);
+      products.push(extra);saveProductRow(extra);
     }
-    var ov=document.getElementById('prodFormOv');if(ov)ov.remove();
-    showToast('✅ บันทึกแล้ว '+(p?'':entries.length+' รายการ'),'ok');
-    doPhotoSearch(document.getElementById('psi').value);
+  }else{
+    for(var k=0;k<entries.length;k++){
+      var np=Object.assign({id:newProductId(),photos:photos},entries[k]);
+      products.push(np);saveProductRow(np);
+    }
   }
-  if(f){
-    var r=new FileReader();
-    r.onload=function(e){compressImage(e.target.result,800,800,0.65,function(c){done(c);});};
-    r.readAsDataURL(f);
-  }else{done(null);}
+  var ov=document.getElementById('prodFormOv');if(ov)ov.remove();
+  showToast('✅ บันทึกแล้ว','ok');
+  doPhotoSearch(document.getElementById('psi').value);
 }
 // ════════ จบระบบค้นหารูปสินค้า ════════
 
@@ -1542,7 +1581,7 @@ function renderList(){
 
 function renderUsers(){
   var el=document.getElementById('usersList');
-  var roleLabels={'store':'👤 สโตร์','sales':'🛍️ ขาย','graphic':'🎨 กราฟฟิก','admin':'🔐 Admin','owner':'⭐ Owner'};
+  var roleLabels={'store':'👤 สโตร์','sales':'🛍️ ขาย','manager':'💼 ผู้จัดการ','graphic':'🎨 กราฟฟิก','admin':'🔐 Admin','owner':'⭐ Owner'};
   var h='<div style="font-size:15px;font-weight:800;color:#92400e;margin-bottom:14px;">👥 จัดการผู้ใช้</div>';
   h+='<button onclick="openAddUser()" style="width:100%;margin-bottom:8px;padding:12px;background:linear-gradient(135deg,#f97316,#ea580c);color:white;border:none;border-radius:11px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:800;cursor:pointer;">+ เพิ่มผู้ใช้ใหม่</button>';
 
@@ -1579,7 +1618,7 @@ function openAddUser(){
     '<div><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">User ID</div><input id="nu_uid" type="text" maxlength="20" placeholder="ตัวอักษรหรือตัวเลข" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:16px;text-align:center;letter-spacing:6px;outline:none;"/></div>'+
     '<div><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Password</div><input id="nu_pwd" type="password" placeholder="••••••" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:16px;text-align:center;letter-spacing:6px;outline:none;"/></div>'+
     '</div>'+
-    '<div style="margin-bottom:16px;"><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">สิทธิ์</div><select id="nu_role" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;"><option value="store">👤 พนักงานสโตร์</option><option value="sales">🛍️ พนักงานขาย</option><option value="graphic">🎨 กราฟฟิก (ลงรูปสินค้าอย่างเดียว)</option><option value="admin">🔐 Admin</option><option value="owner">⭐ Owner</option></select></div>';
+    '<div style="margin-bottom:16px;"><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">สิทธิ์</div><select id="nu_role" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;"><option value="store">👤 พนักงานสโตร์</option><option value="sales">🛍️ พนักงานขาย</option><option value="manager">💼 ผู้จัดการ (เหมือนขาย + ลงรูปสินค้าได้ แต่ย้ายสินค้าไม่ได้)</option><option value="graphic">🎨 กราฟฟิก (ลงรูปสินค้าอย่างเดียว)</option><option value="admin">🔐 Admin</option><option value="owner">⭐ Owner</option></select></div>';
   var saveBtn=document.createElement('button');saveBtn.textContent='💾 บันทึก';
   saveBtn.style.cssText='width:100%;padding:13px;background:linear-gradient(135deg,#f97316,#ea580c);color:white;border:none;border-radius:11px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:800;cursor:pointer;';
   saveBtn.onclick=async function(){
