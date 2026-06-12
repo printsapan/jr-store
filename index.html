@@ -1656,8 +1656,9 @@ function openEditUserRole(id){
     var ownerCount=users.filter(function(x){return x.role==='owner';}).length;
     if(u.role==='owner'&&ownerCount<=1&&newRole!=='owner'){showToast('❌ ต้องมี Owner อย่างน้อย 1 คน','err');return;}
     saveBtn.disabled=true;saveBtn.textContent='⏳ กำลังบันทึก...';
-    var r=await sb.from('staff').update({role:newRole}).eq('id',u.id);
+    var r=await sb.from('staff').update({role:newRole}).eq('id',u.id).select();
     if(r.error){showToast('❌ เปลี่ยนไม่สำเร็จ: '+r.error.message,'err');saveBtn.disabled=false;saveBtn.textContent='💾 บันทึก';return;}
+    if(!r.data||!r.data.length){showToast('❌ ฐานข้อมูลไม่ยอมให้แก้ — ต้องรัน SQL เพิ่มสิทธิ์ UPDATE ให้ตาราง staff ก่อน','err');saveBtn.disabled=false;saveBtn.textContent='💾 บันทึก';return;}
     u.role=newRole;ov.remove();renderUsers();
     showToast('✅ เปลี่ยน '+u.name+' เป็น '+(roleNames[newRole]||newRole)+' แล้ว','ok');
   };
