@@ -297,7 +297,7 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
     <div id="allList"></div>
   </div>
 
-  <div class="page" id="pg-users"><div id="usersList"></div></div>
+  <div class="page" id="pg-users"><div style="margin-bottom:14px;"><button id="backupBtn" onclick="downloadFullBackup()" style="width:100%;background:#1d4ed8;color:#fff;border:none;border-radius:11px;padding:13px;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:800;cursor:pointer;">📦 สำรองข้อมูลทั้งหมด (คลังสินค้า + รูปสินค้า)</button><div style="font-size:11px;color:#9ca3af;text-align:center;margin-top:6px;">ดาวน์โหลดเก็บไว้สม่ำเสมอ เผื่อกู้คืนข้อมูล</div></div><div id="usersList"></div></div>
 </div>
 
 <div class="overlay" id="ov" onclick="sheetBg(event)">
@@ -1250,18 +1250,25 @@ function newProductId(){return 'p'+Date.now().toString(36)+'_'+Math.random().toS
 function productPhotos(p){if(p.photos&&p.photos.length)return p.photos;if(p.photo)return [p.photo];return [];}
 
 async function loadProducts(cb){
-  try{
-    var res=await sb.from('products').select('id,data').limit(5000);
-    if(res.error) throw res.error;
-    products=(res.data||[]).map(function(r){var d=r.data||{};d.id=r.id;return d;});
-    productsLoaded=true;
-    if(cb)cb();
-  }catch(e){
-    console.error('loadProducts',e);
-    productsLoaded=false;
-    var c=document.getElementById('psr');
-    if(c)c.innerHTML='<div class="hint-area"><p>❌ โหลดรูปสินค้าไม่ได้<br><span style="font-size:11px;color:#ef4444;">'+esc(e.message||e)+'</span><br><span style="font-size:11px;">ถ้าขึ้นคำว่า "does not exist" แปลว่ายังไม่ได้สร้างตาราง products ใน Supabase</span></p></div>';
+  var lastErr=null;
+  for(var attempt=1;attempt<=3;attempt++){
+    try{
+      var res=await sb.from('products').select('id,data').limit(5000);
+      if(res.error) throw res.error;
+      products=(res.data||[]).map(function(r){var d=r.data||{};d.id=r.id;return d;});
+      productsLoaded=true;
+      if(cb)cb();
+      return;
+    }catch(e){
+      lastErr=e;
+      console.error('loadProducts attempt '+attempt,e);
+      if(attempt<3)await new Promise(function(r){setTimeout(r,1000*attempt);});
+    }
   }
+  productsLoaded=false;
+  var c=document.getElementById('psr');
+  if(c)c.innerHTML='<div class="hint-area"><p>❌ โหลดรูปสินค้าไม่ได้ (ลองแล้ว 3 ครั้ง)<br><span style="font-size:11px;color:#ef4444;">'+esc((lastErr&&lastErr.message)||lastErr||'')+'</span><br><span style="font-size:11px;">ส่วนใหญ่เกิดจากสัญญาณเน็ตสะดุด กดลองใหม่ได้เลย</span></p>'
+    +'<button onclick="renderPhotoPage()" style="margin-top:10px;background:#ea580c;color:#fff;border:none;border-radius:10px;padding:11px 24px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🔄 ลองใหม่</button></div>';
 }
 function saveProductRow(p){
   if(!productsLoaded){showToast('⚠️ ข้อมูลยังโหลดไม่ครบ กรุณาลองใหม่','err');return;}
@@ -1659,6 +1666,51 @@ function renderUsers(){
     h+='</div>';
   }
   h+='</div>';el.innerHTML=h;
+}
+
+
+async function downloadFullBackup(){
+  var btn=document.getElementById('backupBtn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ กำลังดึงข้อมูลจากฐานข้อมูล...';}
+  function restoreBtn(){if(btn){btn.disabled=false;btn.textContent='📦 สำรองข้อมูลทั้งหมด (คลังสินค้า + รูปสินค้า)';}}
+  try{
+    var t=await sb.from('tiles').select('id,data').limit(20000);
+    if(t.error)throw new Error('tiles: '+t.error.message);
+    var prData=[];
+    try{
+      var pr=await sb.from('products').select('id,data').limit(20000);
+      if(!pr.error)prData=pr.data||[];
+    }catch(_e){}
+    var stData=[];
+    try{
+      var st=await sb.from('staff').select('id,user_id,name,role');
+      if(!st.error)stData=st.data||[];
+    }catch(_e){}
+    var backup={app:'JR Store',version:2,exportedAt:new Date().toISOString(),tiles:t.data||[],products:prData,staff:stData};
+    var json=JSON.stringify(backup);
+    var d=new Date();
+    var fname='JRStore_backup_'+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'_'+('0'+d.getHours()).slice(-2)+('0'+d.getMinutes()).slice(-2)+'.text';
+    var blob=new Blob([json],{type:'application/json'});
+    var shared=false;
+    try{
+      var file=new File([blob],fname,{type:'application/json'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({files:[file]});
+        shared=true;
+      }
+    }catch(e){if(e&&e.name==='AbortError'){restoreBtn();return;}}
+    if(!shared){
+      var a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);a.download=fname;
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(function(){URL.revokeObjectURL(a.href);},5000);
+    }
+    showToast('✅ สำรองแล้ว: คลัง '+(t.data||[]).length+' / รูปสินค้า '+prData.length+' / พนักงาน '+stData.length+' รายการ','ok');
+  }catch(e){
+    console.error('backup',e);
+    showToast('❌ สำรองไม่สำเร็จ: '+(e.message||e),'err');
+  }
+  restoreBtn();
 }
 
 function openEditUserRole(id){
