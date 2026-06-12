@@ -1343,7 +1343,8 @@ function openProductView(id){
     for(var i=0;i<ph.length;i++){imgs+='<img src="'+ph[i]+'" style="height:42vh;border-radius:12px;flex-shrink:0;max-width:88vw;object-fit:contain;background:#111;">';}
     imgs+='</div><div style="color:#fff;font-size:11px;text-align:center;margin-top:4px;opacity:.7;">📷 '+ph.length+' รูป — เลื่อนซ้ายขวาเพื่อดู</div>';
   }
-  var btns='<button onclick="document.getElementById(\'prodViewOv\').remove()" style="flex:1;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">ปิด</button>';
+  var btns='<button data-pid="'+p.id+'" onclick="saveProductPhotos(this.dataset.pid)" style="flex:1;min-width:30%;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">💾 เซฟภาพ</button>'
+    +'<button onclick="document.getElementById(\'prodViewOv\').remove()" style="flex:1;min-width:20%;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">ปิด</button>';
   if(isAdmin){
     btns+='<button data-pid="'+p.id+'" onclick="document.getElementById(\'prodViewOv\').remove();openProductForm(this.dataset.pid)" style="flex:1;background:#ea580c;color:#fff;border:none;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">✏️ แก้ไข</button>';
     btns+='<button data-pid="'+p.id+'" onclick="confirmDeleteProduct(this.dataset.pid)" style="flex:1;background:rgba(239,68,68,.9);color:#fff;border:none;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">🗑️ ลบ</button>';
@@ -1356,8 +1357,40 @@ function openProductView(id){
     +'<div style="font-size:12px;color:#6b7280;">ขนาด: '+esc(fmtProductSize(p)||'—')+'</div>'
     +'<div style="font-size:12px;color:#6b7280;">ยี่ห้อ: '+esc(p.brand||'—')+'</div>'
     +(p.note?'<div style="font-size:12px;color:#6b7280;">หมายเหตุ: '+esc(p.note)+'</div>':'')
-    +'</div><div style="display:flex;gap:8px;margin-top:12px;">'+btns+'</div></div>';
+    +'</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">'+btns+'</div></div>';
   document.body.appendChild(ov);
+}
+
+
+function b64ToBlob(dataUrl){
+  var parts=dataUrl.split(',');
+  var mime=(parts[0].match(/:(.*?);/)||[])[1]||'image/jpeg';
+  var bin=atob(parts[1]);var arr=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+function saveProductPhotos(id){
+  var p=products.find(function(x){return x.id===id;});if(!p)return;
+  var ph=productPhotos(p);if(!ph.length){showToast('❌ ไม่มีรูป','err');return;}
+  try{
+    var files=[];
+    for(var i=0;i<ph.length;i++){
+      var blob=b64ToBlob(ph[i]);
+      files.push(new File([blob],(p.name||'product').replace(/[\/\\:*?"<>|]/g,'')+(ph.length>1?'_'+(i+1):'')+'.jpg',{type:'image/jpeg'}));
+    }
+    if(navigator.canShare&&navigator.canShare({files:files})){
+      navigator.share({files:files}).catch(function(e){});
+      return;
+    }
+  }catch(e){console.error('share',e);}
+  // สำรอง: ดาวน์โหลดตรง (คอมพิวเตอร์/เบราว์เซอร์ที่ไม่มีเมนูแชร์)
+  var ph2=productPhotos(p);
+  for(var j=0;j<ph2.length;j++){
+    var a=document.createElement('a');a.href=ph2[j];
+    a.download=(p.name||'product')+(ph2.length>1?'_'+(j+1):'')+'.jpg';
+    document.body.appendChild(a);a.click();a.remove();
+  }
+  showToast('✅ กำลังบันทึกรูป','ok');
 }
 
 function confirmDeleteProduct(id){
@@ -1595,11 +1628,47 @@ function renderUsers(){
     h+='<div style="font-size:11px;background:#f0f0eb;border-radius:6px;padding:2px 8px;font-family:monospace;">PW: ••••</div>';
     h+='<div style="font-size:10px;background:rgba(234,88,12,.1);color:#ea580c;border-radius:50px;padding:2px 8px;font-weight:700;">'+(roleLabels[u.role]||u.role)+'</div>';
     h+='</div></div>';
-    if(!(u.role==='owner'&&ownerCount<=1)) h+='<button data-uid="'+u.id+'" onclick="deleteUser(this.dataset.uid)" style="background:rgba(234,88,12,.1);color:#ea580c;border:1px solid rgba(234,88,12,.2);border-radius:8px;padding:7px 12px;font-family:Sarabun,sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">ลบ</button>';
+    h+='<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">';
+    if(!(u.role==='owner'&&ownerCount<=1)) h+='<button data-uid="'+u.id+'" onclick="openEditUserRole(this.dataset.uid)" style="background:rgba(22,163,74,.1);color:#16a34a;border:1px solid rgba(22,163,74,.25);border-radius:8px;padding:7px 12px;font-family:Sarabun,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">เปลี่ยนสิทธิ์</button>';
+    if(!(u.role==='owner'&&ownerCount<=1)) h+='<button data-uid="'+u.id+'" onclick="deleteUser(this.dataset.uid)" style="background:rgba(234,88,12,.1);color:#ea580c;border:1px solid rgba(234,88,12,.2);border-radius:8px;padding:7px 12px;font-family:Sarabun,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">ลบ</button>';
+    h+='</div>';
     h+='</div>';
   }
   h+='</div>';el.innerHTML=h;
 }
+
+function openEditUserRole(id){
+  var u=users.find(function(x){return x.id===id;});if(!u)return;
+  var roleNames={'store':'👤 พนักงานสโตร์','sales':'🛍️ พนักงานขาย','manager':'💼 ผู้จัดการ','graphic':'🎨 กราฟฟิก','admin':'🔐 Admin','owner':'⭐ Owner'};
+  var opts='';Object.keys(roleNames).forEach(function(r){opts+='<option value="'+r+'"'+(u.role===r?' selected':'')+'>'+roleNames[r]+'</option>';});
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;';
+  var inner=document.createElement('div');
+  inner.style.cssText='background:#fff;border-radius:20px;padding:24px 20px;width:100%;max-width:360px;border-top:3px solid #16a34a;font-family:Sarabun,sans-serif;';
+  inner.innerHTML='<div style="font-size:15px;font-weight:800;color:#166534;margin-bottom:6px;">เปลี่ยนสิทธิ์: '+u.name+'</div>'
+    +'<div style="font-size:12px;color:#6b7280;margin-bottom:14px;">ID: '+u.userId+' — ชื่อและรหัสผ่านเดิมไม่เปลี่ยน</div>'
+    +'<select id="er_role" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:11px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;margin-bottom:16px;">'+opts+'</select>';
+  var saveBtn=document.createElement('button');saveBtn.textContent='💾 บันทึก';
+  saveBtn.style.cssText='width:100%;padding:13px;background:#16a34a;color:#fff;border:none;border-radius:11px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:800;cursor:pointer;';
+  saveBtn.onclick=async function(){
+    var newRole=document.getElementById('er_role').value;
+    if(newRole===u.role){ov.remove();return;}
+    var ownerCount=users.filter(function(x){return x.role==='owner';}).length;
+    if(u.role==='owner'&&ownerCount<=1&&newRole!=='owner'){showToast('❌ ต้องมี Owner อย่างน้อย 1 คน','err');return;}
+    saveBtn.disabled=true;saveBtn.textContent='⏳ กำลังบันทึก...';
+    var r=await sb.from('staff').update({role:newRole}).eq('id',u.id);
+    if(r.error){showToast('❌ เปลี่ยนไม่สำเร็จ: '+r.error.message,'err');saveBtn.disabled=false;saveBtn.textContent='💾 บันทึก';return;}
+    u.role=newRole;ov.remove();renderUsers();
+    showToast('✅ เปลี่ยน '+u.name+' เป็น '+(roleNames[newRole]||newRole)+' แล้ว','ok');
+  };
+  var cancelBtn=document.createElement('button');cancelBtn.textContent='ยกเลิก';
+  cancelBtn.style.cssText='width:100%;padding:12px;background:#f0f0eb;border:none;border-radius:11px;font-family:Sarabun,sans-serif;font-size:13px;cursor:pointer;margin-top:8px;';
+  cancelBtn.onclick=function(){ov.remove();};
+  inner.appendChild(saveBtn);inner.appendChild(cancelBtn);
+  ov.appendChild(inner);ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
+
 async function deleteUser(id){
   var u=users.find(function(x){return x.id===id;});if(!u) return;
   if(!confirm('ลบผู้ใช้ "'+u.name+'" ?')) return;
