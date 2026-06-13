@@ -1932,10 +1932,11 @@ function openProductView(id){
     +'<div style="background:#fff;border-radius:12px;padding:14px;margin-top:12px;font-family:Sarabun,sans-serif;">'
     +(p.special?'<div style="background:#dc2626;color:#fff;font-size:12px;font-weight:800;padding:6px 12px;border-radius:8px;margin-bottom:8px;text-align:center;">🔴 สินค้าสั่งพิเศษ รอของ — ไม่มีสต็อก</div>':'')
     +'<div style="font-size:16px;font-weight:800;">'+esc(p.name)+'</div>'
-    +'<div style="font-size:12px;color:#6b7280;margin-top:4px;">หมวดหมู่: '+esc(p.category||'—')+'</div>'
-    +'<div style="font-size:12px;color:#6b7280;">ขนาด: '+esc(fmtProductSize(p)||'—')+'</div>'
-    +'<div style="font-size:12px;color:#6b7280;">ยี่ห้อ: '+esc(p.brand||'—')+'</div>'
-    +(p.note?'<div style="font-size:12px;color:#6b7280;">หมายเหตุ: '+esc(p.note)+'</div>':'')
+    +(p.category?'<div style="font-size:12px;color:#6b7280;margin-top:4px;">หมวดหมู่: '+esc(p.category)+'</div>':'')
+    +(fmtProductSize(p)?'<div style="font-size:12px;color:#6b7280;">ขนาด: '+esc(fmtProductSize(p))+'</div>':'')
+    +(p.brand?'<div style="font-size:12px;color:#6b7280;">ยี่ห้อ: '+esc(p.brand)+'</div>':'')
+    +(p.endDate&&(p.section==='promo')?'<div style="font-size:12px;color:#6b7280;">ใช้ได้ถึง: '+thDate(p.endDate)+'</div>':'')
+    +(p.note?'<div style="font-size:12px;color:#6b7280;margin-top:2px;">หมายเหตุ: '+esc(p.note)+'</div>':'')
     +'</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">'+btns+'</div></div>';
   document.body.appendChild(ov);
 }
