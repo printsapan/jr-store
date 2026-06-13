@@ -1400,14 +1400,28 @@ function renderLinkSection(q){
     if(allowLink)hh+='<button onclick="openLinkForm(\''+photoSection+'\')" style="width:100%;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:12px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:12px;">📎 เพิ่มลิงก์'+(photoSection==='tis'?' มอก.':def.label)+'</button>';
   }
   var prods=products.filter(function(p){return (p.section||'photo')===photoSection;});
+  var _today=new Date().toISOString().slice(0,10);
+  function promoState(p){
+    if(photoSection!=='promo')return 'ok';
+    if(p.startDate&&_today<p.startDate)return 'pending';
+    if(p.endDate&&_today>p.endDate)return 'expired';
+    return 'ok';
+  }
+  if(photoSection==='promo'&&!canM){
+    prods=prods.filter(function(p){return promoState(p)==='ok';});
+  }
   if(ql)prods=prods.filter(function(p){var ft=((p.name||'')+' '+(p.category||'')+' '+(p.brand||'')+' '+(p.note||'')).toLowerCase();var ws=ql.split(/\s+/);for(var i=0;i<ws.length;i++){if(ft.indexOf(ws[i])<0)return false;}return true;});
   if(prods.length){
     hh+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">';
     prods.forEach(function(p){
       var ph2=productPhotos(p);
       var im=ph2.length?'<img src="'+ph2[0]+'" style="width:100%;height:110px;object-fit:cover;display:block;">':'<div style="width:100%;height:110px;display:flex;align-items:center;justify-content:center;background:#f3f4f6;font-size:30px;">'+def.icon+'</div>';
-      hh+='<div onclick="openProductView(\''+p.id+'\')" style="background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:pointer;">'+im
-        +'<div style="padding:8px 10px;"><div style="font-size:12.5px;font-weight:800;color:#1f2937;">'+esc(p.name||'')+'</div>'
+      var st=promoState(p);
+      var badge=st==='expired'?'<span style="background:#e5e7eb;color:#6b7280;border-radius:5px;padding:1px 5px;font-size:9px;font-weight:800;">หมดอายุ</span> ':st==='pending'?'<span style="background:#dbeafe;color:#1d4ed8;border-radius:5px;padding:1px 5px;font-size:9px;font-weight:800;">ยังไม่เริ่ม</span> ':'';
+      var dim=(st!=='ok')?'opacity:.5;filter:grayscale(.7);':'';
+      hh+='<div onclick="openProductView(\''+p.id+'\')" style="background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:pointer;'+dim+'">'+im
+        +'<div style="padding:8px 10px;"><div style="font-size:12.5px;font-weight:800;color:#1f2937;">'+badge+esc(p.name||'')+'</div>'
+        +(p.endDate&&photoSection==='promo'?'<div style="font-size:9.5px;color:#9ca3af;margin-top:1px;">ถึง '+thDate(p.endDate)+'</div>':'')
         +(p.note?'<div style="font-size:10px;color:#6b7280;margin-top:1px;">'+esc(p.note)+'</div>':'')+'</div></div>';
     });
     hh+='</div>';
@@ -1770,7 +1784,12 @@ function openSimpleProductForm(section,editId){
     +'<div style="margin-bottom:12px;"><label style="font-size:11px;color:#6b7280;font-weight:700;margin-bottom:4px;display:block;">ชื่อสินค้า</label>'
     +'<input id="spf_name" value="'+(p?esc(p.name||''):'')+'" placeholder="'+(section==='promo'?'เช่น โปรปูนลด 10%':section==='tis'?'เช่น ปูนอินทรี มอก.15':'เช่น ขนาดรถ 6 ล้อ')+'" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;box-sizing:border-box;"></div>'
     +'<div style="margin-bottom:12px;"><label style="font-size:11px;color:#6b7280;font-weight:700;margin-bottom:4px;display:block;">หมายเหตุ (ไม่บังคับ)</label>'
-    +'<textarea id="spf_note" rows="2" placeholder="รายละเอียดเพิ่มเติม" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;box-sizing:border-box;resize:vertical;">'+(p?esc(p.note||''):'')+'</textarea></div>'
+    +'<textarea id="spf_note" rows="2" placeholder="รายละเอียดเพิ่มเติม" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;box-sizing:border-box;resize:vertical;">'+(p?esc(p.note||''):'')+'</textarea></div>'+(section==='promo'?('<div style="display:flex;gap:8px;margin-bottom:12px;">'
+      +'<div style="flex:1;"><label style="font-size:11px;color:#6b7280;font-weight:700;margin-bottom:4px;display:block;">วันเริ่ม (ไม่บังคับ)</label>'
+      +'<input id="spf_start" type="date" value="'+(p&&p.startDate?p.startDate:'')+'" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;box-sizing:border-box;"></div>'
+      +'<div style="flex:1;"><label style="font-size:11px;color:#6b7280;font-weight:700;margin-bottom:4px;display:block;">วันหมด (ไม่บังคับ)</label>'
+      +'<input id="spf_end" type="date" value="'+(p&&p.endDate?p.endDate:'')+'" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px;font-family:Sarabun,sans-serif;font-size:13px;outline:none;box-sizing:border-box;"></div></div>'
+      +'<div style="font-size:10.5px;color:#9ca3af;margin:-6px 0 12px;">พอเลยวันหมด พนักงานขายจะไม่เห็นโปรนี้ แต่กราฟฟิก/เจ้าของยังเห็นเป็นสีเทาไว้ใช้ใหม่ได้</div>'):'')
     +'<div style="margin-bottom:8px;"><label style="font-size:11px;color:#6b7280;font-weight:700;margin-bottom:4px;display:block;">รูปภาพ (เพิ่มได้หลายรูป)</label>'
     +'<div id="spf_prev" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;"></div>'
     +'<input type="file" accept="image/*" multiple onchange="spfPick(this)" style="font-family:Sarabun,sans-serif;font-size:12.5px;"></div>'
@@ -1805,6 +1824,11 @@ async function saveSimpleProduct(section,editId){
   if(!spfPhotos.length){showToast('⚠️ ใส่รูปอย่างน้อย 1 รูป','err');return;}
   var id=editId||('p_'+Date.now()+'_'+Math.random().toString(36).slice(2,8));
   var data={name:name,note:note,section:section,photos:spfPhotos};
+  if(section==='promo'){
+    var sd=document.getElementById('spf_start');var ed=document.getElementById('spf_end');
+    if(sd&&sd.value)data.startDate=sd.value;
+    if(ed&&ed.value)data.endDate=ed.value;
+  }
   try{
     var res=await sb.from('products').upsert({id:id,data:data,updated_at:new Date().toISOString()});
     if(res.error)throw res.error;
