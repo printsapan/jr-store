@@ -1973,6 +1973,7 @@ function openProductView(id){
   var p=products.find(function(x){return x.id===id;});if(!p)return;
   var isAdmin=canManageSection(p.section||'photo');
   var ph=productPhotos(p);
+  _prefetchProdFiles(p.id,ph);
   var ov=document.createElement('div');ov.id='prodViewOv';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
@@ -2013,29 +2014,49 @@ function b64ToBlob(dataUrl){
   for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
   return new Blob([arr],{type:mime});
 }
-function _photoFiles(p,ph){
-  var files=[];
-  for(var i=0;i<ph.length;i++){
-    var blob=b64ToBlob(ph[i]);
-    files.push(new File([blob],(p.name||'product').replace(/[\/\\:*?"<>|]/g,'')+(ph.length>1?'_'+(i+1):'')+'.jpg',{type:'image/jpeg'}));
+var _prodFiles={};
+function _toBlob(u){
+  if(typeof u==='string'&&u.indexOf('data:')===0)return Promise.resolve(b64ToBlob(u));
+  function viaFetch(){return fetch(u,{mode:'cors'}).then(function(r){if(!r.ok)throw new Error('http '+r.status);return r.blob();});}
+  // รูปใน Supabase Storage: ดึงผ่าน SDK โดยตรง เลี่ยงปัญหา CORS แล้วได้ไฟล์รูปจริง
+  var marker='/'+IMG_BUCKET+'/';
+  var idx=(typeof u==='string')?u.indexOf(marker):-1;
+  if(idx!==-1 && typeof sb!=='undefined' && sb.storage){
+    var path=decodeURIComponent(u.substring(idx+marker.length).split('?')[0]);
+    return sb.storage.from(IMG_BUCKET).download(path).then(function(res){
+      if(res.error||!res.data)throw (res.error||new Error('no data'));
+      return res.data;
+    }).catch(viaFetch);
   }
-  return files;
+  return viaFetch();
+}
+function _prefetchProdFiles(id,ph){
+  _prodFiles[id]=null;
+  Promise.all(ph.map(_toBlob)).then(function(blobs){
+    _prodFiles[id]=blobs.map(function(b,i){return new File([b],'product_'+(i+1)+'.jpg',{type:(b.type||'image/jpeg')});});
+  }).catch(function(){ _prodFiles[id]=null; });
 }
 function _shareOrSavePhotos(id,withText){
   var p=products.find(function(x){return x.id===id;});if(!p)return;
   var ph=productPhotos(p);if(!ph.length){showToast('❌ ไม่มีรูป','err');return;}
-  var files=[];try{files=_photoFiles(p,ph);}catch(e){console.error('files',e);}
   var txt='';
   if(withText){txt=(p.name||'');if(fmtProductSize(p))txt+=' ขนาด '+fmtProductSize(p);if(p.brand)txt+=' ยี่ห้อ '+p.brand;}
   function onErr(err){ if(err&&err.name==='AbortError')return; showToast('💡 ถ้าเมนูไม่ขึ้น กดค้างที่รูปด้านบนเพื่อบันทึก/แชร์','ok'); }
-  function trySh(payload){ if(files.length&&navigator.share&&navigator.canShare&&navigator.canShare(payload)){ navigator.share(payload).catch(onErr); return true; } return false; }
-  // เรียงจากดีสุดไปสำรอง: ส่งหลายรูป+ข้อความ → หลายรูป → รูปแรก+ข้อความ → รูปแรก
-  if(withText&&trySh({files:files,text:txt})) return;
-  if(trySh({files:files})) return;
-  if(withText&&trySh({files:[files[0]],text:txt})){ if(files.length>1)showToast('เครื่องนี้แชร์ได้ทีละรูป — รูปอื่นกดปุ่มซ้ำได้','ok'); return; }
-  if(trySh({files:[files[0]]})){ if(files.length>1)showToast('เครื่องนี้เซฟได้ทีละรูป — รูปอื่นกดปุ่มซ้ำได้','ok'); return; }
-  // ไม่มีระบบแชร์ (เบราว์เซอร์ในแอป ฯลฯ) — ไม่เด้งออกจากแอป ให้กดค้างที่รูปที่แสดงอยู่แทน
-  showToast('💡 เครื่องนี้บันทึกอัตโนมัติไม่ได้ — กดค้างที่รูปด้านบนเพื่อบันทึก/ส่ง LINE','ok');
+  function trySh(payload){ try{ if(!navigator.share)return false; if(navigator.canShare&&!navigator.canShare(payload))return false; navigator.share(payload).catch(onErr); return true; }catch(e){return false;} }
+  var files=_prodFiles[id];
+  if(files&&files.length){
+    if(withText&&trySh({files:files,text:txt}))return;
+    if(trySh({files:files}))return;
+    if(withText&&trySh({files:[files[0]],text:txt})){if(files.length>1)showToast('เครื่องนี้แชร์/เซฟได้ทีละรูป — รูปอื่นกดซ้ำได้','ok');return;}
+    if(trySh({files:[files[0]]})){if(files.length>1)showToast('เครื่องนี้แชร์/เซฟได้ทีละรูป — รูปอื่นกดซ้ำได้','ok');return;}
+  }
+  // รูปยังโหลดไม่เสร็จ หรือแชร์ไฟล์ไม่ได้ -> แชร์เป็นลิงก์รูป (ส่ง LINE ได้)
+  var url=ph[0];
+  if(/^https?:/i.test(url)){
+    if(withText&&trySh({text:txt,url:url}))return;
+    if(trySh({url:url}))return;
+  }
+  showToast('💡 กดค้างที่รูปด้านบนเพื่อบันทึก/ส่ง LINE ได้เลย','ok');
 }
 function saveProductPhotos(id){ _shareOrSavePhotos(id,false); }
 function shareProductPhotos(id){ _shareOrSavePhotos(id,true); }
