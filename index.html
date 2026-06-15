@@ -2896,31 +2896,27 @@ function savePlateImg(btn){
 
 
 
-/* ===================== ผังหน้าร้าน (storefront) — ฝังในแท็บแผนที่ ===================== */
+/* ===================== ผังหน้าร้าน (storefront) ===================== */
 window.mapMode=function(m){
   var wh=document.getElementById('mapWarehouse'), sf=document.getElementById('mapStorefront');
   var bw=document.getElementById('mtb-wh'), bs=document.getElementById('mtb-sf');
-  if(m==='storefront'){
-    if(wh)wh.style.display='none'; if(sf)sf.style.display='block';
-    if(bw)bw.classList.remove('active'); if(bs)bs.classList.add('active');
-    if(window.SF)window.SF.open();
-  }else{
-    if(sf)sf.style.display='none'; if(wh)wh.style.display='block';
-    if(bs)bs.classList.remove('active'); if(bw)bw.classList.add('active');
-  }
+  if(m==='storefront'){ if(wh)wh.style.display='none'; if(sf)sf.style.display='block';
+    if(bw)bw.classList.remove('active'); if(bs)bs.classList.add('active'); if(window.SF)window.SF.open(); }
+  else{ if(sf)sf.style.display='none'; if(wh)wh.style.display='block';
+    if(bs)bs.classList.remove('active'); if(bw)bw.classList.add('active'); }
 };
 (function(){
   var NS='http://www.w3.org/2000/svg';
   var ROOM={w:8,h:12};
   var SHELVES=[
-    {n:4,x:1.5,y:0.10,w:2.0,l:0.8,h:1.7,lv:3},{n:5,x:3.6,y:0.10,w:4.0,l:0.6,h:3.0,lv:6},
-    {n:10,x:7.40,y:0.40,w:0.6,l:3.0,h:3.0,lv:6},{n:11,x:7.40,y:4.00,w:0.6,l:3.0,h:3.0,lv:6},
-    {n:1,x:0.20,y:4.00,w:0.8,l:2.4,h:1.7,lv:4},{n:6,x:3.20,y:2.20,w:0.4,l:2.4,h:1.7,lv:4},
-    {n:8,x:3.60,y:2.20,w:0.8,l:2.4,h:1.7,lv:4},{n:7,x:4.40,y:2.20,w:0.4,l:2.4,h:1.7,lv:4},
-    {n:9,x:5.20,y:2.20,w:0.8,l:2.4,h:1.7,lv:4},{n:2,x:6.30,y:2.20,w:0.6,l:3.0,h:3.0,lv:6},
-    {n:3,x:1.20,y:7.00,w:0.96,l:1.8,h:2.34,lv:4},{n:12,x:3.20,y:5.00,w:0.8,l:2.4,h:1.7,lv:4},
-    {n:13,x:4.10,y:5.00,w:0.8,l:2.4,h:1.7,lv:4},{n:14,x:5.00,y:5.00,w:0.8,l:2.4,h:1.7,lv:4},
-    {n:15,x:2.30,y:7.00,w:1.8,l:0.8,h:1.7,lv:5},{n:16,x:2.30,y:5.00,w:0.8,l:0.4,h:1.5,lv:4}
+    {n:1,x:0.20,y:4.00,w:0.8,l:2.4,h:1.7,lv:4},{n:2,x:6.30,y:2.20,w:0.6,l:3.0,h:3.0,lv:6},
+    {n:3,x:1.20,y:7.00,w:0.96,l:1.8,h:2.34,lv:4},{n:4,x:1.5,y:0.10,w:2.0,l:0.8,h:1.7,lv:3},
+    {n:5,x:3.6,y:0.10,w:4.0,l:0.6,h:3.0,lv:6},{n:6,x:3.20,y:2.20,w:0.4,l:2.4,h:1.7,lv:4},
+    {n:7,x:4.40,y:2.20,w:0.4,l:2.4,h:1.7,lv:4},{n:8,x:3.60,y:2.20,w:0.8,l:2.4,h:1.7,lv:4},
+    {n:9,x:5.20,y:2.20,w:0.8,l:2.4,h:1.7,lv:4},{n:10,x:7.40,y:0.40,w:0.6,l:5.0,h:3.0,lv:6},
+    {n:11,x:3.20,y:5.00,w:0.8,l:2.4,h:1.7,lv:4},{n:12,x:4.10,y:5.00,w:0.8,l:2.4,h:1.7,lv:4},
+    {n:13,x:5.00,y:5.00,w:0.8,l:2.4,h:1.7,lv:4},{n:14,x:2.30,y:7.00,w:1.8,l:0.8,h:1.7,lv:5},
+    {n:15,x:2.30,y:5.00,w:0.8,l:0.4,h:1.5,lv:4}
   ];
   var DOOR={kind:'door',wall:'L',pos:1.5,wd:2.0};
   var STAIR={kind:'stair',x:6.0,y:9.0,w:1.4,l:2.4};
@@ -2929,40 +2925,42 @@ window.mapMode=function(m){
     cr.forEach(function(r){cx.forEach(function(x){COLS.push({x:x,y:r.y,m:r.m,kind:'col1'});});});})();
   var COLGRP={kind:'cols'};
   var SNAP=0.5,STEP=0.5,sel=null,inited=false,svg,wallG,colG,stairG,doorLine,doorLbl,zoneLbl;
-  var curFront=null,curCell=null;
+  var curFront=null,curCell=null,curEdit=null;
 
   function E(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
   function snap(v){return Math.round(v/SNAP)*SNAP;}
   function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
   function findShelf(n){for(var i=0;i<SHELVES.length;i++)if(SHELVES[i].n===n)return SHELVES[i];return null;}
-  function setStatus(t){var e=document.getElementById('sfStat');if(e)e.textContent=t;}
   function setLab(t){var e=document.getElementById('sfLab');if(e)e.innerHTML=t;}
-
+  function setStatus(t){var e=document.getElementById('sfStat');if(e)e.textContent=t;}
+  function ensureBays(s){if(!Array.isArray(s.bays))s.bays=[];while(s.bays.length<s.lv)s.bays.push(3);if(s.bays.length>s.lv)s.bays.length=s.lv;}
   function padBtn(d,lab){return '<button class="sfnb" data-d="'+d+'" style="width:42px;height:42px;border:1px solid #e5e7eb;border-radius:10px;background:#f3f4f6;font-size:18px;font-weight:700;color:#1b2420;">'+lab+'</button>';}
-  function toolBtn(id,lab,col){return '<button id="'+id+'" style="border:1px solid #e5e7eb;background:#f3f4f6;border-radius:8px;padding:7px 11px;font-family:Sarabun,sans-serif;font-weight:700;font-size:12px;color:'+(col||'#1b2420')+';cursor:pointer;">'+lab+'</button>';}
+  function tBtn(id,lab,col){return '<button id="'+id+'" style="border:1px solid #e5e7eb;background:#f3f4f6;border-radius:8px;padding:7px 11px;font-family:Sarabun,sans-serif;font-weight:700;font-size:12px;color:'+(col||'#1b2420')+';cursor:pointer;">'+lab+'</button>';}
+  function fld(id,lab,val){return '<div style="display:flex;flex-direction:column;gap:3px;"><label style="font-size:11px;color:#6b7280;font-weight:700;">'+lab+'</label><input id="'+id+'" type="number" step="0.1" value="'+val+'" style="width:70px;border:1.5px solid #e5e7eb;border-radius:8px;padding:8px;font-family:Sarabun,sans-serif;text-align:center;"></div>';}
+
   function build(){
     var wrap=document.getElementById('mapStorefront');
     wrap.innerHTML=
       '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-family:Sarabun,sans-serif;">'
       +'<span style="font-size:13px;color:#6b7280;">ห้อง</span>'
-      +'<input id="sfRW" type="number" value="8" style="width:52px;text-align:center;border:1.5px solid #e5e7eb;border-radius:8px;padding:6px;font-family:Sarabun,sans-serif;">'
-      +'<span style="color:#6b7280;">×</span>'
+      +'<input id="sfRW" type="number" value="8" style="width:52px;text-align:center;border:1.5px solid #e5e7eb;border-radius:8px;padding:6px;font-family:Sarabun,sans-serif;"><span style="color:#6b7280;">×</span>'
       +'<input id="sfRH" type="number" value="12" style="width:52px;text-align:center;border:1.5px solid #e5e7eb;border-radius:8px;padding:6px;font-family:Sarabun,sans-serif;"><span style="font-size:13px;color:#6b7280;">ม.</span>'
       +'<button id="sfApply" style="border:1px solid #e5e7eb;background:#f3f4f6;border-radius:8px;padding:6px 10px;font-family:Sarabun,sans-serif;font-weight:700;cursor:pointer;">ปรับ</button>'
       +'<button id="sfSaveBtn" style="margin-left:auto;background:#16a34a;color:#fff;border:none;border-radius:9px;padding:8px 14px;font-family:Sarabun,sans-serif;font-weight:800;cursor:pointer;">💾 บันทึก</button>'
       +'</div>'
       +'<div id="sfStat" style="font-size:11px;color:#16a34a;font-weight:700;margin-bottom:6px;min-height:14px;font-family:Sarabun,sans-serif;"></div>'
       +'<div id="sfChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;"></div>'
+      +'<div id="sfShelfTools" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">'
+      +tBtn('sfFrontBtn','📦 ด้านหน้า/ช่อง','#0f766e')+tBtn('sfEditBtn','✏️ แก้ชั้นที่เลือก','#0f766e')
+      +tBtn('sfAddShelf','➕ เพิ่มชั้น','#16a34a')+tBtn('sfRenum','🔢 เรียงเลขใหม่','#6b7280')+'</div>'
       +'<div id="sfColTools" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">'
-      +toolBtn('sfAddCol','➕ เสา','#6b746f')+toolBtn('sfAddColM','➕ เสาชั้นลอย','#3a4a8a')+toolBtn('sfDelCol','🗑 ลบเสาที่เลือก','#b23b3b')
-      +'</div>'
-      +'<div id="sfShelfTools" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">'+toolBtn('sfFrontBtn','📦 ด้านหน้า/ช่องของชั้นที่เลือก','#0f766e')+'</div>'
-      +'<div id="sfLab" style="font-size:12px;color:#6b7280;margin-bottom:6px;font-family:Sarabun,sans-serif;">แตะหมายเลข/ประตู/เสา/บันได แล้วแตะบนผังเพื่อย้าย · แตะที่เสาเพื่อเลือกทีละต้น</div>'
+      +tBtn('sfAddCol','➕ เสา','#6b746f')+tBtn('sfAddColM','➕ เสาชั้นลอย','#3a4a8a')+tBtn('sfDelCol','🗑 ลบเสาที่เลือก','#b23b3b')+'</div>'
+      +'<div id="sfLab" style="font-size:12px;color:#6b7280;margin-bottom:6px;font-family:Sarabun,sans-serif;">แตะหมายเลข/ประตู/เสา/บันได แล้วแตะบนผังเพื่อย้าย</div>'
       +'<svg id="sfSvg" style="width:100%;height:56vh;display:block;background:#eef1f0;border-radius:12px;touch-action:manipulation;" preserveAspectRatio="xMidYMid meet"></svg>'
       +'<div id="sfPad" style="display:flex;gap:8px;justify-content:center;margin-top:10px;">'
       +padBtn('L','◀')+padBtn('U','▲')+padBtn('D','▼')+padBtn('R','▶')
-      +'<button class="sfnb" id="sfRot" style="width:42px;height:42px;border:1px solid #e5e7eb;border-radius:10px;background:#f3f4f6;font-size:17px;font-weight:700;color:#1b2420;">⟳</button>'
-      +'</div>'
+      +'<button class="sfnb" id="sfRot" style="width:42px;height:42px;border:1px solid #e5e7eb;border-radius:10px;background:#f3f4f6;font-size:17px;font-weight:700;color:#1b2420;">⟳</button></div>'
+      // front-view overlay
       +'<div id="sfFront" style="display:none;position:fixed;inset:0;background:rgba(15,23,20,.55);z-index:9999;align-items:flex-start;justify-content:center;padding:20px 10px;overflow:auto;">'
       +'<div style="background:#fff;border-radius:16px;max-width:520px;width:100%;padding:16px;font-family:Sarabun,sans-serif;">'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><div style="font-weight:800;font-size:15px;">📦 ช่องวางของชั้น</div>'
@@ -2970,8 +2968,20 @@ window.mapMode=function(m){
       +'<button id="sfFrontClose" style="background:#eee;border:none;border-radius:9px;padding:7px 12px;font-family:Sarabun,sans-serif;font-weight:700;">ปิด</button></div>'
       +'<div id="sfFrontInfo" style="font-size:12px;color:#0f766e;font-weight:700;min-height:16px;margin-bottom:8px;"></div>'
       +'<div id="sfFrontBody"></div>'
-      +'<div style="font-size:11px;color:#9ca3af;margin-top:10px;">ปุ่ม +/− ปรับจำนวนช่องในแต่ละระดับ · แตะช่องเพื่อดูตำแหน่ง</div>'
-      +'</div></div>';
+      +'<div style="font-size:11px;color:#9ca3af;margin-top:10px;">ปุ่ม +/− ปรับจำนวนช่องในแต่ละระดับ · แตะช่องเพื่อดูตำแหน่ง</div></div></div>'
+      // edit-shelf overlay
+      +'<div id="sfEdit" style="display:none;position:fixed;inset:0;background:rgba(15,23,20,.55);z-index:9999;align-items:flex-start;justify-content:center;padding:24px 10px;overflow:auto;">'
+      +'<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;padding:18px;font-family:Sarabun,sans-serif;">'
+      +'<div style="display:flex;align-items:center;margin-bottom:14px;"><div style="font-weight:800;font-size:15px;">✏️ แก้ข้อมูลชั้น</div>'
+      +'<button id="sfeClose" style="margin-left:auto;background:#eee;border:none;border-radius:9px;padding:7px 12px;font-family:Sarabun,sans-serif;font-weight:700;">ปิด</button></div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">'
+      +fld('sfeN','เลขชั้น','1')+fld('sfeW','กว้าง (ม.)','0.8')+fld('sfeL','ยาว (ม.)','2.4')+fld('sfeH','สูง (ม.)','1.7')+'</div>'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><label style="font-size:12px;color:#6b7280;font-weight:700;">จำนวนระดับ</label>'
+      +'<button id="sfeLVdn" style="width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-weight:800;font-size:18px;">−</button>'
+      +'<input id="sfeLV" type="number" value="4" style="width:56px;text-align:center;border:1.5px solid #e5e7eb;border-radius:8px;padding:8px;font-family:Sarabun,sans-serif;font-weight:800;">'
+      +'<button id="sfeLVup" style="width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-weight:800;font-size:18px;">+</button></div>'
+      +'<div style="display:flex;gap:8px;"><button id="sfeApply" style="flex:1;background:#0f766e;color:#fff;border:none;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-weight:800;">บันทึกการแก้ไข</button>'
+      +'<button id="sfeDel" style="background:#fff;color:#b23b3b;border:1.5px solid #b23b3b;border-radius:10px;padding:11px 14px;font-family:Sarabun,sans-serif;font-weight:800;">🗑 ลบชั้นนี้</button></div></div></div>';
     svg=document.getElementById('sfSvg');
     var gridG=E('g',{});gridG.setAttribute('id','sfGrid');
     wallG=E('g',{});colG=E('g',{});stairG=E('g',{});
@@ -2980,20 +2990,11 @@ window.mapMode=function(m){
     zoneLbl=E('text',{fill:'#6b7280','font-size':'.4','font-weight':'600','text-anchor':'middle','font-family':'Sarabun,sans-serif'});zoneLbl.textContent='โซนเสา / ชั้นลอย';
     svg.appendChild(gridG);svg.appendChild(wallG);svg.appendChild(doorLine);svg.appendChild(doorLbl);
     svg.appendChild(colG);svg.appendChild(zoneLbl);svg.appendChild(stairG);
-    SHELVES.forEach(function(s){
-      s.kind='shelf';var g=E('g',{});s._g=g;
-      s._r=E('rect',{rx:0.05,fill:'#2f5d62',stroke:'#21464a','stroke-width':'.04'});
-      s._t=E('text',{fill:'#fff','font-weight':'700','text-anchor':'middle','dominant-baseline':'central','font-family':'Space Grotesk,Sarabun,sans-serif'});
-      s._t.textContent=s.n;g.appendChild(s._r);g.appendChild(s._t);
-      g.addEventListener('click',function(ev){ev.stopPropagation();select(s);});
-      svg.appendChild(g);
-    });
+    SHELVES.forEach(makeShelfEls);
     stairG.addEventListener('click',function(ev){ev.stopPropagation();select(STAIR);});
     doorLine.addEventListener('click',function(ev){ev.stopPropagation();select(DOOR);});
     svg.addEventListener('click',onSvgTap);
-    document.getElementById('sfApply').addEventListener('click',function(){
-      ROOM.w=clamp(parseFloat(document.getElementById('sfRW').value)||8,2,40);
-      ROOM.h=clamp(parseFloat(document.getElementById('sfRH').value)||12,2,40);renderAll();});
+    document.getElementById('sfApply').addEventListener('click',function(){ROOM.w=clamp(parseFloat(document.getElementById('sfRW').value)||8,2,40);ROOM.h=clamp(parseFloat(document.getElementById('sfRH').value)||12,2,40);renderAll();});
     document.getElementById('sfSaveBtn').addEventListener('click',saveToDb);
     document.getElementById('sfPad').addEventListener('click',onNudge);
     document.getElementById('sfRot').addEventListener('click',onRot);
@@ -3004,16 +3005,29 @@ window.mapMode=function(m){
     document.getElementById('sfFrontClose').addEventListener('click',closeFront);
     document.getElementById('sfFrontSave').addEventListener('click',function(){saveToDb();});
     document.getElementById('sfFrontBody').addEventListener('click',onFrontTap);
+    document.getElementById('sfEditBtn').addEventListener('click',function(){if(sel&&sel.kind==='shelf')openEdit(sel);else showToast('แตะเลือกชั้นก่อน','err');});
+    document.getElementById('sfeClose').addEventListener('click',closeEdit);
+    document.getElementById('sfeApply').addEventListener('click',applyEdit);
+    document.getElementById('sfeDel').addEventListener('click',delShelf);
+    document.getElementById('sfeLVup').addEventListener('click',function(){var i=document.getElementById('sfeLV');i.value=clamp((parseInt(i.value)||1)+1,1,12);});
+    document.getElementById('sfeLVdn').addEventListener('click',function(){var i=document.getElementById('sfeLV');i.value=clamp((parseInt(i.value)||1)-1,1,12);});
+    document.getElementById('sfAddShelf').addEventListener('click',addShelf);
+    document.getElementById('sfRenum').addEventListener('click',renumber);
     SHELVES.forEach(ensureBays);
     buildChips();
   }
+  function makeShelfEls(s){s.kind='shelf';var g=E('g',{});s._g=g;
+    s._r=E('rect',{rx:0.05,fill:'#2f5d62',stroke:'#21464a','stroke-width':'.04'});
+    s._t=E('text',{fill:'#fff','font-weight':'700','text-anchor':'middle','dominant-baseline':'central','font-family':'Space Grotesk,Sarabun,sans-serif'});
+    s._t.textContent=s.n;g.appendChild(s._r);g.appendChild(s._t);
+    g.addEventListener('click',function(ev){ev.stopPropagation();select(s);});svg.appendChild(g);}
+  function removeShelfEls(s){if(s._g&&s._g.parentNode)s._g.parentNode.removeChild(s._g);}
 
   function rebuildGrid(){var g=document.getElementById('sfGrid');while(g.firstChild)g.removeChild(g.firstChild);
     for(var gx=0;gx<=ROOM.w;gx++)g.appendChild(E('line',{stroke:'#d9e0dd','stroke-width':'.02',x1:gx,y1:0,x2:gx,y2:ROOM.h}));
     for(var gy=0;gy<=ROOM.h;gy++)g.appendChild(E('line',{stroke:'#d9e0dd','stroke-width':'.02',x1:0,y1:gy,x2:ROOM.w,y2:gy}));}
   function seg(x1,y1,x2,y2){wallG.appendChild(E('line',{stroke:'#1b2420','stroke-width':'.12','stroke-linecap':'square',x1:x1,y1:y1,x2:x2,y2:y2}));}
-  function renderDoor(){while(wallG.firstChild)wallG.removeChild(wallG.firstChild);
-    var W=ROOM.w,H=ROOM.h,d=DOOR,a,b;
+  function renderDoor(){while(wallG.firstChild)wallG.removeChild(wallG.firstChild);var W=ROOM.w,H=ROOM.h,d=DOOR,a,b;
     if(d.wall==='T'){a=clamp(d.pos-1,0,W);b=clamp(d.pos+1,0,W);seg(0,0,a,0);seg(b,0,W,0);}else seg(0,0,W,0);
     if(d.wall==='B'){a=clamp(d.pos-1,0,W);b=clamp(d.pos+1,0,W);seg(0,H,a,H);seg(b,H,W,H);}else seg(0,H,W,H);
     if(d.wall==='L'){a=clamp(d.pos-1,0,H);b=clamp(d.pos+1,0,H);seg(0,0,0,a);seg(0,b,0,H);}else seg(0,0,0,H);
@@ -3039,7 +3053,7 @@ window.mapMode=function(m){
     var t=E('text',{fill:'#6b7280','font-size':'.4','font-weight':'600','text-anchor':'middle','font-family':'Sarabun,sans-serif',x:STAIR.x+STAIR.w/2,y:STAIR.y-0.2});t.textContent='บันได';stairG.appendChild(t);}
   function place(s){s._r.setAttribute('x',s.x);s._r.setAttribute('y',s.y);s._r.setAttribute('width',s.w);s._r.setAttribute('height',s.l);
     s._r.setAttribute('fill',sel===s?'#0f766e':'#2f5d62');s._r.setAttribute('stroke',sel===s?'#e8a13a':'#21464a');s._r.setAttribute('stroke-width',sel===s?'.12':'.04');
-    s._t.setAttribute('x',s.x+s.w/2);s._t.setAttribute('y',s.y+s.l/2);s._t.setAttribute('font-size',Math.min(0.6,Math.max(0.3,Math.min(s.w,s.l)*0.7)));}
+    s._t.textContent=s.n;s._t.setAttribute('x',s.x+s.w/2);s._t.setAttribute('y',s.y+s.l/2);s._t.setAttribute('font-size',Math.min(0.6,Math.max(0.3,Math.min(s.w,s.l)*0.7)));}
   function clampInside(){SHELVES.forEach(function(s){s.x=clamp(snap(s.x),0,Math.max(0,ROOM.w-s.w));s.y=clamp(snap(s.y),0,Math.max(0,ROOM.h-s.l));});
     STAIR.x=clamp(STAIR.x,0,ROOM.w-STAIR.w);STAIR.y=clamp(STAIR.y,0,ROOM.h-STAIR.l);
     var lim=(DOOR.wall==='T'||DOOR.wall==='B')?ROOM.w:ROOM.h;DOOR.pos=clamp(DOOR.pos,1,lim-1);}
@@ -3058,17 +3072,16 @@ window.mapMode=function(m){
     chip('เสา(ทั้งกลุ่ม)',COLGRP,'color:#3a4a8a;font-family:Sarabun,sans-serif;');
     chip('บันได',STAIR,'color:#8a8f8c;font-family:Sarabun,sans-serif;');
     SHELVES.slice().sort(function(a,b){return a.n-b.n;}).forEach(function(s){chip(String(s.n),s);});}
-  function resetChipColor(o){if(!o._chip)return;o._chip.style.background='#f3f6f5';
-    o._chip.style.color=(o===DOOR?'#b23b3b':o===COLGRP?'#3a4a8a':o===STAIR?'#8a8f8c':'#1b2420');}
+  function resetChipColor(o){if(!o._chip)return;o._chip.style.background='#f3f6f5';o._chip.style.color=(o===DOOR?'#b23b3b':o===COLGRP?'#3a4a8a':o===STAIR?'#8a8f8c':'#1b2420');}
   function clearSel(){if(!sel)return;var old=sel;sel=null;
     if(old.kind==='shelf')place(old);else if(old.kind==='door')renderDoor();else if(old.kind==='stair')renderStair();else if(old.kind==='cols'||old.kind==='col1')renderCols();
     resetChipColor(old);}
   function select(o){clearSel();sel=o;if(o._chip){o._chip.style.background='#e8a13a';o._chip.style.color='#fff';}
-    if(o.kind==='shelf'){place(o);setLab('เลือก: <b>ชั้น '+o.n+'</b> ('+o.w+'×'+o.l+' ม.)');}
+    if(o.kind==='shelf'){place(o);setLab('เลือก: <b>ชั้น '+o.n+'</b> ('+o.w+'×'+o.l+' ม. · '+o.lv+' ระดับ) — ปุ่ม ✏️ เพื่อแก้ / 📦 ดูช่อง');}
     else if(o.kind==='door'){renderDoor();setLab('เลือก: <b>ประตู</b> — แตะผนัง');}
     else if(o.kind==='stair'){renderStair();setLab('เลือก: <b>บันได</b> — แตะเพื่อย้าย');}
     else if(o.kind==='cols'){renderCols();setLab('เลือก: <b>เสาทั้งกลุ่ม</b> — แตะเพื่อย้ายพร้อมกัน');}
-    else if(o.kind==='col1'){renderCols();setLab('เลือก: <b>เสา '+(o.m?'ชั้นลอย':'')+'1 ต้น</b> — แตะเพื่อย้าย / ปุ่ม 🗑 เพื่อลบ');}}
+    else if(o.kind==='col1'){renderCols();setLab('เลือก: <b>เสา 1 ต้น</b> — แตะเพื่อย้าย / ปุ่ม 🗑 เพื่อลบ');}}
   function toUser(ev){var pt=svg.createSVGPoint(),t=ev.touches?ev.touches[0]:ev;pt.x=t.clientX;pt.y=t.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse());}
   function onSvgTap(ev){if(!sel)return;var p=toUser(ev);
     if(sel.kind==='door'){var dT=Math.abs(p.y),dB=Math.abs(p.y-ROOM.h),dL=Math.abs(p.x),dR=Math.abs(p.x-ROOM.w),m=Math.min(dT,dB,dL,dR);
@@ -3086,45 +3099,54 @@ window.mapMode=function(m){
       sel.x=clamp(sel.x,0,ROOM.w-sel.w);sel.y=clamp(sel.y,0,ROOM.h-sel.l);place(sel);}
     else if(sel.kind==='stair'){if(d==='L')STAIR.x=snap(STAIR.x-STEP);if(d==='R')STAIR.x=snap(STAIR.x+STEP);if(d==='U')STAIR.y=snap(STAIR.y-STEP);if(d==='D')STAIR.y=snap(STAIR.y+STEP);
       STAIR.x=clamp(STAIR.x,0,ROOM.w-STAIR.w);STAIR.y=clamp(STAIR.y,0,ROOM.h-STAIR.l);renderStair();}
-    else if(sel.kind==='col1'){if(d==='L')sel.x=snap(sel.x-STEP);if(d==='R')sel.x=snap(sel.x+STEP);if(d==='U')sel.y=snap(sel.y-STEP);if(d==='D')sel.y=snap(sel.y+STEP);
-      sel.x=clamp(sel.x,0,ROOM.w);sel.y=clamp(sel.y,0,ROOM.h);renderCols();}
+    else if(sel.kind==='col1'){if(d==='L')sel.x=snap(sel.x-STEP);if(d==='R')sel.x=snap(sel.x+STEP);if(d==='U')sel.y=snap(sel.y-STEP);if(d==='D')sel.y=snap(sel.y+STEP);sel.x=clamp(sel.x,0,ROOM.w);sel.y=clamp(sel.y,0,ROOM.h);renderCols();}
     else if(sel.kind==='cols'){var dx=(d==='L'?-STEP:d==='R'?STEP:0),dy=(d==='U'?-STEP:d==='D'?STEP:0);COLS.forEach(function(c){c.x=clamp(c.x+dx,0,ROOM.w);c.y=clamp(c.y+dy,0,ROOM.h);});renderCols();}}
   function onRot(){if(!sel)return;
     if(sel.kind==='door'){var o=['T','R','B','L'];DOOR.wall=o[(o.indexOf(DOOR.wall)+1)%4];var lim=(DOOR.wall==='T'||DOOR.wall==='B')?ROOM.w:ROOM.h;DOOR.pos=clamp(DOOR.pos,1,lim-1);renderDoor();}
     else if(sel.kind==='shelf'){var t=sel.w;sel.w=sel.l;sel.l=t;sel.x=clamp(sel.x,0,ROOM.w-sel.w);sel.y=clamp(sel.y,0,ROOM.h-sel.l);place(sel);}
     else if(sel.kind==='stair'){var t2=STAIR.w;STAIR.w=STAIR.l;STAIR.l=t2;renderStair();}}
   function addCol(m){var c={x:snap(ROOM.w/2),y:snap(ROOM.h-2),m:!!m,kind:'col1'};COLS.push(c);renderCols();select(c);}
-  function delCol(){if(sel&&sel.kind==='col1'){var t=sel;COLS=COLS.filter(function(x){return x!==t;});sel=null;renderCols();setLab('ลบเสาแล้ว');}
-    else{showToast('แตะเลือกเสาที่จะลบก่อน','err');}}
+  function delCol(){if(sel&&sel.kind==='col1'){var t=sel;COLS=COLS.filter(function(x){return x!==t;});sel=null;renderCols();setLab('ลบเสาแล้ว');}else{showToast('แตะเลือกเสาที่จะลบก่อน','err');}}
 
-  function ensureBays(s){if(!Array.isArray(s.bays))s.bays=[];while(s.bays.length<s.lv)s.bays.push(3);if(s.bays.length>s.lv)s.bays.length=s.lv;}
+  /* ---- front view (ช่องในแต่ละระดับ) ---- */
   function openFront(s){ensureBays(s);curFront=s;curCell=null;var inf=document.getElementById('sfFrontInfo');if(inf)inf.textContent='';document.getElementById('sfFront').style.display='flex';renderFront();}
   function closeFront(){var p=document.getElementById('sfFront');if(p)p.style.display='none';}
   function renderFront(){var s=curFront;if(!s)return;ensureBays(s);var box=document.getElementById('sfFrontBody');
     var html='<div style="font-size:12px;color:#6b7280;margin-bottom:10px;">ชั้น '+s.n+' · กว้าง '+s.w+' × ลึก '+s.l+' ม. · สูง '+s.h+' ม. · '+s.lv+' ระดับ (มองจากด้านหน้า)</div>';
     for(var i=s.lv;i>=1;i--){var nb=s.bays[i-1];
-      html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">';
-      html+='<div style="width:54px;font-size:12px;font-weight:700;color:#0f766e;">ระดับ '+i+'</div>';
-      html+='<div style="flex:1;display:flex;gap:4px;">';
+      html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><div style="width:54px;font-size:12px;font-weight:700;color:#0f766e;">ระดับ '+i+'</div><div style="flex:1;display:flex;gap:4px;">';
       for(var b=1;b<=nb;b++){var on=(curCell&&curCell.lv===i&&curCell.b===b);
         html+='<button class="sffc" data-lv="'+i+'" data-b="'+b+'" style="flex:1;min-height:44px;border:1.5px solid '+(on?'#e8a13a':'#cdd7d4')+';border-radius:8px;background:'+(on?'#0f766e':'#f3f6f5')+';color:'+(on?'#fff':'#1b2420')+';font-family:Sarabun,sans-serif;font-weight:700;cursor:pointer;">'+b+'</button>';}
-      html+='</div>';
-      html+='<button class="sfbm" data-lv="'+i+'" data-op="-" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;font-weight:800;cursor:pointer;">−</button>';
-      html+='<button class="sfbm" data-lv="'+i+'" data-op="+" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;font-weight:800;cursor:pointer;">+</button>';
-      html+='</div>';}
+      html+='</div><button class="sfbm" data-lv="'+i+'" data-op="-" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;font-weight:800;cursor:pointer;">−</button>';
+      html+='<button class="sfbm" data-lv="'+i+'" data-op="+" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;font-weight:800;cursor:pointer;">+</button></div>';}
     box.innerHTML=html;}
   function onFrontTap(ev){var c=ev.target.closest('.sffc'),m=ev.target.closest('.sfbm');
-    if(m){var lv=+m.getAttribute('data-lv'),op=m.getAttribute('data-op'),idx=lv-1;
-      curFront.bays[idx]=clamp((curFront.bays[idx]||3)+(op==='+'?1:-1),1,8);renderFront();return;}
-    if(c){var L=+c.getAttribute('data-lv'),B=+c.getAttribute('data-b');curCell={lv:L,b:B};
-      var inf=document.getElementById('sfFrontInfo');if(inf)inf.textContent='ตำแหน่ง: ชั้น '+curFront.n+' · ระดับ '+L+' · ช่องที่ '+B+' (นับจากซ้าย)';renderFront();}}
+    if(m){var lv=+m.getAttribute('data-lv'),op=m.getAttribute('data-op'),idx=lv-1;curFront.bays[idx]=clamp((curFront.bays[idx]||3)+(op==='+'?1:-1),1,8);renderFront();return;}
+    if(c){var L=+c.getAttribute('data-lv'),B=+c.getAttribute('data-b');curCell={lv:L,b:B};var inf=document.getElementById('sfFrontInfo');if(inf)inf.textContent='ตำแหน่ง: ชั้น '+curFront.n+' · ระดับ '+L+' · ช่องที่ '+B+' (นับจากซ้าย)';renderFront();}}
+
+  /* ---- shelf editor (แก้/ลบ/เพิ่ม/เรียงเลข) ---- */
+  function openEdit(s){curEdit=s;document.getElementById('sfeN').value=s.n;document.getElementById('sfeW').value=s.w;document.getElementById('sfeL').value=s.l;document.getElementById('sfeH').value=s.h;document.getElementById('sfeLV').value=s.lv;document.getElementById('sfEdit').style.display='flex';}
+  function closeEdit(){var p=document.getElementById('sfEdit');if(p)p.style.display='none';}
+  function applyEdit(){if(!curEdit)return;var s=curEdit;
+    var nn=parseInt(document.getElementById('sfeN').value)||s.n;
+    var other=findShelf(nn);if(other&&other!==s){showToast('เลขชั้น '+nn+' ซ้ำกับชั้นอื่น','err');return;}
+    s.n=nn;s.w=clamp(parseFloat(document.getElementById('sfeW').value)||s.w,0.2,12);s.l=clamp(parseFloat(document.getElementById('sfeL').value)||s.l,0.2,12);
+    s.h=clamp(parseFloat(document.getElementById('sfeH').value)||s.h,0.3,8);s.lv=clamp(parseInt(document.getElementById('sfeLV').value)||s.lv,1,12);
+    ensureBays(s);renderAll();buildChips();closeEdit();showToast('แก้ชั้นแล้ว','ok');}
+  function delShelf(){if(!curEdit)return;var s=curEdit;if(!window.confirm('ลบชั้น '+s.n+' ?'))return;
+    removeShelfEls(s);SHELVES=SHELVES.filter(function(x){return x!==s;});if(sel===s)sel=null;curEdit=null;buildChips();renderAll();closeEdit();showToast('ลบชั้นแล้ว','ok');}
+  function addShelf(){var mx=0;SHELVES.forEach(function(s){if(s.n>mx)mx=s.n;});
+    var s={n:mx+1,x:snap(ROOM.w/2-0.4),y:snap(ROOM.h/2-1.2),w:0.8,l:2.4,h:1.7,lv:4};ensureBays(s);makeShelfEls(s);SHELVES.push(s);buildChips();renderAll();select(s);openEdit(s);}
+  function renumber(){SHELVES.slice().sort(function(a,b){return a.n-b.n;}).forEach(function(s,i){s.n=i+1;});SHELVES.forEach(place);buildChips();showToast('เรียงเลขใหม่ 1–'+SHELVES.length+' แล้ว','ok');}
+
   function snapshot(){return {room:{w:ROOM.w,h:ROOM.h},
     sh:SHELVES.map(function(s){return {n:s.n,x:s.x,y:s.y,w:s.w,l:s.l,h:s.h,lv:s.lv,bays:(s.bays||[]).slice()};}),
-    door:{wall:DOOR.wall,pos:DOOR.pos},stair:{x:STAIR.x,y:STAIR.y,w:STAIR.w,l:STAIR.l},
-    cols:COLS.map(function(c){return {x:c.x,y:c.y,m:!!c.m};})};}
+    door:{wall:DOOR.wall,pos:DOOR.pos},stair:{x:STAIR.x,y:STAIR.y,w:STAIR.w,l:STAIR.l},cols:COLS.map(function(c){return {x:c.x,y:c.y,m:!!c.m};})};}
   function applyState(st){if(!st)return;
     if(st.room){ROOM.w=st.room.w;ROOM.h=st.room.h;var rw=document.getElementById('sfRW'),rh=document.getElementById('sfRH');if(rw)rw.value=ROOM.w;if(rh)rh.value=ROOM.h;}
-    if(st.sh)st.sh.forEach(function(o){var s=findShelf(o.n);if(s){s.x=o.x;s.y=o.y;s.w=o.w;s.l=o.l;if(o.h!=null)s.h=o.h;if(o.lv!=null)s.lv=o.lv;if(o.bays)s.bays=o.bays.slice();ensureBays(s);}});
+    if(st.sh&&st.sh.length){SHELVES.forEach(removeShelfEls);
+      SHELVES=st.sh.map(function(o){return {n:o.n,x:o.x,y:o.y,w:o.w,l:o.l,h:(o.h!=null?o.h:1.7),lv:(o.lv!=null?o.lv:4),bays:(o.bays?o.bays.slice():null)};});
+      SHELVES.forEach(function(s){ensureBays(s);makeShelfEls(s);});buildChips();}
     if(st.door){DOOR.wall=st.door.wall;DOOR.pos=st.door.pos;}
     if(st.stair){STAIR.x=st.stair.x;STAIR.y=st.stair.y;STAIR.w=st.stair.w;STAIR.l=st.stair.l;}
     if(st.cols){COLS=st.cols.map(function(c){return {x:c.x,y:c.y,m:!!c.m,kind:'col1'};});}
