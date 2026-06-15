@@ -2013,52 +2013,32 @@ function b64ToBlob(dataUrl){
   for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
   return new Blob([arr],{type:mime});
 }
-function saveProductPhotos(id){
-  var p=products.find(function(x){return x.id===id;});if(!p)return;
-  var ph=productPhotos(p);if(!ph.length){showToast('❌ ไม่มีรูป','err');return;}
-  try{
-    var files=[];
-    for(var i=0;i<ph.length;i++){
-      var blob=b64ToBlob(ph[i]);
-      files.push(new File([blob],(p.name||'product').replace(/[\/\\:*?"<>|]/g,'')+(ph.length>1?'_'+(i+1):'')+'.jpg',{type:'image/jpeg'}));
-    }
-    if(navigator.canShare&&navigator.canShare({files:files})){
-      navigator.share({files:files}).catch(function(e){});
-      return;
-    }
-  }catch(e){console.error('share',e);}
-  // สำรอง: ดาวน์โหลดตรง (คอมพิวเตอร์/เบราว์เซอร์ที่ไม่มีเมนูแชร์)
-  var ph2=productPhotos(p);
-  for(var j=0;j<ph2.length;j++){
-    var a=document.createElement('a');a.href=ph2[j];
-    a.download=(p.name||'product')+(ph2.length>1?'_'+(j+1):'')+'.jpg';
-    document.body.appendChild(a);a.click();a.remove();
+function _photoFiles(p,ph){
+  var files=[];
+  for(var i=0;i<ph.length;i++){
+    var blob=b64ToBlob(ph[i]);
+    files.push(new File([blob],(p.name||'product').replace(/[\/\\:*?"<>|]/g,'')+(ph.length>1?'_'+(i+1):'')+'.jpg',{type:'image/jpeg'}));
   }
-  showToast('✅ กำลังบันทึกรูป','ok');
+  return files;
 }
-
-
-function shareProductPhotos(id){
+function _shareOrSavePhotos(id,withText){
   var p=products.find(function(x){return x.id===id;});if(!p)return;
   var ph=productPhotos(p);if(!ph.length){showToast('❌ ไม่มีรูป','err');return;}
-  try{
-    var files=[];
-    for(var i=0;i<ph.length;i++){
-      var blob=b64ToBlob(ph[i]);
-      files.push(new File([blob],(p.name||'product').replace(/[\/\\:*?"<>|]/g,'')+(ph.length>1?'_'+(i+1):'')+'.jpg',{type:'image/jpeg'}));
-    }
-    var txt=(p.name||'');
-    if(fmtProductSize(p))txt+=' ขนาด '+fmtProductSize(p);
-    if(p.brand)txt+=' ยี่ห้อ '+p.brand;
-    if(navigator.canShare&&navigator.canShare({files:files})){
-      navigator.share({files:files,text:txt}).catch(function(){
-        navigator.share({files:files}).catch(function(){});
-      });
-      return;
-    }
-  }catch(e){console.error('share',e);}
-  showToast('❌ เบราว์เซอร์นี้ไม่รองรับการแชร์รูป ใช้ปุ่มเซฟภาพแทนได้','err');
+  var files=[];try{files=_photoFiles(p,ph);}catch(e){console.error('files',e);}
+  var txt='';
+  if(withText){txt=(p.name||'');if(fmtProductSize(p))txt+=' ขนาด '+fmtProductSize(p);if(p.brand)txt+=' ยี่ห้อ '+p.brand;}
+  function onErr(err){ if(err&&err.name==='AbortError')return; showToast('💡 ถ้าเมนูไม่ขึ้น กดค้างที่รูปด้านบนเพื่อบันทึก/แชร์','ok'); }
+  function trySh(payload){ if(files.length&&navigator.share&&navigator.canShare&&navigator.canShare(payload)){ navigator.share(payload).catch(onErr); return true; } return false; }
+  // เรียงจากดีสุดไปสำรอง: ส่งหลายรูป+ข้อความ → หลายรูป → รูปแรก+ข้อความ → รูปแรก
+  if(withText&&trySh({files:files,text:txt})) return;
+  if(trySh({files:files})) return;
+  if(withText&&trySh({files:[files[0]],text:txt})){ if(files.length>1)showToast('เครื่องนี้แชร์ได้ทีละรูป — รูปอื่นกดปุ่มซ้ำได้','ok'); return; }
+  if(trySh({files:[files[0]]})){ if(files.length>1)showToast('เครื่องนี้เซฟได้ทีละรูป — รูปอื่นกดปุ่มซ้ำได้','ok'); return; }
+  // ไม่มีระบบแชร์ (เบราว์เซอร์ในแอป ฯลฯ) — ไม่เด้งออกจากแอป ให้กดค้างที่รูปที่แสดงอยู่แทน
+  showToast('💡 เครื่องนี้บันทึกอัตโนมัติไม่ได้ — กดค้างที่รูปด้านบนเพื่อบันทึก/ส่ง LINE','ok');
 }
+function saveProductPhotos(id){ _shareOrSavePhotos(id,false); }
+function shareProductPhotos(id){ _shareOrSavePhotos(id,true); }
 
 function confirmDeleteProduct(id){
   var p=products.find(function(x){return x.id===id;});if(!p)return;
