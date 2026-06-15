@@ -2926,6 +2926,7 @@ window.mapMode=function(m){
   var COLGRP={kind:'cols'};
   var SNAP=0.5,STEP=0.5,sel=null,inited=false,svg,wallG,colG,stairG,doorLine,doorLbl,zoneLbl;
   var curFront=null,curCell=null,curEdit=null;
+  var delArm=false,delTimer=null;
 
   function E(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
   function snap(v){return Math.round(v/SNAP)*SNAP;}
@@ -3125,16 +3126,18 @@ window.mapMode=function(m){
     if(c){var L=+c.getAttribute('data-lv'),B=+c.getAttribute('data-b');curCell={lv:L,b:B};var inf=document.getElementById('sfFrontInfo');if(inf)inf.textContent='ตำแหน่ง: ชั้น '+curFront.n+' · ระดับ '+L+' · ช่องที่ '+B+' (นับจากซ้าย)';renderFront();}}
 
   /* ---- shelf editor (แก้/ลบ/เพิ่ม/เรียงเลข) ---- */
-  function openEdit(s){curEdit=s;document.getElementById('sfeN').value=s.n;document.getElementById('sfeW').value=s.w;document.getElementById('sfeL').value=s.l;document.getElementById('sfeH').value=s.h;document.getElementById('sfeLV').value=s.lv;document.getElementById('sfEdit').style.display='flex';}
-  function closeEdit(){var p=document.getElementById('sfEdit');if(p)p.style.display='none';}
+  function openEdit(s){curEdit=s;resetDel();document.getElementById('sfeN').value=s.n;document.getElementById('sfeW').value=s.w;document.getElementById('sfeL').value=s.l;document.getElementById('sfeH').value=s.h;document.getElementById('sfeLV').value=s.lv;document.getElementById('sfEdit').style.display='flex';}
+  function closeEdit(){resetDel();var p=document.getElementById('sfEdit');if(p)p.style.display='none';}
   function applyEdit(){if(!curEdit)return;var s=curEdit;
     var nn=parseInt(document.getElementById('sfeN').value)||s.n;
     var other=findShelf(nn);if(other&&other!==s){showToast('เลขชั้น '+nn+' ซ้ำกับชั้นอื่น','err');return;}
     s.n=nn;s.w=clamp(parseFloat(document.getElementById('sfeW').value)||s.w,0.2,12);s.l=clamp(parseFloat(document.getElementById('sfeL').value)||s.l,0.2,12);
     s.h=clamp(parseFloat(document.getElementById('sfeH').value)||s.h,0.3,8);s.lv=clamp(parseInt(document.getElementById('sfeLV').value)||s.lv,1,12);
     ensureBays(s);renderAll();buildChips();closeEdit();showToast('แก้ชั้นแล้ว','ok');}
-  function delShelf(){if(!curEdit)return;var s=curEdit;if(!window.confirm('ลบชั้น '+s.n+' ?'))return;
-    removeShelfEls(s);SHELVES=SHELVES.filter(function(x){return x!==s;});if(sel===s)sel=null;curEdit=null;buildChips();renderAll();closeEdit();showToast('ลบชั้นแล้ว','ok');}
+  function resetDel(){delArm=false;if(delTimer){clearTimeout(delTimer);delTimer=null;}var b=document.getElementById('sfeDel');if(b){b.textContent='🗑 ลบชั้นนี้';b.style.background='#fff';b.style.color='#b23b3b';}}
+  function delShelf(){var b=document.getElementById('sfeDel');if(!curEdit)return;
+    if(!delArm){delArm=true;if(b){b.textContent='⚠️ แตะยืนยันลบอีกครั้ง';b.style.background='#b23b3b';b.style.color='#fff';}if(delTimer)clearTimeout(delTimer);delTimer=setTimeout(resetDel,3500);return;}
+    var s=curEdit;removeShelfEls(s);SHELVES=SHELVES.filter(function(x){return x!==s;});if(sel===s)sel=null;curEdit=null;resetDel();buildChips();renderAll();closeEdit();showToast('ลบชั้นแล้ว','ok');}
   function addShelf(){var mx=0;SHELVES.forEach(function(s){if(s.n>mx)mx=s.n;});
     var s={n:mx+1,x:snap(ROOM.w/2-0.4),y:snap(ROOM.h/2-1.2),w:0.8,l:2.4,h:1.7,lv:4};ensureBays(s);makeShelfEls(s);SHELVES.push(s);buildChips();renderAll();select(s);openEdit(s);}
   function renumber(){SHELVES.slice().sort(function(a,b){return a.n-b.n;}).forEach(function(s,i){s.n=i+1;});SHELVES.forEach(place);buildChips();showToast('เรียงเลขใหม่ 1–'+SHELVES.length+' แล้ว','ok');}
