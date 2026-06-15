@@ -2927,6 +2927,7 @@ window.mapMode=function(m){
   var SNAP=0.5,STEP=0.5,sel=null,inited=false,svg,wallG,colG,stairG,doorLine,doorLbl,zoneLbl;
   var curFront=null,curCell=null,curEdit=null;
   var delArm=false,delTimer=null;
+  var delShelfArm=false,delShelfTimer=null;
 
   function E(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
   function snap(v){return Math.round(v/SNAP)*SNAP;}
@@ -2953,7 +2954,7 @@ window.mapMode=function(m){
       +'<div id="sfChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;"></div>'
       +'<div id="sfShelfTools" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">'
       +tBtn('sfFrontBtn','📦 ด้านหน้า/ช่อง','#0f766e')+tBtn('sfEditBtn','✏️ แก้ชั้นที่เลือก','#0f766e')
-      +tBtn('sfAddShelf','➕ เพิ่มชั้น','#16a34a')+tBtn('sfRenum','🔢 เรียงเลขใหม่','#6b7280')+'</div>'
+      +tBtn('sfAddShelf','➕ เพิ่มชั้น','#16a34a')+tBtn('sfDelShelf','🗑 ลบชั้นที่เลือก','#b23b3b')+tBtn('sfRenum','🔢 เรียงเลขใหม่','#6b7280')+'</div>'
       +'<div id="sfColTools" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">'
       +tBtn('sfAddCol','➕ เสา','#6b746f')+tBtn('sfAddColM','➕ เสาชั้นลอย','#3a4a8a')+tBtn('sfDelCol','🗑 ลบเสาที่เลือก','#b23b3b')+'</div>'
       +'<div id="sfLab" style="font-size:12px;color:#6b7280;margin-bottom:6px;font-family:Sarabun,sans-serif;">แตะหมายเลข/ประตู/เสา/บันได แล้วแตะบนผังเพื่อย้าย</div>'
@@ -3014,6 +3015,7 @@ window.mapMode=function(m){
     document.getElementById('sfeLVdn').addEventListener('click',function(){var i=document.getElementById('sfeLV');i.value=clamp((parseInt(i.value)||1)-1,1,12);});
     document.getElementById('sfAddShelf').addEventListener('click',addShelf);
     document.getElementById('sfRenum').addEventListener('click',renumber);
+    document.getElementById('sfDelShelf').addEventListener('click',armDelShelf);
     SHELVES.forEach(ensureBays);
     buildChips();
   }
@@ -3140,6 +3142,10 @@ window.mapMode=function(m){
     var s=curEdit;removeShelfEls(s);SHELVES=SHELVES.filter(function(x){return x!==s;});if(sel===s)sel=null;curEdit=null;resetDel();buildChips();renderAll();closeEdit();showToast('ลบชั้นแล้ว','ok');}
   function addShelf(){var mx=0;SHELVES.forEach(function(s){if(s.n>mx)mx=s.n;});
     var s={n:mx+1,x:snap(ROOM.w/2-0.4),y:snap(ROOM.h/2-1.2),w:0.8,l:2.4,h:1.7,lv:4};ensureBays(s);makeShelfEls(s);SHELVES.push(s);buildChips();renderAll();select(s);openEdit(s);}
+  function resetDelShelf(){delShelfArm=false;if(delShelfTimer){clearTimeout(delShelfTimer);delShelfTimer=null;}var b=document.getElementById('sfDelShelf');if(b){b.textContent='🗑 ลบชั้นที่เลือก';b.style.background='#f3f4f6';b.style.color='#b23b3b';}}
+  function armDelShelf(){var b=document.getElementById('sfDelShelf');if(!(sel&&sel.kind==='shelf')){showToast('แตะเลือกชั้นก่อน','err');return;}
+    if(!delShelfArm){delShelfArm=true;if(b){b.textContent='⚠️ แตะยืนยันลบชั้น';b.style.background='#b23b3b';b.style.color='#fff';}if(delShelfTimer)clearTimeout(delShelfTimer);delShelfTimer=setTimeout(resetDelShelf,3500);return;}
+    var s=sel;removeShelfEls(s);SHELVES=SHELVES.filter(function(x){return x!==s;});sel=null;if(curEdit===s)curEdit=null;resetDelShelf();buildChips();renderAll();showToast('ลบชั้นแล้ว','ok');}
   function renumber(){SHELVES.slice().sort(function(a,b){return a.n-b.n;}).forEach(function(s,i){s.n=i+1;});SHELVES.forEach(place);buildChips();showToast('เรียงเลขใหม่ 1–'+SHELVES.length+' แล้ว','ok');}
 
   function snapshot(){return {room:{w:ROOM.w,h:ROOM.h},
