@@ -27,6 +27,9 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
 .nbtn{flex:1;padding:10px 4px;text-align:center;font-size:10px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:2px;}
 .nbtn .ni{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
 .nbtn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.grpbar{display:flex;gap:6px;background:#fff;padding:8px 10px;border-bottom:1px solid var(--border);}
+.grpb{flex:1;border:none;background:#f0f0eb;color:#6b7280;border-radius:10px;padding:9px 4px;font-family:Sarabun,sans-serif;font-size:12px;font-weight:800;cursor:pointer;}
+.grpb.active{background:var(--accent);color:#fff;}
 .page{display:none;padding:14px 14px 80px;}
 .page.active{display:block;}
 .search-wrap{position:relative;margin-bottom:14px;}
@@ -183,10 +186,12 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
       </div>
     </div>
   </div>
+  <div class="grpbar" id="grpNav" style="display:none;"><button type="button" class="grpb" id="grp-sell" onclick="selectGroup('sell',this)">🛒 ขาย</button><button type="button" class="grpb" id="grp-wh" onclick="selectGroup('wh',this)">🏬 โกดัง</button><button type="button" class="grpb" id="grp-sf" onclick="selectGroup('sf',this)">🏠 หน้าร้าน</button><button type="button" class="grpb" id="grp-manage" onclick="selectGroup('manage',this)">👥 จัดการ</button></div>
   <div class="nav">
     <div class="nbtn active" id="nb-search" onclick="go('search',this)"><span class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></svg></span><span id="lbl-search">ค้นหา</span></div>
     <div class="nbtn" id="nb-photo" onclick="go('photo',this)" style="display:none;"><span class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></span><span id="lbl-photo">รูปสินค้า</span></div>
-    <div class="nbtn" id="nb-map" onclick="go('map',this)"><span class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span>แผนที่</div>
+    <div class="nbtn" id="nb-map" onclick="go('map',this)"><span class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span><span id="lbl-map">แผนที่</span></div>
+    <div class="nbtn" id="nb-sfsearch" onclick="go('sfsearch',this)" style="display:none;"><span class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></svg></span>ค้นหาหน้าร้าน</div>
     <div class="nbtn" id="nb-product" onclick="go('product',this)"><span class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/></svg></span><span id="lbl-product">สินค้า</span></div>
     <div class="nbtn" id="nb-weight" onclick="go('weight',this)"><span class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="3"/><path d="M6.5 13a5.5 5.5 0 0 1 11 0"/><rect x="3" y="13" width="18" height="8" rx="2"/><line x1="12" y1="13" x2="12" y2="21"/></svg></span>น้ำหนัก</div>
     <div class="nbtn" id="nb-add" onclick="go('add',this)"><span class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span>เพิ่ม</div>
@@ -194,6 +199,16 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
     <div class="nbtn" id="nb-users" onclick="go('users',this)"><span class="ni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a7 7 0 0 1 12-5"/><circle cx="19" cy="15" r="3"/><path d="M19 12v6M16 15h6"/></svg></span>ผู้ใช้</div>
   </div>
 
+    <div class="page" id="pg-sfsearch">
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <input id="sfpq" type="text" placeholder="ค้นหาชื่อสินค้า หรือ บาร์โค้ด (หน้าร้าน)" style="flex:1;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px;font-family:Sarabun,sans-serif;box-sizing:border-box;">
+      <button onclick="sfpScan()" style="background:#0f766e;color:#fff;border:none;border-radius:10px;padding:0 14px;font-weight:800;font-family:Sarabun,sans-serif;cursor:pointer;">📷</button>
+      <button onclick="sfpDo()" style="background:#ea580c;color:#fff;border:none;border-radius:10px;padding:0 16px;font-weight:800;font-family:Sarabun,sans-serif;cursor:pointer;">🔍</button>
+    </div>
+    <input type="file" id="sfpPhoto" accept="image/*" capture="environment" onchange="sfpPhotoPicked(event)" style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px;">
+    <div id="sfpStatus" style="font-size:13px;color:#6b7280;font-weight:700;margin-bottom:8px;min-height:16px;"></div>
+    <div id="sfpResults" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
   <div class="page active" id="pg-search">
     <div class="search-wrap">
       <input id="si" type="text" placeholder="พิมพ์ชื่อสินค้า" oninput="doSearch(this.value)" autocomplete="off">
@@ -786,13 +801,13 @@ function startApp(){
   var tag=document.getElementById('roleTag');
   var nameEl=document.getElementById('headerName');
   if(nameEl&&currentUser) nameEl.textContent=currentUser.name;
-  var roleLabels={'store':'👤 พนักงาน','sales':'🛍️ ขาย','subowner':'👑 เจ้าของย่อย','manager':'💼 ผู้จัดการ','graphic':'🎨 กราฟฟิก','admin':'👷 หัวหน้าสโตร์','owner':'⭐ Owner'};
+  var roleLabels={'store':'👤 พนักงาน','sales':'🛍️ ขาย','subowner':'👑 เจ้าของย่อย','manager':'💼 ผู้จัดการ','graphic':'🎨 กราฟฟิก','admin':'👷 หัวหน้าสโตร์','storefront':'🏠 สโตร์หน้าร้าน','owner':'⭐ Owner'};
   tag.textContent=roleLabels[currentRole]||currentRole;
   var isAdmin=currentRole==='admin'||currentRole==='owner';
   var isSales=currentRole==='sales'||currentRole==='manager'||currentRole==='subowner';
   var isStore=currentRole==='store';
   var isGraphic=currentRole==='graphic';
-  document.getElementById('nb-map').style.display=isAdmin?'':'none';var _sfb=document.getElementById('mtb-sf');if(_sfb)_sfb.style.display=(currentRole==='owner')?'':'none';
+  document.getElementById('nb-map').style.display=(isAdmin||currentRole==='manager'||currentRole==='subowner')?'':'none';var _sfb=document.getElementById('mtb-sf');var _wb=document.getElementById('mtb-wh');if(_sfb)_sfb.style.display=(currentRole==='owner'||currentRole==='storefront'||currentRole==='manager'||currentRole==='subowner')?'':'none';if(_wb)_wb.style.display=(currentRole==='storefront')?'none':'';
   document.getElementById('nb-add').style.display=isAdmin?'':'none';
   document.getElementById('nb-list').style.display=currentRole==='owner'?'':'none';
   document.getElementById('nb-users').style.display=currentRole==='owner'?'':'none';
@@ -806,16 +821,53 @@ function startApp(){
   document.getElementById('salesFilter').style.display=isSales?'block':'none';
   var si=document.getElementById('si');
   if(si) si.placeholder=isSales?'ค้นหากระเบื้องปูพื้น,ผนัง':'พิมพ์ชื่อสินค้า';
+  document.getElementById('nb-sfsearch').style.display=(currentRole==='storefront'||currentRole==='owner'||currentRole==='manager'||currentRole==='subowner')?'':'none';
+  if(currentRole==='storefront'){document.getElementById('nb-map').style.display='';document.getElementById('nb-search').style.display='none';}
+  if(currentRole==='manager'||currentRole==='subowner'||currentRole==='owner'){setupGroupNav();}
+  else{var _gn0=document.getElementById('grpNav');if(_gn0)_gn0.style.display='none';
   if(isGraphic){go('photo',document.getElementById('nb-photo'));}
+  else if(currentRole==='storefront'){go('sfsearch',document.getElementById('nb-sfsearch'));}
   else{go('search',document.getElementById('nb-search'));}
+  }
 }
+
+var sfpHits=[], sfpZmap={storefront:{},storefront2:{}};
+function sfpDo(){var q=(document.getElementById('sfpq').value||'').trim();var R=document.getElementById('sfpResults'),S=document.getElementById('sfpStatus');if(!R)return;if(!q){R.innerHTML='';if(S)S.textContent='';return;}
+  if(S)S.textContent='กำลังค้นหา...';
+  sb.from('store_layouts').select('location,data').in('location',['storefront','storefront2']).then(function(lres){
+    sfpZmap={storefront:{},storefront2:{}};(lres&&lres.data?lres.data:[]).forEach(function(row){var sh=row.data&&row.data.sh;if(sh&&sfpZmap[row.location])sh.forEach(function(o){sfpZmap[row.location][o.n]=(o.zone||(o.floor?'yellow':'blue'));});});
+    sb.from('store_stock').select('*').in('location',['storefront','storefront2']).then(function(res){
+      var rows=(res&&res.data)?res.data:[];var ql=q.toLowerCase();
+      sfpHits=rows.filter(function(r){return (r.name&&(''+r.name).toLowerCase().indexOf(ql)>=0)||(r.barcode&&(''+r.barcode).toLowerCase().indexOf(ql)>=0);});
+      if(!sfpHits.length){R.innerHTML='';if(S)S.textContent='ไม่พบสินค้า "'+q+'"';return;}
+      if(S)S.textContent='พบ '+sfpHits.length+' รายการ';
+      R.innerHTML=sfpHits.map(function(r,i){var loc=sfpLocText(r);
+        return '<button class="sfprow" data-idx="'+i+'" style="text-align:left;border:1px solid #e5e7eb;border-radius:10px;padding:12px;background:#f8faf9;font-family:Sarabun,sans-serif;cursor:pointer;width:100%;"><div style="font-weight:800;color:#1b2420;">'+(r.name||'(ไม่มีชื่อ)')+'</div><div style="font-size:12px;color:#0f766e;font-weight:700;margin-top:3px;">📍 '+loc+'</div><div style="font-size:12px;color:#6b7280;margin-top:2px;">'+(r.barcode?('บาร์โค้ด '+r.barcode+' · '):'')+'คงเหลือ '+(r.qty!=null?r.qty:0)+'</div></button>';}).join('');
+      Array.prototype.forEach.call(R.querySelectorAll('.sfprow'),function(b){b.addEventListener('click',function(){sfpOpenDetail(sfpHits[+b.getAttribute('data-idx')]);});});
+    }).catch(function(){if(S)S.textContent='ค้นหาไม่สำเร็จ';});
+  }).catch(function(){if(S)S.textContent='ค้นหาไม่สำเร็จ';});
+}
+function sfpLocText(r){var ZN={blue:'โซนฟ้า',yellow:'โซนเหลือง',red:'โซนแดง',green:'โซนเขียว'};var fl=(r.location==='storefront2')?2:1;var z=(sfpZmap[r.location]&&sfpZmap[r.location][r.shelf])||'blue';var bay=(+r.bay_start===+r.bay_end)?r.bay_start:(r.bay_start+'–'+r.bay_end);return 'ชั้น '+fl+' · '+(ZN[z]||'')+' · ชั้นวาง '+r.shelf+' · ระดับ '+r.level+' · ช่อง '+bay;}
+function sfpEnsureDetail(){var d=document.getElementById('sfpDetail');if(d)return d;d=document.createElement('div');d.id='sfpDetail';d.style.cssText='display:none;position:fixed;inset:0;background:rgba(15,23,20,.55);z-index:11000;align-items:flex-start;justify-content:center;padding:20px 10px;overflow:auto;';d.innerHTML='<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;padding:18px;font-family:Sarabun,sans-serif;"><div style="display:flex;align-items:center;margin-bottom:8px;"><div id="sfpdTitle" style="font-weight:800;font-size:16px;flex:1;"></div><button onclick="document.getElementById(\'sfpDetail\').style.display=\'none\'" style="background:#eee;border:none;border-radius:9px;padding:7px 12px;font-family:Sarabun,sans-serif;font-weight:700;cursor:pointer;">ปิด</button></div><div id="sfpdLoc" style="font-size:13px;color:#0f766e;font-weight:700;margin-bottom:4px;"></div><div id="sfpdQty" style="font-size:13px;color:#6b7280;margin-bottom:12px;"></div><button id="sfpdGo" style="width:100%;background:#0f766e;color:#fff;border:none;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-weight:800;margin-bottom:14px;cursor:pointer;">🗺️ ไปดูบนแผนที่</button><div style="font-weight:800;font-size:14px;margin-bottom:8px;">📜 ประวัติการเข้า-ออก</div><div id="sfpdHist" style="display:flex;flex-direction:column;gap:6px;"></div></div>';document.body.appendChild(d);return d;}
+function sfpOpenDetail(r){if(!r)return;var d=sfpEnsureDetail();document.getElementById('sfpdTitle').textContent=r.name||'(ไม่มีชื่อ)';document.getElementById('sfpdLoc').textContent='📍 '+sfpLocText(r);document.getElementById('sfpdQty').textContent=(r.barcode?('บาร์โค้ด '+r.barcode+' · '):'')+'คงเหลือ '+(r.qty!=null?r.qty:0);document.getElementById('sfpdGo').onclick=function(){d.style.display='none';sfpGo(r.location,r.shelf);};var H=document.getElementById('sfpdHist');H.innerHTML='<div style="color:#9aa5a1;font-size:13px;">กำลังโหลด...</div>';d.style.display='flex';
+  sb.from('store_stock_log').select('*').eq('stock_id',r.id).order('created_at',{ascending:false}).then(function(res){
+    if(res&&res.error){H.innerHTML='<div style="color:#b23b3b;font-size:13px;">ยังไม่ได้สร้างตาราง store_stock_log — ต้องรัน SQL ก่อน</div>';return;}
+    var rows=(res&&res.data)?res.data:[];if(!rows.length){H.innerHTML='<div style="color:#9aa5a1;font-size:13px;">ยังไม่มีประวัติ (เริ่มบันทึกตั้งแต่ตอนนี้)</div>';return;}
+    var AC={add:'ลงของเข้า',count:'นับสต๊อก',edit:'แก้จำนวน',remove:'เอาออก'};
+    H.innerHTML=rows.map(function(g){var ch=Number(g.change||0);var io=ch>=0?('<span style="color:#16a34a;font-weight:800;">▲ เข้า +'+ch+'</span>'):('<span style="color:#b23b3b;font-weight:800;">▼ ออก '+ch+'</span>');var dt=g.created_at?new Date(g.created_at):null;var ds=dt?(dt.getDate()+'/'+(dt.getMonth()+1)+' '+('0'+dt.getHours()).slice(-2)+':'+('0'+dt.getMinutes()).slice(-2)):'';return '<div style="border:1px solid #eee;border-radius:9px;padding:9px;background:#f8faf9;"><div style="display:flex;justify-content:space-between;font-size:13px;"><span style="font-weight:700;">'+(AC[g.action]||g.action||'')+'</span>'+io+'</div><div style="font-size:11px;color:#6b7280;margin-top:2px;">'+ds+' · เหลือ '+(g.qty_after!=null?g.qty_after:'-')+(g.by_name?(' · '+g.by_name):'')+'</div></div>';}).join('');
+  }).catch(function(){H.innerHTML='<div style="color:#b23b3b;font-size:13px;">โหลดประวัติไม่ได้</div>';});
+}
+function sfpGo(loc,shelf){var nb=document.getElementById('nb-map');go('map',nb);if(window.mapMode)mapMode('storefront');if(window.SF&&window.SF.jumpTo)setTimeout(function(){window.SF.jumpTo(loc,shelf);},250);}
+function sfpScan(){var i=document.getElementById('sfpPhoto');if(i){i.value='';i.click();}}
+function sfpPhotoPicked(ev){var file=ev.target.files&&ev.target.files[0];if(!file)return;var S=document.getElementById('sfpStatus');if(S)S.textContent='🔍 กำลังอ่านบาร์โค้ด...';sfpDecode(file,function(code){if(code){document.getElementById('sfpq').value=code;sfpDo();}else if(S)S.textContent='อ่านบาร์โค้ดไม่ได้ — พิมพ์เองได้';});}
+function sfpDecode(file,cb){if(!file){cb(null);return;}var fr=new FileReader();fr.onload=function(){var src=fr.result;function qg(){if(typeof Quagga==='undefined'){cb(null);return;}try{Quagga.decodeSingle({src:src,numOfWorkers:0,locate:true,locator:{patchSize:'large',halfSample:false},inputStream:{size:1280},decoder:{readers:['ean_reader','ean_8_reader','upc_reader','upc_e_reader','code_128_reader','code_39_reader','itf_reader']}},function(result){var c=result&&result.codeResult&&result.codeResult.code;cb(c||null);});}catch(e){cb(null);}}if(typeof ZXing!=='undefined'){try{var rd=new ZXing.BrowserMultiFormatReader();rd.decodeFromImageUrl(src).then(function(res){var t=res&&res.getText&&res.getText();if(t)cb(t);else qg();}).catch(function(){qg();});}catch(e){qg();}}else qg();};fr.onerror=function(){cb(null);};fr.readAsDataURL(file);}
 
 function go(id,el){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});
   document.getElementById('pg-'+id).classList.add('active');
   if(el) el.classList.add('active');
-  if(id==='map') renderMap();
+  if(id==='map'){var _mm=(curGroup==='sf')?'storefront':(curGroup==='wh')?'warehouse':(currentRole==='storefront'?'storefront':'warehouse');if(window.mapMode)mapMode(_mm);renderMap();}
   if(id==='list') renderList();
   if(id==='users'){renderUsers();loadStaffList().then(renderUsers);}
   if(id==='weight') renderWeight();
@@ -823,12 +875,39 @@ function go(id,el){
   if(id==='photo') renderPhotoPage();
 }
 
-function doSearch(q){
+var curGroup=null;
+var GROUP_TABS={sell:['search','photo','product','weight'],wh:['search','map','add'],sf:['sfsearch','map'],manage:['list','users']};
+var ALL_TABS=['search','photo','map','sfsearch','product','weight','add','list','users'];
+function tabAllowed(id){var el=document.getElementById('nb-'+id);return !!el && el.getAttribute('data-allow')==='1';}
+function selectGroup(g,el){
+  curGroup=g;var ids=GROUP_TABS[g]||[];if(typeof setSearchMode==='function'){if(g==='sell')setSearchMode('sales');else if(g==='wh')setSearchMode('name');}
+  ALL_TABS.forEach(function(id){var b=document.getElementById('nb-'+id);if(!b)return;var show=tabAllowed(id)&&ids.indexOf(id)>=0;b.style.display=show?'':'none';});
+  var ml=document.getElementById('lbl-map');if(ml)ml.textContent=(g==='sf')?'แผนที่หน้าร้าน':'แผนที่โกดัง';
+  var gbs=document.querySelectorAll('.grpb');for(var k=0;k<gbs.length;k++)gbs[k].classList.remove('active');
+  if(el)el.classList.add('active');else{var gb=document.getElementById('grp-'+g);if(gb)gb.classList.add('active');}
+  var first=null;for(var i=0;i<ids.length;i++){if(tabAllowed(ids[i])){first=ids[i];break;}}
+  if(first){var fb=document.getElementById('nb-'+first);go(first,fb);if(first==='map'&&window.mapMode)mapMode(g==='sf'?'storefront':'warehouse');}
+}
+function setupGroupNav(){
+  ALL_TABS.forEach(function(id){var b=document.getElementById('nb-'+id);if(b)b.setAttribute('data-allow',(b.style.display!=='none')?'1':'0');});
+  var grouped=(currentRole==='manager'||currentRole==='subowner'||currentRole==='owner');
+  var gn=document.getElementById('grpNav');
+  if(!grouped){if(gn)gn.style.display='none';return;}
+  if(gn)gn.style.display='flex';
+  var firstG=null;
+  ['sell','wh','sf','manage'].forEach(function(g){var any=GROUP_TABS[g].some(function(id){return tabAllowed(id);});var gb=document.getElementById('grp-'+g);if(gb)gb.style.display=any?'':'none';if(any&&!firstG)firstG=g;});
+  if(firstG)selectGroup(firstG,document.getElementById('grp-'+firstG));
+}
+
+
+var searchMode='name';
+  function setSearchMode(m){searchMode=m;var sf=document.getElementById('salesFilter');if(sf)sf.style.display=(m==='sales')?'block':'none';var si=document.getElementById('si');if(si){si.placeholder=(m==='sales')?'ค้นหากระเบื้องปูพื้น,ผนัง':'พิมพ์ชื่อสินค้า';si.value='';}var ls=document.getElementById('lbl-search');if(ls)ls.textContent=(m==='sales')?'ค้นหากระเบื้อง':'ค้นหาที่กระเบื้อง';var sr=document.getElementById('sr');if(sr)sr.innerHTML='<div class="hint-area"><p>'+((m==='sales')?'ค้นหากระเบื้องปูพื้น,ผนัง':'พิมพ์ชื่อสินค้า')+'</p></div>';}
+  function doSearch(q){
   if(q.trim()==='__export__'){
     document.getElementById('sr').innerHTML='<div style="background:#f7f7f4;border-radius:12px;padding:14px;"><div style="font-size:12px;font-weight:700;color:#ea580c;margin-bottom:8px;">📦 Export</div><textarea readonly style="width:100%;height:120px;font-size:10px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px;font-family:monospace;resize:none;" onclick="this.select()">'+JSON.stringify(items)+'</textarea></div>';
     return;
   }
-  if(currentRole==='sales'){doSearchWithFilter(q,document.getElementById('flt_size').value,document.getElementById('flt_surface').value,document.getElementById('flt_color')?document.getElementById('flt_color').value:'');return;}
+  if(currentRole==='sales'||searchMode==='sales'){doSearchWithFilter(q,document.getElementById('flt_size').value,document.getElementById('flt_surface').value,document.getElementById('flt_color')?document.getElementById('flt_color').value:'');return;}
   var c=document.getElementById('sr');
   if(!q.trim()){c.innerHTML='<div class="hint-area"><p>พิมพ์ชื่อสินค้า</p></div>';return;}
   var ql=q.toLowerCase().trim();
@@ -2299,7 +2378,7 @@ function renderList(){
 
 function renderUsers(){
   var el=document.getElementById('usersList');
-  var roleLabels={'store':'👤 สโตร์','sales':'🛍️ ขาย','subowner':'👑 เจ้าของย่อย','manager':'💼 ผู้จัดการ','graphic':'🎨 กราฟฟิก','admin':'👷 หัวหน้าสโตร์','owner':'⭐ Owner'};
+  var roleLabels={'store':'👤 สโตร์','sales':'🛍️ ขาย','subowner':'👑 เจ้าของย่อย','manager':'💼 ผู้จัดการ','graphic':'🎨 กราฟฟิก','admin':'👷 หัวหน้าสโตร์','storefront':'🏠 สโตร์หน้าร้าน','owner':'⭐ Owner'};
   var h='<div style="font-size:15px;font-weight:800;color:#92400e;margin-bottom:14px;">👥 จัดการผู้ใช้</div>';
   h+='<button onclick="openAddUser()" style="width:100%;margin-bottom:8px;padding:12px;background:linear-gradient(135deg,#f97316,#ea580c);color:white;border:none;border-radius:11px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:800;cursor:pointer;">+ เพิ่มผู้ใช้ใหม่</button>';
 
@@ -2435,7 +2514,7 @@ async function downloadFullBackup(){
 
 function openEditUserRole(id){
   var u=users.find(function(x){return String(x.id)===String(id);});if(!u){showToast('❌ ไม่พบผู้ใช้ ลองรีเฟรชหน้า','err');return;}
-  var roleNames={'store':'👤 พนักงานสโตร์','sales':'🛍️ พนักงานขาย','subowner':'👑 เจ้าของย่อย (เหมือนขาย แต่ใช้ได้ทุกเวลา)','manager':'💼 ผู้จัดการ','graphic':'🎨 กราฟฟิก','admin':'👷 หัวหน้าสโตร์','owner':'⭐ Owner'};
+  var roleNames={'store':'👤 พนักงานสโตร์','sales':'🛍️ พนักงานขาย','subowner':'👑 เจ้าของย่อย (เหมือนขาย แต่ใช้ได้ทุกเวลา)','manager':'💼 ผู้จัดการ','graphic':'🎨 กราฟฟิก','admin':'👷 หัวหน้าสโตร์','storefront':'🏠 สโตร์หน้าร้าน','owner':'⭐ Owner'};
   var opts='';Object.keys(roleNames).forEach(function(r){opts+='<option value="'+r+'"'+(u.role===r?' selected':'')+'>'+roleNames[r]+'</option>';});
   var ov=document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;';
@@ -2484,7 +2563,7 @@ function openAddUser(){
     '<div><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">User ID</div><input id="nu_uid" type="text" maxlength="20" placeholder="ตัวอักษรหรือตัวเลข" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:16px;text-align:center;letter-spacing:6px;outline:none;"/></div>'+
     '<div><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Password</div><input id="nu_pwd" type="password" placeholder="••••••" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:16px;text-align:center;letter-spacing:6px;outline:none;"/></div>'+
     '</div>'+
-    '<div style="margin-bottom:16px;"><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">สิทธิ์</div><select id="nu_role" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;"><option value="store">👤 พนักงานสโตร์</option><option value="sales">🛍️ พนักงานขาย</option><option value="subowner">👑 เจ้าของย่อย (เหมือนขาย แต่ใช้ได้ทุกเวลา)</option><option value="manager">💼 ผู้จัดการ (เหมือนขาย + ลงรูปสินค้าได้ แต่ย้ายสินค้าไม่ได้)</option><option value="graphic">🎨 กราฟฟิก (ลงรูปสินค้าอย่างเดียว)</option><option value="admin">👷 หัวหน้าสโตร์ (จัดการสต็อกกระเบื้องทุกชั้น ไม่เกี่ยวหน้าร้าน)</option><option value="owner">⭐ Owner</option></select></div>';
+    '<div style="margin-bottom:16px;"><div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:4px;">สิทธิ์</div><select id="nu_role" style="width:100%;background:#f7f7f4;border:1.5px solid #e5e7eb;border-radius:9px;padding:10px 12px;font-family:Sarabun,sans-serif;font-size:14px;outline:none;"><option value="store">👤 พนักงานสโตร์</option><option value="sales">🛍️ พนักงานขาย</option><option value="subowner">👑 เจ้าของย่อย (เหมือนขาย แต่ใช้ได้ทุกเวลา)</option><option value="manager">💼 ผู้จัดการ (เหมือนขาย + ลงรูปสินค้าได้ แต่ย้ายสินค้าไม่ได้)</option><option value="graphic">🎨 กราฟฟิก (ลงรูปสินค้าอย่างเดียว)</option><option value="admin">👷 หัวหน้าสโตร์ (จัดการสต็อกกระเบื้องทุกชั้น ไม่เกี่ยวหน้าร้าน)</option><option value="storefront">🏠 สโตร์หน้าร้าน (ลง/ลบ/แก้สินค้าหน้าร้าน)</option><option value="owner">⭐ Owner</option></select></div>';
   var saveBtn=document.createElement('button');saveBtn.textContent='💾 บันทึก';
   saveBtn.style.cssText='width:100%;padding:13px;background:linear-gradient(135deg,#f97316,#ea580c);color:white;border:none;border-radius:11px;font-family:Sarabun,sans-serif;font-size:14px;font-weight:800;cursor:pointer;';
   saveBtn.onclick=async function(){
@@ -2959,7 +3038,8 @@ window.mapMode=function(m){
   function build(){
     var wrap=document.getElementById('mapStorefront');
     wrap.innerHTML=
-      '<div id="sfFloorBar" style="display:flex;gap:8px;margin-bottom:10px;font-family:Sarabun,sans-serif;">'+'<button id="sff-1" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:800;font-family:Sarabun,sans-serif;cursor:pointer;background:#0f766e;color:#fff;">ชั้น 1 (พื้น)</button>'+'<button id="sff-2" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:800;font-family:Sarabun,sans-serif;cursor:pointer;background:#e5e7eb;color:#6b7280;">ชั้น 2 (ชั้นลอย)</button>'+'</div>'
+      '<div id="sfSearchWrap" style="margin-bottom:12px;font-family:Sarabun,sans-serif;">'+'<div style="display:flex;gap:6px;">'+'<input id="sfqInput" type="text" placeholder="ค้นหาชื่อสินค้า หรือ บาร์โค้ด" style="flex:1;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;box-sizing:border-box;">'+'<button id="sfqScan" style="background:#0f766e;color:#fff;border:none;border-radius:10px;padding:0 14px;font-weight:800;font-family:Sarabun,sans-serif;cursor:pointer;">📷</button>'+'<button id="sfqBtn" style="background:#ea580c;color:#fff;border:none;border-radius:10px;padding:0 16px;font-weight:800;font-family:Sarabun,sans-serif;cursor:pointer;">🔍</button>'+'</div>'+'<input type="file" id="sfqPhoto" accept="image/*" capture="environment" onchange="__sfqPhoto(event)" style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px;">'+'<div id="sfqStatus" style="font-size:12px;color:#6b7280;font-weight:700;margin-top:6px;min-height:14px;"></div>'+'<div id="sfqResults" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>'+'</div>'
+      +'<div id="sfFloorBar" style="display:flex;gap:8px;margin-bottom:10px;font-family:Sarabun,sans-serif;">'+'<button id="sff-1" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:800;font-family:Sarabun,sans-serif;cursor:pointer;background:#0f766e;color:#fff;">ชั้น 1 (พื้น)</button>'+'<button id="sff-2" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:800;font-family:Sarabun,sans-serif;cursor:pointer;background:#e5e7eb;color:#6b7280;">ชั้น 2 (ชั้นลอย)</button>'+'</div>'
       +'<div id="sfModeBar" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-family:Sarabun,sans-serif;"><div id="sfModeLbl" style="font-size:12px;color:#6b7280;font-weight:700;">โหมดลงสินค้า — แตะชั้นเพื่อลงสินค้า/ดูสต๊อก</div><button id="sfEditMode" style="margin-left:auto;border:1px solid #e5e7eb;background:#f3f4f6;border-radius:8px;padding:6px 10px;font-family:Sarabun,sans-serif;font-weight:700;font-size:12px;color:#6b7280;cursor:pointer;">⚙️ แก้ผัง</button></div>'
       +'<div id="sfRoomRow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-family:Sarabun,sans-serif;">'
       +'<span style="font-size:13px;color:#6b7280;">ห้อง</span>'
@@ -3001,7 +3081,7 @@ window.mapMode=function(m){
       +'<input id="sfeLV" type="number" value="4" style="width:56px;text-align:center;border:1.5px solid #e5e7eb;border-radius:8px;padding:8px;font-family:Sarabun,sans-serif;font-weight:800;">'
       +'<button id="sfeLVup" style="width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-weight:800;font-size:18px;">+</button></div>'
       +'<div style="margin-bottom:14px;"><div style="font-size:12px;color:#6b7280;font-weight:700;margin-bottom:6px;">สีโซน</div><div id="sfeZone" style="display:flex;gap:8px;flex-wrap:wrap;">'+zb('blue','ฟ้า','#2563eb')+zb('yellow','เหลือง','#d8b15a')+zb('red','แดง','#dc2626')+zb('green','เขียว','#2f5d62')+'</div></div>'+'<div style="display:flex;gap:8px;"><button id="sfeApply" style="flex:1;background:#0f766e;color:#fff;border:none;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-weight:800;">บันทึกการแก้ไข</button>'
-      +'<button id="sfeDel" style="background:#fff;color:#b23b3b;border:1.5px solid #b23b3b;border-radius:10px;padding:11px 14px;font-family:Sarabun,sans-serif;font-weight:800;">🗑 ลบชั้นนี้</button></div></div></div>'+'<div id="sfStk" style="display:none;position:fixed;inset:0;background:rgba(15,23,20,.55);z-index:10001;align-items:flex-start;justify-content:center;padding:24px 10px;overflow:auto;">'+'<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;padding:18px;font-family:Sarabun,sans-serif;">'+'<div style="display:flex;align-items:center;margin-bottom:8px;"><div style="font-weight:800;font-size:15px;">🏷️ สินค้าในช่อง</div>'+'<button id="sfStkClose" style="margin-left:auto;background:#eee;border:none;border-radius:9px;padding:7px 12px;font-family:Sarabun,sans-serif;font-weight:700;">ปิด</button></div>'+'<div id="sfStkPos" style="font-size:12px;color:#0f766e;font-weight:700;margin-bottom:12px;"></div>'+'<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">'+'<div><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">ชื่อสินค้า</label><input id="stkName" type="text" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"></div>'+'<div><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">บาร์โค้ด</label><div style="display:flex;gap:6px;"><input id="stkBarcode" type="text" inputmode="numeric" style="flex:1;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"><button id="stkScan" style="background:#0f766e;color:#fff;border:none;border-radius:8px;padding:0 14px;font-family:Sarabun,sans-serif;font-weight:800;white-space:nowrap;">📷 สแกน</button></div><input type="file" id="stkPhoto" accept="image/*" capture="environment" onchange="__sfPhoto(event)" style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px;"><div id="stkScanMsg" style="font-size:12px;font-weight:700;margin-top:6px;min-height:16px;"></div></div>'+'<div><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">จำนวนคงเหลือ (สต๊อก)</label><input id="stkQty" type="number" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"></div>'+'</div>'+'<div id="stkCountInfo" style="font-size:12px;color:#6b7280;margin-bottom:8px;min-height:14px;"></div>'+'<div id="stkCountWrap" style="display:flex;gap:6px;align-items:flex-end;margin-bottom:14px;background:#f3f6f5;border-radius:10px;padding:10px;">'+'<div style="flex:1;"><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">นับสต๊อกใหม่ (จำนวนที่นับได้)</label><input id="stkCountVal" type="number" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"></div>'+'<button id="stkCountBtn" style="background:#0f766e;color:#fff;border:none;border-radius:9px;padding:11px 12px;font-family:Sarabun,sans-serif;font-weight:800;white-space:nowrap;">📊 บันทึกการนับ</button></div>'+'<div style="display:flex;gap:8px;"><button id="stkSave" style="flex:1;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:12px;font-family:Sarabun,sans-serif;font-weight:800;">💾 บันทึกข้อมูล</button>'+'<button id="stkDel" style="background:#fff;color:#b23b3b;border:1.5px solid #b23b3b;border-radius:10px;padding:12px 14px;font-family:Sarabun,sans-serif;font-weight:800;">🗑 เอาออก</button></div>'+'</div></div>'+'<div id="sfCell" style="display:none;position:fixed;inset:0;background:rgba(15,23,20,.55);z-index:10000;align-items:flex-start;justify-content:center;padding:24px 10px;overflow:auto;">'+'<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;padding:18px;font-family:Sarabun,sans-serif;">'+'<div style="display:flex;align-items:center;margin-bottom:6px;"><div style="font-weight:800;font-size:15px;">📦 ช่องนี้</div>'+'<button id="sfCellClose" style="margin-left:auto;background:#eee;border:none;border-radius:9px;padding:7px 12px;font-family:Sarabun,sans-serif;font-weight:700;">ปิด</button></div>'+'<div id="sfCellPos" style="font-size:12px;color:#0f766e;font-weight:700;margin-bottom:10px;"></div>'+'<div id="sfCellList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>'+'<button id="sfCellAdd" style="width:100%;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:12px;font-family:Sarabun,sans-serif;font-weight:800;">➕ เพิ่มสินค้าในช่องนี้</button>'+'</div></div>'+'<div id="sfScan" style="display:none;position:fixed;inset:0;background:#000;z-index:10002;flex-direction:column;align-items:center;justify-content:center;padding:16px;">'+'<div style="color:#fff;margin-bottom:10px;font-family:Sarabun,sans-serif;font-weight:700;">เล็งกล้องไปที่บาร์โค้ด</div>'+'<div id="sfScanBox" style="width:100%;max-width:400px;"></div>'+'<button id="sfScanClose" style="margin-top:16px;background:#fff;border:none;border-radius:10px;padding:10px 22px;font-family:Sarabun,sans-serif;font-weight:800;">ปิดกล้อง</button></div>';
+      +'<button id="sfeDel" style="background:#fff;color:#b23b3b;border:1.5px solid #b23b3b;border-radius:10px;padding:11px 14px;font-family:Sarabun,sans-serif;font-weight:800;">🗑 ลบชั้นนี้</button></div></div></div>'+'<div id="sfStk" style="display:none;position:fixed;inset:0;background:rgba(15,23,20,.55);z-index:10001;align-items:flex-start;justify-content:center;padding:24px 10px;overflow:auto;">'+'<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;padding:18px;font-family:Sarabun,sans-serif;">'+'<div style="display:flex;align-items:center;margin-bottom:8px;"><div style="font-weight:800;font-size:15px;">🏷️ สินค้าในช่อง</div>'+'<button id="sfStkClose" style="margin-left:auto;background:#eee;border:none;border-radius:9px;padding:7px 12px;font-family:Sarabun,sans-serif;font-weight:700;">ปิด</button></div>'+'<div id="sfStkPos" style="font-size:12px;color:#0f766e;font-weight:700;margin-bottom:12px;"></div>'+'<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">'+'<div><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">ชื่อสินค้า</label><input id="stkName" type="text" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"></div>'+'<div><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">บาร์โค้ด</label><div style="display:flex;gap:6px;"><input id="stkBarcode" type="text" inputmode="numeric" style="flex:1;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"><button id="stkScan" style="background:#0f766e;color:#fff;border:none;border-radius:8px;padding:0 14px;font-family:Sarabun,sans-serif;font-weight:800;white-space:nowrap;">📷 สแกน</button></div><input type="file" id="stkPhoto" accept="image/*" capture="environment" onchange="__sfPhoto(event)" style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px;"><div id="stkScanMsg" style="font-size:12px;font-weight:700;margin-top:6px;min-height:16px;"></div></div>'+'<div><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">จำนวนเริ่มต้น</label><input id="stkQty" type="number" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"></div>'+'<label id="stkTrackWrap" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#1b2420;font-weight:700;cursor:pointer;margin-top:2px;"><input type="checkbox" id="stkTrackExp" onchange="__sfExpToggle(this)" style="width:18px;height:18px;"> ⚠️ สินค้านี้ต้องใส่วันหมดอายุทุกครั้ง</label>'+'<div id="stkExpWrap" style="display:none;"><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">วันหมดอายุ</label><input id="stkExpiry" type="date" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"></div>'+'</div>'+'<div id="stkLotArea" style="display:none;margin-bottom:12px;"><div id="stkWarn" style="display:none;border-radius:10px;padding:10px;font-size:13px;font-weight:800;margin-bottom:10px;"></div><div style="font-size:13px;font-weight:800;color:#1b2420;margin-bottom:6px;">คงเหลือรวม: <span id="stkTotal">0</span> ชิ้น</div><div id="stkLotList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div><div style="display:flex;gap:8px;"><button id="stkInBtn" type="button" style="flex:1;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-weight:800;">➕ รับเข้า</button><button id="stkOutBtn" type="button" style="flex:1;background:#ea580c;color:#fff;border:none;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-weight:800;">➖ หยิบออก</button></div><div id="stkInWrap" style="display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px;margin-top:10px;"><div style="font-weight:800;font-size:13px;color:#166534;margin-bottom:6px;">➕ รับเข้าล็อตใหม่</div><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">จำนวนที่รับเข้า</label><input id="stkInQty" type="number" inputmode="numeric" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;margin-bottom:6px;"><div id="stkInExpWrap" style="display:none;"><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">วันหมดอายุของล็อตนี้</label><input id="stkInExp" type="date" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;margin-bottom:6px;"></div><button id="stkInGo" type="button" style="width:100%;background:#16a34a;color:#fff;border:none;border-radius:9px;padding:11px;font-family:Sarabun,sans-serif;font-weight:800;">ยืนยันรับเข้า</button></div><div id="stkOutWrap" style="display:none;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:10px;margin-top:10px;"><div style="font-weight:800;font-size:13px;color:#9a3412;margin-bottom:6px;">➖ หยิบออก — เลือกล็อตที่จะหยิบ</div><div id="stkOutList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">จำนวนที่หยิบออก</label><input id="stkOutQty" type="number" inputmode="numeric" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;margin-bottom:6px;"><button id="stkOutGo" type="button" style="width:100%;background:#ea580c;color:#fff;border:none;border-radius:9px;padding:11px;font-family:Sarabun,sans-serif;font-weight:800;">ยืนยันหยิบออก</button></div></div>'+'<div id="stkCountInfo" style="font-size:12px;color:#6b7280;margin-bottom:8px;min-height:14px;"></div>'+'<div id="stkCountWrap" style="display:flex;gap:6px;align-items:flex-end;margin-bottom:14px;background:#f3f6f5;border-radius:10px;padding:10px;">'+'<div style="flex:1;"><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">นับสต๊อกใหม่ (จำนวนที่นับได้)</label><input id="stkCountVal" type="number" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"></div>'+'<button id="stkCountBtn" style="background:#0f766e;color:#fff;border:none;border-radius:9px;padding:11px 12px;font-family:Sarabun,sans-serif;font-weight:800;white-space:nowrap;">📊 บันทึกการนับ</button></div>'+'<div style="display:flex;gap:8px;"><button id="stkSave" style="flex:1;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:12px;font-family:Sarabun,sans-serif;font-weight:800;">💾 บันทึกข้อมูล</button>'+'<button id="stkDel" style="background:#fff;color:#b23b3b;border:1.5px solid #b23b3b;border-radius:10px;padding:12px 14px;font-family:Sarabun,sans-serif;font-weight:800;">🗑 เอาออก</button></div>'+'</div></div>'+'<div id="sfCell" style="display:none;position:fixed;inset:0;background:rgba(15,23,20,.55);z-index:10000;align-items:flex-start;justify-content:center;padding:24px 10px;overflow:auto;">'+'<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;padding:18px;font-family:Sarabun,sans-serif;">'+'<div style="display:flex;align-items:center;margin-bottom:6px;"><div style="font-weight:800;font-size:15px;">📦 ช่องนี้</div>'+'<button id="sfCellClose" style="margin-left:auto;background:#eee;border:none;border-radius:9px;padding:7px 12px;font-family:Sarabun,sans-serif;font-weight:700;">ปิด</button></div>'+'<div id="sfCellPos" style="font-size:12px;color:#0f766e;font-weight:700;margin-bottom:10px;"></div>'+'<div id="sfCellList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>'+'<button id="sfCellAdd" style="width:100%;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:12px;font-family:Sarabun,sans-serif;font-weight:800;">➕ เพิ่มสินค้าในช่องนี้</button>'+'</div></div>'+'<div id="sfScan" style="display:none;position:fixed;inset:0;background:#000;z-index:10002;flex-direction:column;align-items:center;justify-content:center;padding:16px;">'+'<div style="color:#fff;margin-bottom:10px;font-family:Sarabun,sans-serif;font-weight:700;">เล็งกล้องไปที่บาร์โค้ด</div>'+'<div id="sfScanBox" style="width:100%;max-width:400px;"></div>'+'<button id="sfScanClose" style="margin-top:16px;background:#fff;border:none;border-radius:10px;padding:10px 22px;font-family:Sarabun,sans-serif;font-weight:800;">ปิดกล้อง</button></div>';
     svg=document.getElementById('sfSvg');
     var gridG=E('g',{});gridG.setAttribute('id','sfGrid');
     wallG=E('g',{});colG=E('g',{});stairG=E('g',{});
@@ -3039,11 +3119,14 @@ window.mapMode=function(m){
     document.getElementById('sfEditMode').addEventListener('click',toggleEditMode);
     document.getElementById('sff-1').addEventListener('click',function(){switchFloor('storefront');});
     document.getElementById('sff-2').addEventListener('click',function(){switchFloor('storefront2');});
+    document.getElementById('sfqBtn').addEventListener('click',function(){doSearch(document.getElementById('sfqInput').value);});
+    document.getElementById('sfqInput').addEventListener('keydown',function(e){if(e.key==='Enter')doSearch(this.value);});
+    document.getElementById('sfqScan').addEventListener('click',function(){var i=document.getElementById('sfqPhoto');if(i){i.value='';i.click();}});
     document.getElementById('sfStkClose').addEventListener('click',closeStk);
     document.getElementById('stkSave').addEventListener('click',saveProduct);
     document.getElementById('stkCountBtn').addEventListener('click',recordCount);
     document.getElementById('stkDel').addEventListener('click',armDelStock);
-    document.getElementById('stkScan').addEventListener('click',openScan);
+    document.getElementById('stkScan').addEventListener('click',openScan);var _olst=document.getElementById('stkOutList');if(_olst)_olst.addEventListener('click',function(e){var b=e.target.closest('.lotpick');if(!b)return;sfSelLot=parseInt(b.getAttribute('data-lot'),10);var ks=_olst.querySelectorAll('.lotpick');for(var i=0;i<ks.length;i++){var on=(parseInt(ks[i].getAttribute('data-lot'),10)===sfSelLot);ks[i].style.border='2px solid '+(on?'#ea580c':'#e5e7eb');ks[i].style.background=on?'#fff7ed':'#fff';}});var _ib=document.getElementById('stkInBtn');if(_ib)_ib.addEventListener('click',function(){window.__sfLotMode('in');});var _ob=document.getElementById('stkOutBtn');if(_ob)_ob.addEventListener('click',function(){window.__sfLotMode('out');});var _ig=document.getElementById('stkInGo');if(_ig)_ig.addEventListener('click',function(){window.__sfLotAdd();});var _og=document.getElementById('stkOutGo');if(_og)_og.addEventListener('click',function(){window.__sfLotPick();});
     document.getElementById('sfScanClose').addEventListener('click',closeScan);
     document.getElementById('sfCellClose').addEventListener('click',closeCell);
     document.getElementById('sfCellAdd').addEventListener('click',function(){formSpan=curSpan;openProductForm(null);});
@@ -3063,6 +3146,8 @@ window.mapMode=function(m){
     for(var gy=0;gy<=ROOM.h;gy++)g.appendChild(E('line',{stroke:'#d9e0dd','stroke-width':'.02',x1:0,y1:gy,x2:ROOM.w,y2:gy}));}
   function seg(x1,y1,x2,y2){wallG.appendChild(E('line',{stroke:'#1b2420','stroke-width':'.12','stroke-linecap':'square',x1:x1,y1:y1,x2:x2,y2:y2}));}
   function renderDoor(){while(wallG.firstChild)wallG.removeChild(wallG.firstChild);var W=ROOM.w,H=ROOM.h,d=DOOR,a,b;
+    if(d.hidden){seg(0,0,W,0);seg(0,H,W,H);seg(0,0,0,H);seg(W,0,W,H);if(doorLine)doorLine.style.display='none';if(doorLbl)doorLbl.style.display='none';return;}
+    if(doorLine)doorLine.style.display='';if(doorLbl)doorLbl.style.display='';
     if(d.wall==='T'){a=clamp(d.pos-1,0,W);b=clamp(d.pos+1,0,W);seg(0,0,a,0);seg(b,0,W,0);}else seg(0,0,W,0);
     if(d.wall==='B'){a=clamp(d.pos-1,0,W);b=clamp(d.pos+1,0,W);seg(0,H,a,H);seg(b,H,W,H);}else seg(0,H,W,H);
     if(d.wall==='L'){a=clamp(d.pos-1,0,H);b=clamp(d.pos+1,0,H);seg(0,0,0,a);seg(0,b,0,H);}else seg(0,0,0,H);
@@ -3076,6 +3161,7 @@ window.mapMode=function(m){
     doorLine.setAttribute('stroke-width',sel===DOOR?'.28':'.16');
     doorLbl.setAttribute('x',lx);doorLbl.setAttribute('y',ly);doorLbl.setAttribute('text-anchor','middle');
     doorLbl.setAttribute('transform',rot?('rotate('+rot+' '+lx+' '+ly+')'):'');}
+  window.__sfDoorToggle=function(){DOOR.hidden=!DOOR.hidden;buildChips();renderDoor();select(DOOR);showToast(DOOR.hidden?'ลบประตูแล้ว — อย่าลืมกดบันทึกผัง':'ใส่ประตูกลับแล้ว','ok');};
   function renderCols(){while(colG.firstChild)colG.removeChild(colG.firstChild);
     COLS.forEach(function(c){var ci=E('circle',{cx:c.x,cy:c.y,r:0.18,fill:(c.m?'#3a4a8a':'#6b746f')});ci.style.cursor='pointer';
       if(sel===c||sel===COLGRP){ci.setAttribute('stroke','#e8a13a');ci.setAttribute('stroke-width',sel===c?'.1':'.07');}
@@ -3104,7 +3190,7 @@ window.mapMode=function(m){
     function chip(label,obj,extra){var b=document.createElement('button');b.textContent=label;
       b.style.cssText='min-width:30px;height:30px;padding:0 7px;border:1px solid #e5e7eb;border-radius:8px;background:#f3f6f5;font-weight:700;font-size:13px;color:#1b2420;font-family:Space Grotesk,Sarabun,sans-serif;cursor:pointer;'+(extra||'');
       obj._chip=b;b.addEventListener('click',function(){select(obj);});c.appendChild(b);}
-    chip('ประตู',DOOR,'color:#b23b3b;font-family:Sarabun,sans-serif;');
+    chip(DOOR.hidden?'ประตู (ซ่อน)':'ประตู',DOOR,'color:#b23b3b;font-family:Sarabun,sans-serif;');
     chip('เสา(ทั้งกลุ่ม)',COLGRP,'color:#3a4a8a;font-family:Sarabun,sans-serif;');
     chip('บันได',STAIR,'color:#8a8f8c;font-family:Sarabun,sans-serif;');
     SHELVES.slice().sort(function(a,b){return a.n-b.n;}).forEach(function(s){chip(String(s.n),s);});}
@@ -3114,7 +3200,7 @@ window.mapMode=function(m){
     resetChipColor(old);}
   function select(o){clearSel();sel=o;if(o._chip){o._chip.style.background='#e8a13a';o._chip.style.color='#fff';}
     if(o.kind==='shelf'){place(o);setLab('เลือก: <b>ชั้น '+o.n+'</b> ('+o.w+'×'+o.l+' ม. · '+o.lv+' ระดับ) — ปุ่ม ✏️ เพื่อแก้ / 📦 ดูช่อง');}
-    else if(o.kind==='door'){renderDoor();setLab('เลือก: <b>ประตู</b> — แตะผนัง');}
+    else if(o.kind==='door'){renderDoor();setLab('เลือก: <b>ประตู</b> — แตะผนังเพื่อย้าย <button onclick="__sfDoorToggle()" style="margin-left:6px;border:1px solid #b23b3b;background:#fff;color:#b23b3b;border-radius:7px;padding:4px 9px;font-family:Sarabun,sans-serif;font-weight:800;font-size:12px;cursor:pointer;">'+(DOOR.hidden?'➕ ใส่ประตูกลับ':'🗑 ลบประตู')+'</button>');}
     else if(o.kind==='stair'){renderStair();setLab('เลือก: <b>บันได</b> — แตะเพื่อย้าย');}
     else if(o.kind==='cols'){renderCols();setLab('เลือก: <b>เสาทั้งกลุ่ม</b> — แตะเพื่อย้ายพร้อมกัน');}
     else if(o.kind==='col1'){renderCols();setLab('เลือก: <b>เสา 1 ต้น</b> — แตะเพื่อย้าย / ปุ่ม 🗑 เพื่อลบ');}}
@@ -3187,12 +3273,12 @@ window.mapMode=function(m){
   function loadStock(shelf,cb){STOCK=[];sb.from('store_stock').select('*').eq('location',SF_LOC).eq('shelf',shelf).then(function(res){if(res&&res.data)STOCK=res.data;if(cb)cb();}).catch(function(){if(cb)cb();});}
   function openProductForm(slot){resetDelStock();curSlot=slot||null;var cw=document.getElementById('stkCountWrap'),dl=document.getElementById('stkDel'),ci=document.getElementById('stkCountInfo'),pos;
     if(slot){pos=zoneName(curFront)+' · ชั้น '+curFront.n+' · '+(curFront.floor?'พื้น':'ระดับ '+slot.level)+' · ช่อง '+((+slot.bay_start===+slot.bay_end)?slot.bay_start:(slot.bay_start+'–'+slot.bay_end));
-      document.getElementById('stkName').value=slot.name||'';document.getElementById('stkBarcode').value=slot.barcode||'';document.getElementById('stkQty').value=(slot.qty!=null?slot.qty:'');
+      document.getElementById('stkName').value=slot.name||'';document.getElementById('stkBarcode').value=slot.barcode||'';document.getElementById('stkQty').value=(slot.qty!=null?slot.qty:'');var _te=document.getElementById('stkTrackExp');if(_te){_te.checked=!!slot.track_expiry;_te.disabled=true;}var _tw=document.getElementById('stkTrackWrap');if(_tw)_tw.style.display=slot.track_expiry?'':'none';var _ew=document.getElementById('stkExpWrap');if(_ew)_ew.style.display=slot.track_expiry?'':'none';var _ex=document.getElementById('stkExpiry');if(_ex)_ex.value=slot.expiry||'';
       if(slot.prev_qty!=null)ci.textContent='นับครั้งก่อน: '+slot.prev_qty+' ชิ้น'+(slot.prev_counted_at?(' ('+fmtDate(slot.prev_counted_at)+')'):'')+(slot.counted_at?(' · ล่าสุด '+fmtDate(slot.counted_at)):'');
       else ci.textContent=(slot.counted_at?('นับล่าสุด '+fmtDate(slot.counted_at)):'ยังไม่เคยนับสต๊อก');
-      cw.style.display='flex';dl.style.display='';
+      cw.style.display='none';dl.style.display='';var _qfh=document.getElementById('stkQty');if(_qfh&&_qfh.parentNode)_qfh.parentNode.style.display='none';var _lae=document.getElementById('stkLotArea');if(_lae)_lae.style.display='';renderLots();
     }else{var sp=formSpan||{level:selLevel,a:Math.min(selA,selB),z:Math.max(selA,selB)};pos=zoneName(curFront)+' · ชั้น '+curFront.n+' · '+(curFront.floor?'พื้น':'ระดับ '+sp.level)+' · ช่อง '+(sp.a===sp.z?sp.a:(sp.a+'–'+sp.z));
-      document.getElementById('stkName').value='';document.getElementById('stkBarcode').value='';document.getElementById('stkQty').value='';ci.textContent='';cw.style.display='none';dl.style.display='none';}
+      document.getElementById('stkName').value='';document.getElementById('stkBarcode').value='';document.getElementById('stkQty').value='';ci.textContent='';cw.style.display='none';dl.style.display='none';var _te=document.getElementById('stkTrackExp');if(_te){_te.checked=false;_te.disabled=false;}var _tw=document.getElementById('stkTrackWrap');if(_tw)_tw.style.display='';var _ew=document.getElementById('stkExpWrap');if(_ew)_ew.style.display='none';var _ex=document.getElementById('stkExpiry');if(_ex)_ex.value='';var _qfs=document.getElementById('stkQty');if(_qfs&&_qfs.parentNode)_qfs.parentNode.style.display='';var _las=document.getElementById('stkLotArea');if(_las)_las.style.display='none';}
     document.getElementById('stkCountVal').value='';var _sm=document.getElementById('stkScanMsg');if(_sm)_sm.textContent='';document.getElementById('sfStkPos').textContent=pos;document.getElementById('sfStk').style.display='flex';}
   function closeStk(){resetDelStock();var p=document.getElementById('sfStk');if(p)p.style.display='none';}
   function scanMsg(t,kind){var e=document.getElementById('stkScanMsg');if(!e)return;e.textContent=t||'';e.style.color=(kind==='ok')?'#16a34a':(kind==='err')?'#b23b3b':'#6b7280';}
@@ -3220,14 +3306,38 @@ window.mapMode=function(m){
     fr.readAsDataURL(file);}
   function closeScan(){try{if(typeof Quagga!=='undefined'){Quagga.offDetected();Quagga.stop();}}catch(e){}scanner=null;var b=document.getElementById('sfScanBox');if(b)b.innerHTML='';var p=document.getElementById('sfScan');if(p)p.style.display='none';}
   function afterStockWrite(res){if(res&&res.error){var m=((res.error.message||'')+'');if(/store_stock|does not exist|relation|schema cache|404/i.test(m)){showToast('ยังไม่ได้สร้างตาราง store_stock ใน Supabase — ต้องรัน SQL ก่อน','err');}else{showToast('บันทึกไม่สำเร็จ: '+m,'err');}return;}showToast('บันทึกสินค้าแล้ว ✓','ok');closeStk();selLevel=selA=selB=null;formSpan=null;loadStock(curFront.n,function(){renderFront();if(document.getElementById('sfCell').style.display==='flex')renderCellList();});}
-  function saveProduct(){var name=document.getElementById('stkName').value.trim(),barcode=document.getElementById('stkBarcode').value.trim(),qty=parseFloat(document.getElementById('stkQty').value);if(isNaN(qty))qty=0;
-    if(!name&&!barcode){showToast('ใส่ชื่อหรือบาร์โค้ดอย่างน้อย 1 อย่าง','err');return;}var now=new Date().toISOString();
-    if(curSlot){sb.from('store_stock').update({name:name,barcode:barcode,qty:qty,updated_at:now}).eq('id',curSlot.id).then(afterStockWrite);}
+  function logStockChange(o){try{var who=(typeof currentUser!=='undefined'&&currentUser&&currentUser.name)?currentUser.name:'';sb.from('store_stock_log').insert({stock_id:o.stock_id||null,location:SF_LOC,shelf:o.shelf,level:o.level,bay_start:o.bay_start,bay_end:o.bay_end,name:o.name||null,barcode:o.barcode||null,change:o.change,qty_after:o.qty_after,action:o.action,by_name:who}).then(function(){},function(){});}catch(e){}}
+  window.__sfExpToggle=function(cb){var w=document.getElementById('stkExpWrap');if(w)w.style.display=cb.checked?'':'none';};
+  var sfLots=[];var sfSelLot=null;
+  function lotHasExp(){return !!(curSlot&&curSlot.track_expiry);}
+  function sortLots(a){var exp=lotHasExp();a.sort(function(x,y){if(exp){var ex=x.expiry||'9999-12-31',ey=y.expiry||'9999-12-31';if(ex!==ey)return ex<ey?-1:1;}var dx=x.date_in||x.created_at||'',dy=y.date_in||y.created_at||'';if(dx!==dy)return dx<dy?-1:1;return (x.id||0)-(y.id||0);});return a;}
+  function loadLots(stockId,cb){sb.from('store_lots').select('*').eq('stock_id',stockId).then(function(res){var arr=(res&&res.data)?res.data:[];sortLots(arr);if(cb)cb(arr);},function(){if(cb)cb([]);});}
+  function lotsTotal(a){var t=0;for(var i=0;i<a.length;i++)t+=(+a[i].qty||0);return t;}
+  function syncStockQty(total){var now=new Date().toISOString();sb.from('store_stock').update({qty:total,updated_at:now}).eq('id',curSlot.id).then(function(){},function(){});if(curSlot)curSlot.qty=total;}
+  function refreshAfterLot(){loadStock(curFront.n,function(){renderFront();if(document.getElementById('sfCell').style.display==='flex')renderCellList();});}
+  function renderLots(){if(!curSlot)return;loadLots(curSlot.id,function(arr){
+    if(arr.length===0&&(+curSlot.qty||0)>0){sb.from('store_lots').insert({stock_id:curSlot.id,qty:curSlot.qty,expiry:curSlot.expiry||null,date_in:(curSlot.counted_at||new Date().toISOString())}).then(function(){renderLots();},function(){});return;}
+    sfLots=arr;var total=lotsTotal(arr);var tEl=document.getElementById('stkTotal');if(tEl)tEl.textContent=total;var exp=lotHasExp();
+    var list=document.getElementById('stkLotList');
+    if(list)list.innerHTML=arr.map(function(l,i){var tag=(i===0&&arr.length>1)?'<span style="background:#fde68a;color:#92400e;border-radius:6px;padding:1px 6px;font-size:11px;font-weight:800;margin-left:6px;">เก่าสุด</span>':'';var ex=l.expiry?(' · หมดอายุ '+fmtDate(l.expiry)):'';var di=l.date_in?(' · รับเข้า '+fmtDate(l.date_in)):'';return '<div style="border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;font-size:13px;color:#1b2420;background:#f8faf9;"><b>'+(+l.qty||0)+' ชิ้น</b>'+ex+di+tag+'</div>';}).join('');
+    var w=document.getElementById('stkWarn');
+    if(w){if(arr.length>1){if(exp){var first=arr[0];w.style.background='#fef2f2';w.style.color='#b91c1c';w.style.border='1.5px solid #fecaca';w.innerHTML='🔴 มีของเก่า'+(first.expiry?(' หมดอายุ '+fmtDate(first.expiry)):'')+' กรุณานำมาไว้ข้างหน้า';}else{var oldQ=total-(+arr[arr.length-1].qty||0);w.style.background='#fffbeb';w.style.color='#92400e';w.style.border='1.5px solid #fde68a';w.innerHTML='🟡 ยังมีของเก่าอยู่ '+oldQ+' ชิ้น กรุณานำมาไว้ข้างหน้า';}w.style.display='';}else{w.style.display='none';}}
+    sfSelLot=arr.length?arr[0].id:null;
+    var ol=document.getElementById('stkOutList');
+    if(ol)ol.innerHTML=arr.map(function(l,i){var sel=(l.id===sfSelLot);var ex=l.expiry?(' · หมดอายุ '+fmtDate(l.expiry)):'';var rec=(i===0&&arr.length>1)?' · ควรหยิบก่อน':'';return '<button type="button" class="lotpick" data-lot="'+l.id+'" style="text-align:left;border:2px solid '+(sel?'#ea580c':'#e5e7eb')+';background:'+(sel?'#fff7ed':'#fff')+';border-radius:8px;padding:8px 10px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:700;color:#1b2420;cursor:pointer;">'+(+l.qty||0)+' ชิ้น'+ex+rec+'</button>';}).join('');
+  });}
+  window.__sfLotMode=function(m){var iw=document.getElementById('stkInWrap'),ow=document.getElementById('stkOutWrap');if(m==='in'){var show=iw.style.display==='none';iw.style.display=show?'':'none';ow.style.display='none';var ie=document.getElementById('stkInExpWrap');if(ie)ie.style.display=lotHasExp()?'':'none';var q=document.getElementById('stkInQty');if(q)q.value='';var e=document.getElementById('stkInExp');if(e)e.value='';}else{var show2=ow.style.display==='none';ow.style.display=show2?'':'none';iw.style.display='none';var q2=document.getElementById('stkOutQty');if(q2)q2.value='';}};
+  window.__sfLotAdd=function(){if(!curSlot)return;var q=parseFloat(document.getElementById('stkInQty').value);if(isNaN(q)||q<=0){showToast('ใส่จำนวนที่รับเข้า','err');return;}var exV='';if(lotHasExp()){exV=(document.getElementById('stkInExp')&&document.getElementById('stkInExp').value)||'';if(!exV){showToast('สินค้านี้ต้องใส่วันหมดอายุของล็อต','err');return;}}var now=new Date().toISOString();sb.from('store_lots').insert({stock_id:curSlot.id,qty:q,expiry:exV||null,date_in:now}).then(function(r){if(r&&r.error){showToast('รับเข้าไม่สำเร็จ','err');return;}loadLots(curSlot.id,function(arr){var total=lotsTotal(arr);syncStockQty(total);logStockChange({stock_id:curSlot.id,shelf:curFront.n,level:curSlot.level,bay_start:curSlot.bay_start,bay_end:curSlot.bay_end,name:curSlot.name,barcode:curSlot.barcode,change:q,qty_after:total,action:'in'});showToast('รับเข้าแล้ว ✓','ok');var iw=document.getElementById('stkInWrap');if(iw)iw.style.display='none';renderLots();refreshAfterLot();});});};
+  window.__sfLotPick=function(){if(!curSlot)return;if(!sfSelLot){showToast('เลือกล็อตที่จะหยิบ','err');return;}var amt=parseFloat(document.getElementById('stkOutQty').value);if(isNaN(amt)||amt<=0){showToast('ใส่จำนวนที่หยิบออก','err');return;}var lot=null;for(var i=0;i<sfLots.length;i++){if(sfLots[i].id===sfSelLot)lot=sfLots[i];}if(!lot){showToast('ไม่พบล็อต','err');return;}if(amt>(+lot.qty||0)){showToast('หยิบเกินจำนวนในล็อต (มี '+(+lot.qty||0)+')','err');return;}var left=(+lot.qty||0)-amt;var done=function(){loadLots(curSlot.id,function(arr){var total=lotsTotal(arr);syncStockQty(total);logStockChange({stock_id:curSlot.id,shelf:curFront.n,level:curSlot.level,bay_start:curSlot.bay_start,bay_end:curSlot.bay_end,name:curSlot.name,barcode:curSlot.barcode,change:-amt,qty_after:total,action:'out'});showToast('หยิบออกแล้ว ✓','ok');var ow=document.getElementById('stkOutWrap');if(ow)ow.style.display='none';renderLots();refreshAfterLot();});};if(left<=0){sb.from('store_lots').delete().eq('id',lot.id).then(function(r){if(r&&r.error){showToast('หยิบออกไม่สำเร็จ','err');return;}done();});}else{sb.from('store_lots').update({qty:left}).eq('id',lot.id).then(function(r){if(r&&r.error){showToast('หยิบออกไม่สำเร็จ','err');return;}done();});}};
+  
+function saveProduct(){var name=document.getElementById('stkName').value.trim(),barcode=document.getElementById('stkBarcode').value.trim(),qty=parseFloat(document.getElementById('stkQty').value);if(isNaN(qty))qty=0;
+    if(!name&&!barcode){showToast('ใส่ชื่อหรือบาร์โค้ดอย่างน้อย 1 อย่าง','err');return;}var now=new Date().toISOString();var _teEl=document.getElementById('stkTrackExp');var te=curSlot?!!curSlot.track_expiry:(!!(_teEl&&_teEl.checked));var expVal=(document.getElementById('stkExpiry')&&document.getElementById('stkExpiry').value)||'';if(te&&!expVal){showToast('สินค้านี้ต้องใส่วันหมดอายุก่อนบันทึก','err');return;}
+    if(curSlot){var _cs=curSlot;sb.from('store_stock').update({name:name,barcode:barcode,updated_at:now}).eq('id',_cs.id).then(function(res){afterStockWrite(res);});}
     else{var sp=formSpan||{level:selLevel,a:Math.min(selA,selB),z:Math.max(selA,selB)};if(sp.level==null||isNaN(sp.a)||isNaN(sp.z)){showToast('เลือกช่องก่อนบันทึก','err');return;}var clash=slotsOnLevel(sp.level).some(function(r){var ra=+r.bay_start,rz=+r.bay_end;return !(sp.z<ra||sp.a>rz)&&!(ra===sp.a&&rz===sp.z);});if(clash){showToast('ช่วงช่องนี้ทับกับสินค้าอื่น','err');return;}
-      sb.from('store_stock').insert({location:SF_LOC,shelf:curFront.n,level:sp.level,bay_start:sp.a,bay_end:sp.z,name:name,barcode:barcode,qty:qty,counted_at:now,updated_at:now}).then(afterStockWrite);}}
+      sb.from('store_stock').insert({location:SF_LOC,shelf:curFront.n,level:sp.level,bay_start:sp.a,bay_end:sp.z,name:name,barcode:barcode,qty:qty,track_expiry:te,expiry:expVal||null,counted_at:now,updated_at:now}).select().then(function(res){if(!(res&&res.error)){var _nid=(res.data&&res.data[0]&&res.data[0].id)||null;logStockChange({stock_id:_nid,shelf:curFront.n,level:sp.level,bay_start:sp.a,bay_end:sp.z,name:name,barcode:barcode,change:qty,qty_after:qty,action:'add'});if(_nid){sb.from('store_lots').insert({stock_id:_nid,qty:qty,expiry:expVal||null,date_in:now}).then(function(){},function(){});}}afterStockWrite(res);});}}
   function recordCount(){if(!curSlot){showToast('บันทึกสินค้าก่อน','err');return;}var v=parseFloat(document.getElementById('stkCountVal').value);if(isNaN(v)){showToast('ใส่จำนวนที่นับได้','err');return;}var now=new Date().toISOString();
-    sb.from('store_stock').update({prev_qty:curSlot.qty,prev_counted_at:curSlot.counted_at,qty:v,counted_at:now,updated_at:now}).eq('id',curSlot.id).then(function(res){if(res&&res.error){showToast('บันทึกการนับไม่สำเร็จ','err');return;}showToast('บันทึกการนับแล้ว','ok');closeStk();loadStock(curFront.n,function(){renderFront();if(document.getElementById('sfCell').style.display==='flex')renderCellList();});});}
-  function deleteSlot(){if(!curSlot)return;sb.from('store_stock').delete().eq('id',curSlot.id).then(function(res){if(res&&res.error){showToast('ลบไม่สำเร็จ','err');return;}showToast('เอาสินค้าออกแล้ว','ok');closeStk();loadStock(curFront.n,function(){renderFront();if(document.getElementById('sfCell').style.display==='flex')renderCellList();});});}
+    sb.from('store_stock').update({prev_qty:curSlot.qty,prev_counted_at:curSlot.counted_at,qty:v,counted_at:now,updated_at:now}).eq('id',curSlot.id).then(function(res){if(res&&res.error){showToast('บันทึกการนับไม่สำเร็จ','err');return;}logStockChange({stock_id:curSlot.id,shelf:curFront.n,level:curSlot.level,bay_start:curSlot.bay_start,bay_end:curSlot.bay_end,name:curSlot.name,barcode:curSlot.barcode,change:v-(curSlot.qty||0),qty_after:v,action:'count'});showToast('บันทึกการนับแล้ว','ok');closeStk();loadStock(curFront.n,function(){renderFront();if(document.getElementById('sfCell').style.display==='flex')renderCellList();});});}
+  function deleteSlot(){if(!curSlot)return;var _cs=curSlot;sb.from('store_stock').delete().eq('id',_cs.id).then(function(res){if(res&&res.error){showToast('ลบไม่สำเร็จ','err');return;}logStockChange({stock_id:_cs.id,shelf:curFront.n,level:_cs.level,bay_start:_cs.bay_start,bay_end:_cs.bay_end,name:_cs.name,barcode:_cs.barcode,change:-(_cs.qty||0),qty_after:0,action:'remove'});showToast('เอาสินค้าออกแล้ว','ok');closeStk();loadStock(curFront.n,function(){renderFront();if(document.getElementById('sfCell').style.display==='flex')renderCellList();});});}
   function resetDelStock(){stkDelArm=false;if(stkDelTimer){clearTimeout(stkDelTimer);stkDelTimer=null;}var b=document.getElementById('stkDel');if(b){b.textContent='🗑 เอาออก';b.style.background='#fff';b.style.color='#b23b3b';}}
   function armDelStock(){if(!curSlot){showToast('ยังไม่มีสินค้าให้เอาออก','err');return;}var b=document.getElementById('stkDel');if(!stkDelArm){stkDelArm=true;if(b){b.textContent='⚠️ ยืนยันเอาออก';b.style.background='#b23b3b';b.style.color='#fff';}if(stkDelTimer)clearTimeout(stkDelTimer);stkDelTimer=setTimeout(resetDelStock,3500);return;}deleteSlot();resetDelStock();}
   function applyLockUI(){var on=EDIT_LAYOUT;['sfRoomRow','sfChips','sfShelfTools','sfColTools','sfPad'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display=on?'flex':'none';});
@@ -3260,13 +3370,13 @@ window.mapMode=function(m){
 
   function snapshot(){return {room:{w:ROOM.w,h:ROOM.h},
     sh:SHELVES.map(function(s){return {n:s.n,x:s.x,y:s.y,w:s.w,l:s.l,h:s.h,lv:s.lv,floor:s.floor?1:0,zone:(s.zone||null),bays:(s.bays||[]).slice()};}),
-    door:{wall:DOOR.wall,pos:DOOR.pos},stair:{x:STAIR.x,y:STAIR.y,w:STAIR.w,l:STAIR.l},cols:COLS.map(function(c){return {x:c.x,y:c.y,m:!!c.m};})};}
+    door:{wall:DOOR.wall,pos:DOOR.pos,hidden:!!DOOR.hidden},stair:{x:STAIR.x,y:STAIR.y,w:STAIR.w,l:STAIR.l},cols:COLS.map(function(c){return {x:c.x,y:c.y,m:!!c.m};})};}
   function applyState(st){if(!st)return;
     if(st.room){ROOM.w=st.room.w;ROOM.h=st.room.h;var rw=document.getElementById('sfRW'),rh=document.getElementById('sfRH');if(rw)rw.value=ROOM.w;if(rh)rh.value=ROOM.h;}
     if(st.sh&&st.sh.length){SHELVES.forEach(removeShelfEls);
       SHELVES=st.sh.map(function(o){return {n:o.n,x:o.x,y:o.y,w:o.w,l:o.l,h:(o.h!=null?o.h:1.7),lv:(o.lv!=null?o.lv:4),floor:!!o.floor,zone:(o.zone||null),bays:(o.bays?o.bays.slice():null)};});
       SHELVES.forEach(function(s){ensureBays(s);makeShelfEls(s);});buildChips();}
-    if(st.door){DOOR.wall=st.door.wall;DOOR.pos=st.door.pos;}
+    if(st.door){DOOR.wall=st.door.wall;DOOR.pos=st.door.pos;DOOR.hidden=!!st.door.hidden;}
     if(st.stair){STAIR.x=st.stair.x;STAIR.y=st.stair.y;STAIR.w=st.stair.w;STAIR.l=st.stair.l;}
     if(st.cols){COLS=st.cols.map(function(c){return {x:c.x,y:c.y,m:!!c.m,kind:'col1'};});}
     else if(st.coloff){COLS.forEach(function(c){c.x+=st.coloff.dx;c.y+=st.coloff.dy;});}}
@@ -3278,14 +3388,14 @@ window.mapMode=function(m){
   function loadFromDb(){sb.from('store_layouts').select('data').eq('location',SF_LOC).maybeSingle()
       .then(function(res){if(res&&res.data&&res.data.data&&res.data.data.sh){applyState(res.data.data);renderAll();setStatus('โหลดผังที่บันทึกไว้ ✓');}}).catch(function(){});}
 
-  function defaultFloor2(){return {room:{w:8,h:12},sh:[],door:{wall:'L',pos:1.5},stair:{x:6,y:9,w:1.4,l:2.4},cols:[]};}
+  function defaultFloor2(){return {room:{w:8,h:12},sh:[],door:{wall:'L',pos:1.5,hidden:true},stair:{x:6,y:9,w:1.4,l:2.4},cols:[]};}
   function setFloorTab(loc){var b1=document.getElementById('sff-1'),b2=document.getElementById('sff-2');if(!b1||!b2)return;var on='background:#0f766e;color:#fff;',off='background:#e5e7eb;color:#6b7280;';var bs='flex:1;padding:9px;border:none;border-radius:9px;font-weight:800;font-family:Sarabun,sans-serif;cursor:pointer;';b1.style.cssText=bs+(loc==='storefront'?on:off);b2.style.cssText=bs+(loc==='storefront2'?on:off);}
-  function loadFloor(loc){SF_LOC=loc;
+  function loadFloor(loc,cb){SF_LOC=loc;
     ['sfFront','sfEdit','sfStk','sfCell'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});
     sel=null;curEdit=null;curFront=null;curSlot=null;selLevel=selA=selB=null;
     SHELVES.forEach(removeShelfEls);
     var base=(loc==='storefront')?JSON.parse(JSON.stringify(DEF1)):defaultFloor2();
-    ROOM.w=base.room.w;ROOM.h=base.room.h;DOOR.wall=base.door.wall;DOOR.pos=base.door.pos;
+    ROOM.w=base.room.w;ROOM.h=base.room.h;DOOR.wall=base.door.wall;DOOR.pos=base.door.pos;DOOR.hidden=!!base.door.hidden;
     STAIR.x=base.stair.x;STAIR.y=base.stair.y;STAIR.w=base.stair.w;STAIR.l=base.stair.l;
     COLS=base.cols.map(function(c){return {x:c.x,y:c.y,m:!!c.m,kind:'col1'};});
     SHELVES=base.sh.map(function(o){return {n:o.n,x:o.x,y:o.y,w:o.w,l:o.l,h:(o.h!=null?o.h:1.7),lv:(o.lv!=null?o.lv:4),floor:!!o.floor,zone:(o.zone||null),bays:(o.bays?o.bays.slice():null)};});
@@ -3293,17 +3403,42 @@ window.mapMode=function(m){
     var rw=document.getElementById('sfRW'),rh=document.getElementById('sfRH');if(rw)rw.value=ROOM.w;if(rh)rh.value=ROOM.h;
     renderAll();
     sb.from('store_layouts').select('data').eq('location',loc).maybeSingle().then(function(res){
-      if(res&&res.data&&res.data.data&&res.data.data.sh){applyState(res.data.data);renderAll();setStatus('โหลดผังที่บันทึกไว้ ✓');return;}
+      if(res&&res.data&&res.data.data&&res.data.data.sh){applyState(res.data.data);renderAll();setStatus('โหลดผังที่บันทึกไว้ ✓');if(cb)cb();return;}
       if(loc==='storefront2'){
         sb.from('store_layouts').select('data').eq('location','storefront').maybeSingle().then(function(r1){
           var d=r1&&r1.data&&r1.data.data;
-          if(d){if(d.room){ROOM.w=d.room.w;ROOM.h=d.room.h;}if(d.door){DOOR.wall=d.door.wall;DOOR.pos=d.door.pos;}if(d.stair){STAIR.x=d.stair.x;STAIR.y=d.stair.y;STAIR.w=d.stair.w;STAIR.l=d.stair.l;}if(d.cols){COLS=d.cols.map(function(c){return {x:c.x,y:c.y,m:!!c.m,kind:'col1'};});}var rw=document.getElementById('sfRW'),rh=document.getElementById('sfRH');if(rw)rw.value=ROOM.w;if(rh)rh.value=ROOM.h;renderAll();}
-          setStatus('ชั้นลอยยังว่าง — โครงห้อง/บันได/เสา อ้างอิงจากชั้น 1 ให้แล้ว เพิ่มชั้นวางได้เลย');
-        }).catch(function(){setStatus('ชั้นลอยยังว่าง — เพิ่มชั้นวางได้เลย');});
-      } else { setStatus(''); }
-    }).catch(function(){});}
+          if(d){if(d.room){ROOM.w=d.room.w;ROOM.h=d.room.h;}if(d.door){DOOR.wall=d.door.wall;DOOR.pos=d.door.pos;}DOOR.hidden=true;if(d.stair){STAIR.x=d.stair.x;STAIR.y=d.stair.y;STAIR.w=d.stair.w;STAIR.l=d.stair.l;}if(d.cols){COLS=d.cols.map(function(c){return {x:c.x,y:c.y,m:!!c.m,kind:'col1'};});}var rw=document.getElementById('sfRW'),rh=document.getElementById('sfRH');if(rw)rw.value=ROOM.w;if(rh)rh.value=ROOM.h;renderAll();}
+          setStatus('ชั้นลอยยังว่าง — โครงห้อง/บันได/เสา อ้างอิงจากชั้น 1 ให้แล้ว เพิ่มชั้นวางได้เลย');if(cb)cb();
+        }).catch(function(){setStatus('ชั้นลอยยังว่าง — เพิ่มชั้นวางได้เลย');if(cb)cb();});
+      } else { setStatus('');if(cb)cb(); }
+    }).catch(function(){if(cb)cb();});}
   function switchFloor(loc){if(loc===SF_LOC)return;setFloorTab(loc);loadFloor(loc);}
-  window.SF={ open:function(){ if(!inited){inited=true;build();renderAll();loadFromDb();} else { applyLockUI();setTimeout(fitView,30); } } };
+  function sfDecodeFile(file,cb){if(!file){cb(null);return;}var fr=new FileReader();
+    fr.onload=function(){var src=fr.result;
+      function qg(){if(typeof Quagga==='undefined'){cb(null);return;}try{Quagga.decodeSingle({src:src,numOfWorkers:0,locate:true,locator:{patchSize:'large',halfSample:false},inputStream:{size:1280},decoder:{readers:['ean_reader','ean_8_reader','upc_reader','upc_e_reader','code_128_reader','code_39_reader','itf_reader']}},function(result){var code=result&&result.codeResult&&result.codeResult.code;cb(code||null);});}catch(e){cb(null);}}
+      if(typeof ZXing!=='undefined'){try{var rd=new ZXing.BrowserMultiFormatReader();rd.decodeFromImageUrl(src).then(function(res){var t=res&&res.getText&&res.getText();if(t)cb(t);else qg();}).catch(function(){qg();});}catch(e){qg();}}else qg();};
+    fr.onerror=function(){cb(null);};fr.readAsDataURL(file);}
+  window.__sfqPhoto=function(ev){var file=ev.target.files&&ev.target.files[0];if(!file)return;var S=document.getElementById('sfqStatus');if(S)S.textContent='🔍 กำลังอ่านบาร์โค้ด...';sfDecodeFile(file,function(code){if(code){var i=document.getElementById('sfqInput');if(i)i.value=code;doSearch(code);}else{if(S)S.textContent='อ่านบาร์โค้ดไม่ได้ — พิมพ์เองได้';}});};
+  function loadZoneMaps(cb){var out={storefront:{},storefront2:{}};
+    sb.from('store_layouts').select('location,data').in('location',['storefront','storefront2']).then(function(res){(res&&res.data?res.data:[]).forEach(function(row){var sh=row.data&&row.data.sh;if(sh&&out[row.location])sh.forEach(function(o){out[row.location][o.n]=(o.zone||(o.floor?'yellow':'blue'));});});cb(out);}).catch(function(){cb(out);});}
+  function doSearch(q){q=(q||'').trim();var R=document.getElementById('sfqResults'),S=document.getElementById('sfqStatus');if(!R)return;if(!q){R.innerHTML='';if(S)S.textContent='';return;}
+    if(S)S.textContent='กำลังค้นหา...';
+    loadZoneMaps(function(zmap){
+      sb.from('store_stock').select('*').in('location',['storefront','storefront2']).then(function(res){
+        var rows=(res&&res.data)?res.data:[];var ql=q.toLowerCase();
+        var hits=rows.filter(function(r){return (r.name&&(''+r.name).toLowerCase().indexOf(ql)>=0)||(r.barcode&&(''+r.barcode).toLowerCase().indexOf(ql)>=0);});
+        if(!hits.length){R.innerHTML='';if(S)S.textContent='ไม่พบสินค้า "'+q+'"';return;}
+        if(S)S.textContent='พบ '+hits.length+' รายการ';
+        var ZN={blue:'โซนฟ้า',yellow:'โซนเหลือง',red:'โซนแดง',green:'โซนเขียว'};
+        R.innerHTML=hits.map(function(r){var fl=(r.location==='storefront2')?2:1;var z=(zmap[r.location]&&zmap[r.location][r.shelf])||'blue';var bay=(+r.bay_start===+r.bay_end)?r.bay_start:(r.bay_start+'–'+r.bay_end);
+          var loc='ชั้น '+fl+' · '+(ZN[z]||'')+' · ชั้นวาง '+r.shelf+' · ระดับ '+r.level+' · ช่อง '+bay;
+          return '<button class="sfqrow" data-loc="'+r.location+'" data-shelf="'+r.shelf+'" style="text-align:left;border:1px solid #e5e7eb;border-radius:10px;padding:10px;background:#f8faf9;font-family:Sarabun,sans-serif;cursor:pointer;width:100%;"><div style="font-weight:800;color:#1b2420;">'+(r.name||'(ไม่มีชื่อ)')+'</div><div style="font-size:12px;color:#0f766e;font-weight:700;margin-top:2px;">📍 '+loc+'</div><div style="font-size:12px;color:#6b7280;margin-top:2px;">'+(r.barcode?('บาร์โค้ด '+r.barcode+' · '):'')+'คงเหลือ '+(r.qty!=null?r.qty:0)+'</div></button>';}).join('');
+        Array.prototype.forEach.call(R.querySelectorAll('.sfqrow'),function(b){b.addEventListener('click',function(){jumpToResult(b.getAttribute('data-loc'),+b.getAttribute('data-shelf'));});});
+      }).catch(function(){if(S)S.textContent='ค้นหาไม่สำเร็จ';});
+    });}
+  function jumpToResult(loc,shelf){function go(){var sh=findShelf(shelf);if(sh){openFront(sh);}else{showToast('ไม่พบชั้นวาง '+shelf+' ในผัง','err');}}
+    if(SF_LOC!==loc){setFloorTab(loc);loadFloor(loc,go);}else{go();}}
+  window.SF={ open:function(){ if(!inited){inited=true;build();renderAll();loadFromDb();} else { applyLockUI();setTimeout(fitView,30); } }, jumpTo:function(loc,shelf){ if(!inited){inited=true;build();renderAll();} setFloorTab(loc); loadFloor(loc,function(){var sh=findShelf(shelf);if(sh)openFront(sh);else showToast('ไม่พบชั้นวาง '+shelf,'err');}); } };
 })();
 
 </script>
