@@ -3188,7 +3188,7 @@ window.mapMode=function(m){
     if(typeof Quagga==='undefined'){showToast('ตัวอ่านบาร์โค้ดยังโหลดไม่เสร็จ ลองใหม่','err');return;}
     showToast('กำลังอ่านบาร์โค้ด...','ok');
     var fr=new FileReader();
-    fr.onload=function(){try{Quagga.decodeSingle({src:fr.result,numOfWorkers:0,locate:true,inputStream:{size:1600},
+    fr.onload=function(){try{Quagga.decodeSingle({src:fr.result,numOfWorkers:0,locate:true,locator:{patchSize:'large',halfSample:false},inputStream:{size:1280},
       decoder:{readers:['ean_reader','ean_8_reader','upc_reader','upc_e_reader','code_128_reader','code_39_reader','itf_reader']}},
       function(result){var code=result&&result.codeResult&&result.codeResult.code;
         if(code){var i=document.getElementById('stkBarcode');if(i)i.value=code;showToast('อ่านได้: '+code,'ok');}
@@ -3196,11 +3196,11 @@ window.mapMode=function(m){
     fr.onerror=function(){showToast('อ่านไฟล์ภาพไม่ได้','err');};
     fr.readAsDataURL(file);}
   function closeScan(){try{if(typeof Quagga!=='undefined'){Quagga.offDetected();Quagga.stop();}}catch(e){}scanner=null;var b=document.getElementById('sfScanBox');if(b)b.innerHTML='';var p=document.getElementById('sfScan');if(p)p.style.display='none';}
-  function afterStockWrite(res){if(res&&res.error){showToast('บันทึกไม่สำเร็จ: '+(res.error.message||''),'err');return;}showToast('บันทึกสินค้าแล้ว','ok');closeStk();selLevel=selA=selB=null;formSpan=null;loadStock(curFront.n,function(){renderFront();if(document.getElementById('sfCell').style.display==='flex')renderCellList();});}
+  function afterStockWrite(res){if(res&&res.error){var m=((res.error.message||'')+'');if(/store_stock|does not exist|relation|schema cache|404/i.test(m)){showToast('ยังไม่ได้สร้างตาราง store_stock ใน Supabase — ต้องรัน SQL ก่อน','err');}else{showToast('บันทึกไม่สำเร็จ: '+m,'err');}return;}showToast('บันทึกสินค้าแล้ว ✓','ok');closeStk();selLevel=selA=selB=null;formSpan=null;loadStock(curFront.n,function(){renderFront();if(document.getElementById('sfCell').style.display==='flex')renderCellList();});}
   function saveProduct(){var name=document.getElementById('stkName').value.trim(),barcode=document.getElementById('stkBarcode').value.trim(),qty=parseFloat(document.getElementById('stkQty').value);if(isNaN(qty))qty=0;
     if(!name&&!barcode){showToast('ใส่ชื่อหรือบาร์โค้ดอย่างน้อย 1 อย่าง','err');return;}var now=new Date().toISOString();
     if(curSlot){sb.from('store_stock').update({name:name,barcode:barcode,qty:qty,updated_at:now}).eq('id',curSlot.id).then(afterStockWrite);}
-    else{var sp=formSpan||{level:selLevel,a:Math.min(selA,selB),z:Math.max(selA,selB)};var clash=slotsOnLevel(sp.level).some(function(r){var ra=+r.bay_start,rz=+r.bay_end;return !(sp.z<ra||sp.a>rz)&&!(ra===sp.a&&rz===sp.z);});if(clash){showToast('ช่วงช่องนี้ทับกับสินค้าอื่น','err');return;}
+    else{var sp=formSpan||{level:selLevel,a:Math.min(selA,selB),z:Math.max(selA,selB)};if(sp.level==null||isNaN(sp.a)||isNaN(sp.z)){showToast('เลือกช่องก่อนบันทึก','err');return;}var clash=slotsOnLevel(sp.level).some(function(r){var ra=+r.bay_start,rz=+r.bay_end;return !(sp.z<ra||sp.a>rz)&&!(ra===sp.a&&rz===sp.z);});if(clash){showToast('ช่วงช่องนี้ทับกับสินค้าอื่น','err');return;}
       sb.from('store_stock').insert({location:'storefront',shelf:curFront.n,level:sp.level,bay_start:sp.a,bay_end:sp.z,name:name,barcode:barcode,qty:qty,counted_at:now,updated_at:now}).then(afterStockWrite);}}
   function recordCount(){if(!curSlot){showToast('บันทึกสินค้าก่อน','err');return;}var v=parseFloat(document.getElementById('stkCountVal').value);if(isNaN(v)){showToast('ใส่จำนวนที่นับได้','err');return;}var now=new Date().toISOString();
     sb.from('store_stock').update({prev_qty:curSlot.qty,prev_counted_at:curSlot.counted_at,qty:v,counted_at:now,updated_at:now}).eq('id',curSlot.id).then(function(res){if(res&&res.error){showToast('บันทึกการนับไม่สำเร็จ','err');return;}showToast('บันทึกการนับแล้ว','ok');closeStk();loadStock(curFront.n,function(){renderFront();if(document.getElementById('sfCell').style.display==='flex')renderCellList();});});}
