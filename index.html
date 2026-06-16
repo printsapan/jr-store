@@ -2926,6 +2926,8 @@ window.mapMode=function(m){
   var COLGRP={kind:'cols'};
   var SNAP=0.5,STEP=0.5,sel=null,inited=false,svg,wallG,colG,stairG,doorLine,doorLbl,zoneLbl;
   var curFront=null,curCell=null,curEdit=null;
+  var EDIT_LAYOUT=false,STOCK=[],selLevel=null,selA=null,selB=null,curSlot=null;
+  var stkDelArm=false,stkDelTimer=null;
   var delArm=false,delTimer=null;
   var delShelfArm=false,delShelfTimer=null;
 
@@ -2943,7 +2945,8 @@ window.mapMode=function(m){
   function build(){
     var wrap=document.getElementById('mapStorefront');
     wrap.innerHTML=
-      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-family:Sarabun,sans-serif;">'
+      '<div id="sfModeBar" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-family:Sarabun,sans-serif;"><div id="sfModeLbl" style="font-size:12px;color:#6b7280;font-weight:700;">โหมดลงสินค้า — แตะชั้นเพื่อลงสินค้า/ดูสต๊อก</div><button id="sfEditMode" style="margin-left:auto;border:1px solid #e5e7eb;background:#f3f4f6;border-radius:8px;padding:6px 10px;font-family:Sarabun,sans-serif;font-weight:700;font-size:12px;color:#6b7280;cursor:pointer;">⚙️ แก้ผัง</button></div>'
+      +'<div id="sfRoomRow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-family:Sarabun,sans-serif;">'
       +'<span style="font-size:13px;color:#6b7280;">ห้อง</span>'
       +'<input id="sfRW" type="number" value="8" style="width:52px;text-align:center;border:1.5px solid #e5e7eb;border-radius:8px;padding:6px;font-family:Sarabun,sans-serif;"><span style="color:#6b7280;">×</span>'
       +'<input id="sfRH" type="number" value="12" style="width:52px;text-align:center;border:1.5px solid #e5e7eb;border-radius:8px;padding:6px;font-family:Sarabun,sans-serif;"><span style="font-size:13px;color:#6b7280;">ม.</span>'
@@ -2983,7 +2986,7 @@ window.mapMode=function(m){
       +'<input id="sfeLV" type="number" value="4" style="width:56px;text-align:center;border:1.5px solid #e5e7eb;border-radius:8px;padding:8px;font-family:Sarabun,sans-serif;font-weight:800;">'
       +'<button id="sfeLVup" style="width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-weight:800;font-size:18px;">+</button></div>'
       +'<div style="display:flex;gap:8px;"><button id="sfeApply" style="flex:1;background:#0f766e;color:#fff;border:none;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-weight:800;">บันทึกการแก้ไข</button>'
-      +'<button id="sfeDel" style="background:#fff;color:#b23b3b;border:1.5px solid #b23b3b;border-radius:10px;padding:11px 14px;font-family:Sarabun,sans-serif;font-weight:800;">🗑 ลบชั้นนี้</button></div></div></div>';
+      +'<button id="sfeDel" style="background:#fff;color:#b23b3b;border:1.5px solid #b23b3b;border-radius:10px;padding:11px 14px;font-family:Sarabun,sans-serif;font-weight:800;">🗑 ลบชั้นนี้</button></div></div></div>'+'<div id="sfStk" style="display:none;position:fixed;inset:0;background:rgba(15,23,20,.55);z-index:10000;align-items:flex-start;justify-content:center;padding:24px 10px;overflow:auto;">'+'<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;padding:18px;font-family:Sarabun,sans-serif;">'+'<div style="display:flex;align-items:center;margin-bottom:8px;"><div style="font-weight:800;font-size:15px;">🏷️ สินค้าในช่อง</div>'+'<button id="sfStkClose" style="margin-left:auto;background:#eee;border:none;border-radius:9px;padding:7px 12px;font-family:Sarabun,sans-serif;font-weight:700;">ปิด</button></div>'+'<div id="sfStkPos" style="font-size:12px;color:#0f766e;font-weight:700;margin-bottom:12px;"></div>'+'<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">'+'<div><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">ชื่อสินค้า</label><input id="stkName" type="text" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"></div>'+'<div><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">บาร์โค้ด</label><input id="stkBarcode" type="text" inputmode="numeric" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"></div>'+'<div><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">จำนวนคงเหลือ (สต๊อก)</label><input id="stkQty" type="number" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"></div>'+'</div>'+'<div id="stkCountInfo" style="font-size:12px;color:#6b7280;margin-bottom:8px;min-height:14px;"></div>'+'<div id="stkCountWrap" style="display:flex;gap:6px;align-items:flex-end;margin-bottom:14px;background:#f3f6f5;border-radius:10px;padding:10px;">'+'<div style="flex:1;"><label style="font-size:11px;color:#6b7280;font-weight:700;display:block;margin-bottom:3px;">นับสต๊อกใหม่ (จำนวนที่นับได้)</label><input id="stkCountVal" type="number" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-family:Sarabun,sans-serif;box-sizing:border-box;"></div>'+'<button id="stkCountBtn" style="background:#0f766e;color:#fff;border:none;border-radius:9px;padding:11px 12px;font-family:Sarabun,sans-serif;font-weight:800;white-space:nowrap;">📊 บันทึกการนับ</button></div>'+'<div style="display:flex;gap:8px;"><button id="stkSave" style="flex:1;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:12px;font-family:Sarabun,sans-serif;font-weight:800;">💾 บันทึกข้อมูล</button>'+'<button id="stkDel" style="background:#fff;color:#b23b3b;border:1.5px solid #b23b3b;border-radius:10px;padding:12px 14px;font-family:Sarabun,sans-serif;font-weight:800;">🗑 เอาออก</button></div>'+'</div></div>';
     svg=document.getElementById('sfSvg');
     var gridG=E('g',{});gridG.setAttribute('id','sfGrid');
     wallG=E('g',{});colG=E('g',{});stairG=E('g',{});
@@ -2993,8 +2996,8 @@ window.mapMode=function(m){
     svg.appendChild(gridG);svg.appendChild(wallG);svg.appendChild(doorLine);svg.appendChild(doorLbl);
     svg.appendChild(colG);svg.appendChild(zoneLbl);svg.appendChild(stairG);
     SHELVES.forEach(makeShelfEls);
-    stairG.addEventListener('click',function(ev){ev.stopPropagation();select(STAIR);});
-    doorLine.addEventListener('click',function(ev){ev.stopPropagation();select(DOOR);});
+    stairG.addEventListener('click',function(ev){if(!EDIT_LAYOUT)return;ev.stopPropagation();select(STAIR);});
+    doorLine.addEventListener('click',function(ev){if(!EDIT_LAYOUT)return;ev.stopPropagation();select(DOOR);});
     svg.addEventListener('click',onSvgTap);
     document.getElementById('sfApply').addEventListener('click',function(){ROOM.w=clamp(parseFloat(document.getElementById('sfRW').value)||8,2,40);ROOM.h=clamp(parseFloat(document.getElementById('sfRH').value)||12,2,40);renderAll();});
     document.getElementById('sfSaveBtn').addEventListener('click',saveToDb);
@@ -3016,14 +3019,19 @@ window.mapMode=function(m){
     document.getElementById('sfAddShelf').addEventListener('click',addShelf);
     document.getElementById('sfRenum').addEventListener('click',renumber);
     document.getElementById('sfDelShelf').addEventListener('click',armDelShelf);
+    document.getElementById('sfEditMode').addEventListener('click',toggleEditMode);
+    document.getElementById('sfStkClose').addEventListener('click',closeStk);
+    document.getElementById('stkSave').addEventListener('click',saveProduct);
+    document.getElementById('stkCountBtn').addEventListener('click',recordCount);
+    document.getElementById('stkDel').addEventListener('click',armDelStock);
     SHELVES.forEach(ensureBays);
-    buildChips();
+    buildChips();applyLockUI();
   }
   function makeShelfEls(s){s.kind='shelf';var g=E('g',{});s._g=g;
     s._r=E('rect',{rx:0.05,fill:'#2f5d62',stroke:'#21464a','stroke-width':'.04'});
     s._t=E('text',{fill:'#fff','font-weight':'700','text-anchor':'middle','dominant-baseline':'central','font-family':'Space Grotesk,Sarabun,sans-serif'});
     s._t.textContent=s.n;g.appendChild(s._r);g.appendChild(s._t);
-    g.addEventListener('click',function(ev){ev.stopPropagation();select(s);});svg.appendChild(g);}
+    g.addEventListener('click',function(ev){ev.stopPropagation();if(EDIT_LAYOUT)select(s);else openFront(s);});svg.appendChild(g);}
   function removeShelfEls(s){if(s._g&&s._g.parentNode)s._g.parentNode.removeChild(s._g);}
 
   function rebuildGrid(){var g=document.getElementById('sfGrid');while(g.firstChild)g.removeChild(g.firstChild);
@@ -3047,7 +3055,7 @@ window.mapMode=function(m){
   function renderCols(){while(colG.firstChild)colG.removeChild(colG.firstChild);
     COLS.forEach(function(c){var ci=E('circle',{cx:c.x,cy:c.y,r:0.18,fill:(c.m?'#3a4a8a':'#6b746f')});ci.style.cursor='pointer';
       if(sel===c||sel===COLGRP){ci.setAttribute('stroke','#e8a13a');ci.setAttribute('stroke-width',sel===c?'.1':'.07');}
-      ci.addEventListener('click',function(ev){ev.stopPropagation();select(c);});colG.appendChild(ci);});
+      ci.addEventListener('click',function(ev){if(!EDIT_LAYOUT)return;ev.stopPropagation();select(c);});colG.appendChild(ci);});
     var miny=COLS.length?Math.min.apply(null,COLS.map(function(c){return c.y;})):8;
     zoneLbl.setAttribute('x',ROOM.w/2);zoneLbl.setAttribute('y',Math.max(0.5,miny-0.5));}
   function renderStair(){while(stairG.firstChild)stairG.removeChild(stairG.firstChild);
@@ -3086,7 +3094,7 @@ window.mapMode=function(m){
     else if(o.kind==='cols'){renderCols();setLab('เลือก: <b>เสาทั้งกลุ่ม</b> — แตะเพื่อย้ายพร้อมกัน');}
     else if(o.kind==='col1'){renderCols();setLab('เลือก: <b>เสา 1 ต้น</b> — แตะเพื่อย้าย / ปุ่ม 🗑 เพื่อลบ');}}
   function toUser(ev){var pt=svg.createSVGPoint(),t=ev.touches?ev.touches[0]:ev;pt.x=t.clientX;pt.y=t.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse());}
-  function onSvgTap(ev){if(!sel)return;var p=toUser(ev);
+  function onSvgTap(ev){if(!sel||!EDIT_LAYOUT)return;var p=toUser(ev);
     if(sel.kind==='door'){var dT=Math.abs(p.y),dB=Math.abs(p.y-ROOM.h),dL=Math.abs(p.x),dR=Math.abs(p.x-ROOM.w),m=Math.min(dT,dB,dL,dR);
       if(m===dT){DOOR.wall='T';DOOR.pos=clamp(snap(p.x),1,ROOM.w-1);}else if(m===dB){DOOR.wall='B';DOOR.pos=clamp(snap(p.x),1,ROOM.w-1);}
       else if(m===dL){DOOR.wall='L';DOOR.pos=clamp(snap(p.y),1,ROOM.h-1);}else{DOOR.wall='R';DOOR.pos=clamp(snap(p.y),1,ROOM.h-1);}renderDoor();}
@@ -3112,20 +3120,62 @@ window.mapMode=function(m){
   function delCol(){if(sel&&sel.kind==='col1'){var t=sel;COLS=COLS.filter(function(x){return x!==t;});sel=null;renderCols();setLab('ลบเสาแล้ว');}else{showToast('แตะเลือกเสาที่จะลบก่อน','err');}}
 
   /* ---- front view (ช่องในแต่ละระดับ) ---- */
-  function openFront(s){ensureBays(s);curFront=s;curCell=null;var inf=document.getElementById('sfFrontInfo');if(inf)inf.textContent='';document.getElementById('sfFront').style.display='flex';renderFront();}
+  function openFront(s){ensureBays(s);curFront=s;curCell=null;selLevel=selA=selB=null;curSlot=null;var inf=document.getElementById('sfFrontInfo');if(inf)inf.textContent=(EDIT_LAYOUT?'โหมดแก้ผัง: ปุ่ม +/− ปรับจำนวนช่อง':'แตะช่องว่างเพื่อเลือก แล้วใส่สินค้า · แตะสินค้าเพื่อดู/นับสต๊อก');document.getElementById('sfFront').style.display='flex';loadStock(s.n,renderFront);}
   function closeFront(){var p=document.getElementById('sfFront');if(p)p.style.display='none';}
+  function slotsOnLevel(L){return STOCK.filter(function(r){return +r.level===L;});}
+  function slotStartingAt(slots,b){for(var i=0;i<slots.length;i++)if(+slots[i].bay_start===b)return slots[i];return null;}
+  function fmtDate(iso){try{var d=new Date(iso);return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}catch(e){return '';}}
   function renderFront(){var s=curFront;if(!s)return;ensureBays(s);var box=document.getElementById('sfFrontBody');
-    var html='<div style="font-size:12px;color:#6b7280;margin-bottom:10px;">ชั้น '+s.n+' · กว้าง '+s.w+' × ลึก '+s.l+' ม. · สูง '+s.h+' ม. · '+s.lv+' ระดับ (มองจากด้านหน้า)</div>';
-    for(var i=s.lv;i>=1;i--){var nb=s.bays[i-1];
-      html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><div style="width:54px;font-size:12px;font-weight:700;color:#0f766e;">ระดับ '+i+'</div><div style="flex:1;display:flex;gap:4px;">';
-      for(var b=1;b<=nb;b++){var on=(curCell&&curCell.lv===i&&curCell.b===b);
-        html+='<button class="sffc" data-lv="'+i+'" data-b="'+b+'" style="flex:1;min-height:44px;border:1.5px solid '+(on?'#e8a13a':'#cdd7d4')+';border-radius:8px;background:'+(on?'#0f766e':'#f3f6f5')+';color:'+(on?'#fff':'#1b2420')+';font-family:Sarabun,sans-serif;font-weight:700;cursor:pointer;">'+b+'</button>';}
-      html+='</div><button class="sfbm" data-lv="'+i+'" data-op="-" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;font-weight:800;cursor:pointer;">−</button>';
-      html+='<button class="sfbm" data-lv="'+i+'" data-op="+" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;font-weight:800;cursor:pointer;">+</button></div>';}
+    var html='<div style="font-size:12px;color:#6b7280;margin-bottom:10px;">ชั้น '+s.n+' · '+s.w+'×'+s.l+' ม. · สูง '+s.h+' ม. · '+s.lv+' ระดับ'+(EDIT_LAYOUT?' (โหมดแก้ผัง)':'')+'</div>';
+    for(var i=s.lv;i>=1;i--){var nb=s.bays[i-1];var slots=slotsOnLevel(i);
+      html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><div style="width:50px;font-size:12px;font-weight:700;color:#0f766e;">ระดับ '+i+'</div><div style="flex:1;display:flex;gap:4px;">';
+      var b=1;
+      while(b<=nb){var slot=slotStartingAt(slots,b);
+        if(slot){var span=(+slot.bay_end)-(+slot.bay_start)+1;if(span<1)span=1;
+          html+='<button class="sfprod" data-id="'+slot.id+'" style="flex:'+span+';min-height:46px;border:1.5px solid #0f766e;border-radius:8px;background:#0f766e;color:#fff;font-family:Sarabun,sans-serif;font-weight:700;font-size:12px;padding:3px 4px;cursor:pointer;overflow:hidden;line-height:1.2;">'+(slot.name||'(ไม่มีชื่อ)')+'<br><span style="font-weight:400;font-size:11px;opacity:.9;">'+(slot.qty!=null?('คงเหลือ '+slot.qty):'')+'</span></button>';
+          b=(+slot.bay_end)+1;
+        }else{var insel=(selLevel===i&&selA!=null&&b>=Math.min(selA,selB)&&b<=Math.max(selA,selB));
+          html+='<button class="sfbay" data-lv="'+i+'" data-b="'+b+'" style="flex:1;min-height:46px;border:1.5px dashed '+(insel?'#e8a13a':'#cdd7d4')+';border-radius:8px;background:'+(insel?'#fff7ed':'#f3f6f5')+';color:#9aa5a1;font-family:Sarabun,sans-serif;font-weight:700;cursor:pointer;">'+b+'</button>';b++;}
+      }
+      html+='</div>';
+      if(EDIT_LAYOUT){html+='<button class="sfbm" data-lv="'+i+'" data-op="-" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;font-weight:800;cursor:pointer;">−</button><button class="sfbm" data-lv="'+i+'" data-op="+" style="width:28px;height:28px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;font-weight:800;cursor:pointer;">+</button>';}
+      html+='</div>';}
+    if(selLevel!=null&&selA!=null){var a=Math.min(selA,selB),z=Math.max(selA,selB);
+      html+='<div style="display:flex;align-items:center;gap:8px;margin-top:6px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:8px;"><div style="font-size:12px;font-weight:700;color:#9a3412;">เลือก ระดับ '+selLevel+' · ช่อง '+(a===z?a:(a+'–'+z))+'</div><button id="sfStkAdd" style="margin-left:auto;background:#0f766e;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-family:Sarabun,sans-serif;font-weight:800;">➕ ใส่สินค้า</button><button id="sfSelClear" style="background:#eee;border:none;border-radius:8px;padding:7px 10px;font-family:Sarabun,sans-serif;font-weight:700;">ยกเลิก</button></div>';}
     box.innerHTML=html;}
-  function onFrontTap(ev){var c=ev.target.closest('.sffc'),m=ev.target.closest('.sfbm');
-    if(m){var lv=+m.getAttribute('data-lv'),op=m.getAttribute('data-op'),idx=lv-1;curFront.bays[idx]=clamp((curFront.bays[idx]||3)+(op==='+'?1:-1),1,8);renderFront();return;}
-    if(c){var L=+c.getAttribute('data-lv'),B=+c.getAttribute('data-b');curCell={lv:L,b:B};var inf=document.getElementById('sfFrontInfo');if(inf)inf.textContent='ตำแหน่ง: ชั้น '+curFront.n+' · ระดับ '+L+' · ช่องที่ '+B+' (นับจากซ้าย)';renderFront();}}
+  function onFrontTap(ev){
+    var bm=ev.target.closest('.sfbm');if(bm&&EDIT_LAYOUT){var lv=+bm.getAttribute('data-lv'),op=bm.getAttribute('data-op'),idx=lv-1;curFront.bays[idx]=clamp((curFront.bays[idx]||3)+(op==='+'?1:-1),1,12);selLevel=selA=selB=null;renderFront();return;}
+    var pr=ev.target.closest('.sfprod');if(pr){var id=pr.getAttribute('data-id'),slot=null;for(var k=0;k<STOCK.length;k++)if(String(STOCK[k].id)===String(id))slot=STOCK[k];if(slot)openProductForm(slot);return;}
+    if(ev.target.closest('#sfStkAdd')){openProductForm(null);return;}
+    if(ev.target.closest('#sfSelClear')){selLevel=selA=selB=null;renderFront();return;}
+    var bay=ev.target.closest('.sfbay');if(bay){var L=+bay.getAttribute('data-lv'),B=+bay.getAttribute('data-b');if(selLevel!==L||selA==null){selLevel=L;selA=B;selB=B;}else{selB=B;}renderFront();return;}}
+  function loadStock(shelf,cb){STOCK=[];sb.from('store_stock').select('*').eq('location','storefront').eq('shelf',shelf).then(function(res){if(res&&res.data)STOCK=res.data;if(cb)cb();}).catch(function(){if(cb)cb();});}
+  function openProductForm(slot){resetDelStock();curSlot=slot||null;var cw=document.getElementById('stkCountWrap'),dl=document.getElementById('stkDel'),ci=document.getElementById('stkCountInfo'),pos;
+    if(slot){pos='ชั้น '+curFront.n+' · ระดับ '+slot.level+' · ช่อง '+((+slot.bay_start===+slot.bay_end)?slot.bay_start:(slot.bay_start+'–'+slot.bay_end));
+      document.getElementById('stkName').value=slot.name||'';document.getElementById('stkBarcode').value=slot.barcode||'';document.getElementById('stkQty').value=(slot.qty!=null?slot.qty:'');
+      if(slot.prev_qty!=null)ci.textContent='นับครั้งก่อน: '+slot.prev_qty+' ชิ้น'+(slot.prev_counted_at?(' ('+fmtDate(slot.prev_counted_at)+')'):'')+(slot.counted_at?(' · ล่าสุด '+fmtDate(slot.counted_at)):'');
+      else ci.textContent=(slot.counted_at?('นับล่าสุด '+fmtDate(slot.counted_at)):'ยังไม่เคยนับสต๊อก');
+      cw.style.display='flex';dl.style.display='';
+    }else{var a=Math.min(selA,selB),z=Math.max(selA,selB);pos='ชั้น '+curFront.n+' · ระดับ '+selLevel+' · ช่อง '+(a===z?a:(a+'–'+z));
+      document.getElementById('stkName').value='';document.getElementById('stkBarcode').value='';document.getElementById('stkQty').value='';ci.textContent='';cw.style.display='none';dl.style.display='none';}
+    document.getElementById('stkCountVal').value='';document.getElementById('sfStkPos').textContent=pos;document.getElementById('sfStk').style.display='flex';}
+  function closeStk(){resetDelStock();var p=document.getElementById('sfStk');if(p)p.style.display='none';}
+  function afterStockWrite(res){if(res&&res.error){showToast('บันทึกไม่สำเร็จ: '+(res.error.message||''),'err');return;}showToast('บันทึกสินค้าแล้ว','ok');closeStk();selLevel=selA=selB=null;loadStock(curFront.n,renderFront);}
+  function saveProduct(){var name=document.getElementById('stkName').value.trim(),barcode=document.getElementById('stkBarcode').value.trim(),qty=parseFloat(document.getElementById('stkQty').value);if(isNaN(qty))qty=0;
+    if(!name&&!barcode){showToast('ใส่ชื่อหรือบาร์โค้ดอย่างน้อย 1 อย่าง','err');return;}var now=new Date().toISOString();
+    if(curSlot){sb.from('store_stock').update({name:name,barcode:barcode,qty:qty,updated_at:now}).eq('id',curSlot.id).then(afterStockWrite);}
+    else{var a=Math.min(selA,selB),z=Math.max(selA,selB);var clash=slotsOnLevel(selLevel).some(function(r){return !(z<(+r.bay_start)||a>(+r.bay_end));});if(clash){showToast('ช่วงช่องนี้มีสินค้าอยู่แล้ว','err');return;}
+      sb.from('store_stock').insert({location:'storefront',shelf:curFront.n,level:selLevel,bay_start:a,bay_end:z,name:name,barcode:barcode,qty:qty,counted_at:now,updated_at:now}).then(afterStockWrite);}}
+  function recordCount(){if(!curSlot){showToast('บันทึกสินค้าก่อน','err');return;}var v=parseFloat(document.getElementById('stkCountVal').value);if(isNaN(v)){showToast('ใส่จำนวนที่นับได้','err');return;}var now=new Date().toISOString();
+    sb.from('store_stock').update({prev_qty:curSlot.qty,prev_counted_at:curSlot.counted_at,qty:v,counted_at:now,updated_at:now}).eq('id',curSlot.id).then(function(res){if(res&&res.error){showToast('บันทึกการนับไม่สำเร็จ','err');return;}showToast('บันทึกการนับแล้ว','ok');closeStk();loadStock(curFront.n,renderFront);});}
+  function deleteSlot(){if(!curSlot)return;sb.from('store_stock').delete().eq('id',curSlot.id).then(function(res){if(res&&res.error){showToast('ลบไม่สำเร็จ','err');return;}showToast('เอาสินค้าออกแล้ว (แยกช่อง)','ok');closeStk();loadStock(curFront.n,renderFront);});}
+  function resetDelStock(){stkDelArm=false;if(stkDelTimer){clearTimeout(stkDelTimer);stkDelTimer=null;}var b=document.getElementById('stkDel');if(b){b.textContent='🗑 เอาออก';b.style.background='#fff';b.style.color='#b23b3b';}}
+  function armDelStock(){if(!curSlot){showToast('ยังไม่มีสินค้าให้เอาออก','err');return;}var b=document.getElementById('stkDel');if(!stkDelArm){stkDelArm=true;if(b){b.textContent='⚠️ ยืนยันเอาออก';b.style.background='#b23b3b';b.style.color='#fff';}if(stkDelTimer)clearTimeout(stkDelTimer);stkDelTimer=setTimeout(resetDelStock,3500);return;}deleteSlot();resetDelStock();}
+  function applyLockUI(){var on=EDIT_LAYOUT;['sfRoomRow','sfChips','sfShelfTools','sfColTools','sfPad'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display=on?'flex':'none';});
+    var lab=document.getElementById('sfLab');if(lab)lab.style.display=on?'block':'none';
+    var em=document.getElementById('sfEditMode');if(em){em.style.display=(currentRole==='owner')?'':'none';em.textContent=on?'✅ ล็อกผัง':'⚙️ แก้ผัง';em.style.color=on?'#16a34a':'#6b7280';}
+    var ml=document.getElementById('sfModeLbl');if(ml)ml.textContent=on?'โหมดแก้ผัง — ย้าย/เพิ่ม/ลบ/แก้ชั้นได้':'โหมดลงสินค้า — แตะชั้นเพื่อลงสินค้า/ดูสต๊อก';}
+  function toggleEditMode(){if(currentRole!=='owner'){showToast('เฉพาะเจ้าของ','err');return;}EDIT_LAYOUT=!EDIT_LAYOUT;if(!EDIT_LAYOUT){clearSel();}applyLockUI();}
 
   /* ---- shelf editor (แก้/ลบ/เพิ่ม/เรียงเลข) ---- */
   function openEdit(s){curEdit=s;resetDel();document.getElementById('sfeN').value=s.n;document.getElementById('sfeW').value=s.w;document.getElementById('sfeL').value=s.l;document.getElementById('sfeH').value=s.h;document.getElementById('sfeLV').value=s.lv;document.getElementById('sfEdit').style.display='flex';}
@@ -3168,7 +3218,7 @@ window.mapMode=function(m){
   function loadFromDb(){sb.from('store_layouts').select('data').eq('location','storefront').maybeSingle()
       .then(function(res){if(res&&res.data&&res.data.data&&res.data.data.sh){applyState(res.data.data);renderAll();setStatus('โหลดผังที่บันทึกไว้ ✓');}}).catch(function(){});}
 
-  window.SF={ open:function(){ if(!inited){inited=true;build();renderAll();loadFromDb();} else { setTimeout(fitView,30); } } };
+  window.SF={ open:function(){ if(!inited){inited=true;build();renderAll();loadFromDb();} else { applyLockUI();setTimeout(fitView,30); } } };
 })();
 
 </script>
