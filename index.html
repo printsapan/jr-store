@@ -134,7 +134,7 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script>
 </head>
 <body>
 
@@ -3160,7 +3160,7 @@ window.mapMode=function(m){
   function onFrontTap(ev){
     var bm=ev.target.closest('.sfbm');if(bm&&EDIT_LAYOUT){var lv=+bm.getAttribute('data-lv'),op=bm.getAttribute('data-op'),idx=lv-1;curFront.bays[idx]=clamp((curFront.bays[idx]||3)+(op==='+'?1:-1),1,12);selLevel=selA=selB=null;renderFront();return;}
     var cl=ev.target.closest('.sfcell');if(cl){openCell(+cl.getAttribute('data-lv'),+cl.getAttribute('data-a'),+cl.getAttribute('data-z'));return;}
-    if(ev.target.closest('#sfStkAdd')){formSpan={level:selLevel,a:Math.min(selA,selB),z:Math.max(selA,selB)};openProductForm(null);return;}
+    if(ev.target.closest('#sfStkAdd')){var aa=Math.min(selA,selB),zz=Math.max(selA,selB),LL=selLevel;selLevel=selA=selB=null;renderFront();openCell(LL,aa,zz);return;}
     if(ev.target.closest('#sfSelClear')){selLevel=selA=selB=null;renderFront();return;}
     var bay=ev.target.closest('.sfbay');if(bay){var L=+bay.getAttribute('data-lv'),B=+bay.getAttribute('data-b');if(selLevel!==L||selA==null){selLevel=L;selA=B;selB=B;}else{selB=B;}renderFront();return;}}
   function openCell(level,a,z){curSpan={level:level,a:a,z:z};document.getElementById('sfCell').style.display='flex';renderCellList();}
@@ -3182,15 +3182,16 @@ window.mapMode=function(m){
       document.getElementById('stkName').value='';document.getElementById('stkBarcode').value='';document.getElementById('stkQty').value='';ci.textContent='';cw.style.display='none';dl.style.display='none';}
     document.getElementById('stkCountVal').value='';document.getElementById('sfStkPos').textContent=pos;document.getElementById('sfStk').style.display='flex';}
   function closeStk(){resetDelStock();var p=document.getElementById('sfStk');if(p)p.style.display='none';}
-  function openScan(){if(typeof Html5Qrcode==='undefined'){showToast('โหลดตัวสแกนไม่ได้ เช็กอินเทอร์เน็ต','err');return;}
-    document.getElementById('sfScan').style.display='flex';
-    var fmts=null;try{var F=Html5QrcodeSupportedFormats;fmts=[F.EAN_13,F.EAN_8,F.UPC_A,F.UPC_E,F.CODE_128,F.CODE_39,F.ITF,F.CODABAR,F.QR_CODE];}catch(e){fmts=null;}
-    try{scanner=new Html5Qrcode('sfScanBox',fmts?{formatsToSupport:fmts,verbose:false}:undefined);}catch(e){showToast('เปิดสแกนไม่ได้','err');return;}
-    scanner.start({facingMode:'environment'},
-      {fps:12,qrbox:function(w,h){var bw=Math.min((w||320)-16,360);return {width:bw,height:Math.max(120,Math.round(bw*0.5))};},experimentalFeatures:{useBarCodeDetectorIfSupported:true}},
-      function(txt){var i=document.getElementById('stkBarcode');if(i)i.value=txt;showToast('สแกนได้: '+txt,'ok');closeScan();},
-      function(){}).catch(function(e){showToast('เปิดกล้องไม่ได้: '+((e&&e.message)||e),'err');closeScan();});}
-  function closeScan(){var p=document.getElementById('sfScan');if(scanner){try{scanner.stop().then(function(){try{scanner.clear();}catch(e){}scanner=null;}).catch(function(){scanner=null;});}catch(e){scanner=null;}}if(p)p.style.display='none';}
+  var scanDone=false;
+  function openScan(){if(typeof Quagga==='undefined'){showToast('โหลดตัวสแกนไม่ได้ เช็กอินเทอร์เน็ต','err');return;}
+    var box=document.getElementById('sfScanBox');box.innerHTML='';box.style.position='relative';box.style.overflow='hidden';box.style.borderRadius='12px';
+    document.getElementById('sfScan').style.display='flex';scanner=true;scanDone=false;
+    Quagga.init({inputStream:{type:'LiveStream',target:box,constraints:{facingMode:'environment'},area:{top:'25%',right:'8%',left:'8%',bottom:'25%'}},
+      decoder:{readers:['ean_reader','ean_8_reader','upc_reader','upc_e_reader','code_128_reader','code_39_reader','itf_reader']},
+      locator:{patchSize:'medium',halfSample:true},locate:true,frequency:10,numOfWorkers:0},
+      function(err){if(err){showToast('เปิดกล้องไม่ได้: '+((err&&err.message)||err),'err');closeScan();return;}try{Quagga.start();}catch(e){showToast('เริ่มกล้องไม่ได้','err');closeScan();}});
+    Quagga.onDetected(function(result){if(scanDone)return;var code=result&&result.codeResult&&result.codeResult.code;if(!code)return;scanDone=true;var i=document.getElementById('stkBarcode');if(i)i.value=code;showToast('สแกนได้: '+code,'ok');closeScan();});}
+  function closeScan(){try{if(typeof Quagga!=='undefined'){Quagga.offDetected();Quagga.stop();}}catch(e){}scanner=null;var b=document.getElementById('sfScanBox');if(b)b.innerHTML='';var p=document.getElementById('sfScan');if(p)p.style.display='none';}
   function afterStockWrite(res){if(res&&res.error){showToast('บันทึกไม่สำเร็จ: '+(res.error.message||''),'err');return;}showToast('บันทึกสินค้าแล้ว','ok');closeStk();selLevel=selA=selB=null;formSpan=null;loadStock(curFront.n,function(){renderFront();if(document.getElementById('sfCell').style.display==='flex')renderCellList();});}
   function saveProduct(){var name=document.getElementById('stkName').value.trim(),barcode=document.getElementById('stkBarcode').value.trim(),qty=parseFloat(document.getElementById('stkQty').value);if(isNaN(qty))qty=0;
     if(!name&&!barcode){showToast('ใส่ชื่อหรือบาร์โค้ดอย่างน้อย 1 อย่าง','err');return;}var now=new Date().toISOString();
