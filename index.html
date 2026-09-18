@@ -8,6 +8,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f7f7f4">
+<link rel="manifest" href="/manifest.json">
 <title>คลังกระเบื้อง JR Store</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&family=Bebas+Neue&display=swap');
@@ -179,9 +180,10 @@ body{font-family:'Sarabun',sans-serif;background:#f7f7f4;color:#1a1a1a;min-heigh
 <div id="app" style="display:none;">
   <div class="header">
     <div class="hlogo"><img src="data:image/jpeg;base64,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" alt="JR" style="width:100%;height:100%;object-fit:cover;border-radius:9px;"/></div>
-    <div><h1>JR Store</h1><p id="headerName" style="font-size:9px;color:#6b7280;">Warehouse Management</p><div style="font-size:8px;color:#94a3b8;font-weight:800;letter-spacing:.3px;">อัปเดต 17 ก.ย. · v324 (เคลม: เจ้าของกดแทนได้ทุกตำแหน่ง สโตร์/จัดซื้อ/บัญชี · ป้ายแจ้งเตือนไม่ขึ้นที่เจ้าของ)</div></div>
+    <div><h1>JR Store</h1><p id="headerName" style="font-size:9px;color:#6b7280;">Warehouse Management</p><div style="font-size:8px;color:#94a3b8;font-weight:800;letter-spacing:.3px;">อัปเดต 18 ก.ย. · v332 (แจ้งเตือน: ถามครั้งเดียวตอนเข้าสู่ระบบ ผูกกับเครื่อง ออกจากระบบก็ยังเตือน)</div></div>
     <div class="header-right">
       <div class="role-tag" id="roleTag"></div>
+      <div id="pushBell" onclick="pushToggle()" title="แจ้งเตือน" style="cursor:pointer;font-size:20px;line-height:1;opacity:.45;margin-right:2px;display:none;">🔕</div>
       <div class="logout" onclick="doLogout()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </div>
@@ -523,6 +525,7 @@ function initFaceId(){
 }
 
 async function doFaceId(){
+  try{pushAskOnTap();}catch(e){}
   try{
     var sess=localStorage.getItem('jr_biometric');
     if(!sess){showToast('❌ ยังไม่ได้ตั้งค่า Face ID','err');return;}
@@ -743,6 +746,7 @@ function tilesAt(row,col,floor){return items.filter(function(x){return x.row===r
 function realTilesAt(row,col,floor){return tilesAt(row,+col,+floor).filter(function(x){return !isVacant(x);});}
 
 async function doLogin(){
+  try{pushAskOnTap();}catch(e){}
   try{
     var uid=document.getElementById('loginUser').value.trim();
     var pwd=document.getElementById('loginPass').value.trim();
@@ -796,7 +800,86 @@ var _timeGuard=setInterval(function(){
 },60000);
 
 function devTokCheck(){try{if(!currentUser||currentRole==='owner'||!window.__devTok)return;if(document.visibilityState!=='visible')return;sb.from('staff').select('session_token').eq('id',currentUser.id).maybeSingle().then(function(r){if(r&&r.data&&r.data.session_token&&r.data.session_token!==window.__devTok){showToast('🔒 บัญชีนี้ถูกล็อกอินที่เครื่องอื่น — เครื่องนี้ออกจากระบบ','err');setTimeout(function(){try{doLogout();}catch(e){}},700);}},function(){});}catch(e){}}setInterval(devTokCheck,60000);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')setTimeout(devTokCheck,800);});
+/* ===== แจ้งเตือนนอกแอป (Web Push) + เลขบนไอคอน ===== */
+var PUSH_PUBLIC='BKRwkoHBW6PviZJpeZtsRbYC1CU_8YX4_tUQMRP8hqwHK3s2pMsI-8nHljKWCG8aJvHiE0MgoU1tlBitTn8myX8';
+function pushSupported(){return 'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;}
+function pushIsIOS(){return /iPhone|iPad|iPod/i.test(navigator.userAgent);}
+function pushStandalone(){return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}
+function pushB64(b){var pad='='.repeat((4-b.length%4)%4);var r=(b+pad).replace(/-/g,'+').replace(/_/g,'/');var raw=atob(r);var a=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)a[i]=raw.charCodeAt(i);return a;}
+function pushReg(){if(!('serviceWorker' in navigator))return Promise.resolve(null);return navigator.serviceWorker.register('/sw.js').then(function(r){return r;},function(e){console.warn('sw',e);return null;});}
+function pushAskOnTap(){
+  /* ขอสิทธิ์แจ้งเตือนตอนแตะปุ่มเข้าสู่ระบบ (ต้องอยู่ในจังหวะแตะ ไม่งั้น iPhone ไม่ยอมถาม) — ถามครั้งเดียว ตอบแล้วไม่ถามซ้ำ */
+  if(!pushSupported())return;if(pushIsIOS()&&!pushStandalone())return;
+  if(Notification.permission!=='default')return;
+  Notification.requestPermission().then(function(){pushUI();});
+}
+function pushUI(){
+  var b=document.getElementById('pushBell');if(!b)return;
+  if(!pushSupported()&&!pushIsIOS()){b.style.display='none';return;}
+  b.style.display='';
+  var on=pushSupported()&&Notification.permission==='granted'&&!!window.__pushOn;
+  b.textContent=on?'🔔':'🔕';b.style.opacity=on?'1':'.45';
+  b.title=on?'แจ้งเตือนเปิดอยู่ (แตะเพื่อปิด)':'แตะเพื่อเปิดแจ้งเตือน';
+}
+async function pushSave(sub){
+  if(!currentUser||!sub)return false;
+  var j=sub.toJSON();
+  var row={staff_id:currentUser.id!=null?+currentUser.id:null,staff_name:currentUser.name||'',user_id:currentUser.userId||'',role:currentRole||'',is_purchasing:!!(currentUser.isPurchasing),endpoint:sub.endpoint,p256dh:(j.keys||{}).p256dh||'',auth:(j.keys||{}).auth||'',ua:navigator.userAgent.slice(0,180)};
+  var r=await sb.from('push_subs').upsert(row,{onConflict:'endpoint'});
+  if(r&&r.error){console.warn('push_subs',r.error);return false;}
+  window.__pushOn=true;return true;
+}
+async function pushAfterLogin(){
+  pushUI();
+  if(!pushSupported()||Notification.permission!=='granted')return;
+  var reg=await pushReg();if(!reg)return;
+  var sub=await reg.pushManager.getSubscription();
+  if(!sub){try{sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:pushB64(PUSH_PUBLIC)});}catch(e){return;}}
+  await pushSave(sub);pushUI();pushBadgeSync();
+}
+async function pushForget(){
+  if(!pushSupported())return;
+  try{var reg=await navigator.serviceWorker.getRegistration();var sub=reg&&await reg.pushManager.getSubscription();
+    if(sub)await sb.from('push_subs').delete().eq('endpoint',sub.endpoint);}catch(e){}
+  window.__pushOn=false;pushUI();try{pushBadgeSend(0);}catch(e){}
+}
+window.pushToggle=async function(){
+  if(!currentUser){showToast('เข้าสู่ระบบก่อน','err');return;}
+  if(pushIsIOS()&&!pushStandalone()){alert('iPhone ต้องเปิดจากไอคอนบนหน้าจอถึงจะเปิดแจ้งเตือนได้\n\nวิธีติดตั้ง: Safari → ปุ่มแชร์ → "เพิ่มไปยังหน้าจอโฮม" แล้วเปิดจากไอคอนนั้น');return;}
+  if(!pushSupported()){alert('เครื่องนี้ไม่รองรับแจ้งเตือน (ลองใช้ Chrome หรืออัปเดต iOS 16.4 ขึ้นไป)');return;}
+  if(window.__pushOn){if(!confirm('ปิดแจ้งเตือนเครื่องนี้?'))return;await pushForget();showToast('ปิดแจ้งเตือนแล้ว','ok');return;}
+  if(Notification.permission==='denied'){alert('เครื่องนี้เคยปฏิเสธการแจ้งเตือน ต้องไปเปิดในตั้งค่าเครื่อง → การแจ้งเตือน → JR Store');return;}
+  var perm=await Notification.requestPermission();
+  if(perm!=='granted'){showToast('ไม่ได้อนุญาต','err');pushUI();return;}
+  var reg=await pushReg();if(!reg){showToast('ลงทะเบียนไม่สำเร็จ (sw.js)','err');return;}
+  var sub;try{sub=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:pushB64(PUSH_PUBLIC)});}catch(e){showToast('สมัครแจ้งเตือนไม่สำเร็จ · '+(e.message||''),'err');return;}
+  if(await pushSave(sub)){showToast('🔔 เปิดแจ้งเตือนแล้ว · '+(currentUser.name||''),'ok');}else showToast('บันทึกไม่สำเร็จ','err');
+  pushUI();pushBadgeSync();
+};
+/* เลขบนไอคอน = รวมป้ายเลขค้างที่แสดงอยู่ */
+function pushBadgeCount(){
+  var ids=['nbApproveBadge','nbClaimBadge','nbSignBadge','nbDispatchBadge','jobPcBadge'];var n=0;
+  ids.forEach(function(id){var e=document.getElementById(id);if(!e)return;if(e.style.display==='none'||e.offsetParent===null)return;var v=parseInt((e.textContent||'').replace(/[^0-9]/g,''),10);if(v>0)n+=v;});
+  return n;
+}
+function pushBadgeSend(n){
+  try{if(navigator.setAppBadge){if(n>0)navigator.setAppBadge(n);else navigator.clearAppBadge();}}catch(e){}
+  try{if(navigator.serviceWorker&&navigator.serviceWorker.controller)navigator.serviceWorker.controller.postMessage({type:'jr-badge',n:n});}catch(e){}
+}
+function pushBadgeSync(){if(!currentUser)return;pushBadgeSend(pushBadgeCount());}
+setInterval(function(){try{if(document.visibilityState==='visible')pushBadgeSync();}catch(e){}},8000);
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')setTimeout(pushBadgeSync,1500);});
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){pushReg();});
+  navigator.serviceWorker.addEventListener('message',function(e){
+    var d=e.data||{};if(d.type!=='jr-open'||!currentUser)return;
+    var m={'#claim':'claim','#approve':'approve','#sign':'sign','#dispatch':'dispatch','#storefront':'sfsearch','#price':'list'};
+    var t=m[d.url];var el=t&&document.getElementById('nb-'+t);
+    if(el&&el.style.display!=='none'){try{go(t,el);}catch(x){}}
+  });
+}
 function doLogout(){
+  /* ไม่ลบการลงทะเบียนตอนออกจากระบบ — เครื่องนี้ยังเตือนคนล่าสุดที่ล็อกอิน จนกว่าคนอื่นจะล็อกอินแทน */
   currentRole=null;currentUser=null;
   try{localStorage.removeItem('jr_session');}catch(e){}
   try{sb.auth.signOut();}catch(e){}
@@ -808,6 +891,7 @@ function doLogout(){
 }
 
 function startApp(){
+  try{setTimeout(pushAfterLogin,800);setTimeout(pushAfterLogin,6000);}catch(e){}
   // Save session
   try{window.__devTok=dispUuid();localStorage.setItem('jr_session',JSON.stringify({userId:currentUser.userId,tok:window.__devTok}));if(currentUser&&currentUser.id!=null&&currentRole!=='owner'){sb.from('staff').update({session_token:window.__devTok}).eq('id',currentUser.id).then(function(){},function(){});}}catch(e){}
   document.getElementById('loginScreen').style.display='none';
@@ -4000,9 +4084,10 @@ var CLAIM_V={
   other:{l:'อื่นๆ ระบุ',wh:'✓ ทำแล้ว',needNote:1,end:1},
   cem_fill:{l:'ตักลงได้เลย · กรอกปูนลงถุงใหม่',wh:'🧱 กรอกปูนแล้ว',cem:1,fill:1},
   cem_hold_pallet:{l:'อย่าเพิ่งยุ่งกับพาเลทนี้ (รอจัดซื้อสั่ง)',cem:1,hold:1},
-  cem_hold_truck:{l:'อย่าเพิ่งลงทั้งคัน รอคำสั่ง',cem:1,hold:1}
+  cem_hold_truck:{l:'อย่าเพิ่งลงทั้งคัน รอคำสั่ง',cem:1,hold:1},
+  cem_no:{l:'เคลมไม่ได้ · ระบุเหตุผล',cem:1,close:1,needNote:1}
 };
-var CLAIM_CEM_KEYS=['cem_fill','cem_hold_pallet','cem_hold_truck','need_photo'];
+var CLAIM_CEM_KEYS=['cem_fill','cem_hold_pallet','cem_hold_truck','need_photo','cem_no'];
 var CLAIM_LIABLE={factory:'🏭 โรงงาน',transport:'🚛 ขนส่ง',shop:'🏬 ร้านรับเอง (ไม่ตามเงิน)'};
 function claimIsCem(x){return (x.category||'')==='ปูนถุง';}
 function claimShort(x){if(x.filled_qty==null)return null;var d=(+x.qty||0)-(+x.filled_qty||0);return d<0?0:d;}
@@ -4015,6 +4100,7 @@ function claimVSel(x,cur){
 }
 function claimIsWh(){return currentRole==='store'||currentRole==='admin'||currentRole==='owner';}
 function claimIsAcct(){return currentRole==='account'||currentRole==='owner';}
+function claimSeeMoney(){return currentRole==='account'||currentRole==='owner'||currentRole==='subowner';}
 function claimMe(){return (typeof dispMe==='function')?dispMe():(currentUser&&currentUser.name)||'';}
 function claimVL(v){return (CLAIM_V[v]||{}).l||v||'';}
 window.__claimView='list';
@@ -4042,7 +4128,9 @@ function claimItemState(x){
 function claimItemHtml(c,x,phs){
   var st=claimItemState(x);var V=CLAIM_V[x.verdict]||{};
   var h='<div style="border:1px solid '+(st==='closed'?'#e2e8f0':'#fde68a')+';background:'+(st==='closed'?'#f8fafc':'#fffbeb')+';border-radius:10px;padding:9px 10px;margin-bottom:6px;">'
-    +'<div style="font-size:13.5px;font-weight:800;color:#1b2420;">'+esc(x.name||'-')+' <span style="color:#b91c1c;">× '+(+x.qty||0)+' ชิ้น</span></div>'
+    +'<div style="display:flex;align-items:flex-start;gap:8px;"><div style="flex:1;font-size:13.5px;font-weight:800;color:#1b2420;">'+esc(x.name||'-')+' <span style="color:#b91c1c;">× '+(+x.qty||0)+' ชิ้น</span></div>'
+    +(x.filled_qty!=null&&claimShort(x)>0?'<div style="flex:none;background:#b91c1c;color:#fff;border-radius:12px;padding:6px 12px;text-align:center;line-height:1.1;box-shadow:0 2px 6px rgba(185,28,28,.35);"><div style="font-size:10.5px;font-weight:700;opacity:.9;">เสียหาย</div><div style="font-size:22px;font-weight:900;">'+claimShort(x)+'</div><div style="font-size:10.5px;font-weight:700;opacity:.9;">ถุง</div></div>':'')
+    +'</div>'
     +'<div style="font-size:11px;color:#6b7280;margin-bottom:5px;">'+esc(x.category||'-')+(x.lot_no?(' · <b>ล็อต '+esc(x.lot_no)+'</b>'):'')+(x.reason?(' · <b>'+esc(x.reason)+'</b>'):'')+(x.truck_plate?(' · รถ '+esc(x.truck_plate)):'')+'</div>';
   var ip=phs.filter(function(p){return p.item_id===x.id;});
   if(ip.length){h+='<div style="display:flex;gap:5px;overflow-x:auto;margin-bottom:6px;">';ip.forEach(function(p){if(p.thumb)h+='<div style="flex:none;text-align:center;"><img src="'+p.thumb+'" onclick="claimZoom('+p.id+')" style="height:64px;width:64px;object-fit:cover;border-radius:8px;border:1.5px solid #e5e7eb;cursor:pointer;"><div style="font-size:9.5px;color:#94a3b8;">'+(p.kind==='paint'?'หลังฉีดสี':p.kind==='extra'?'รูปเพิ่ม':'')+'</div></div>';});h+='</div>';}
@@ -4064,16 +4152,23 @@ function claimItemHtml(c,x,phs){
     if(claimIsWh()){h+='<div style="font-size:11.5px;color:#475569;font-weight:700;margin-bottom:4px;">ตักลงได้เลย — กรอกปูนลงถุงใหม่แล้วบอกว่าได้กี่ถุง (จาก '+(+x.qty||0)+' ถุง) ทำเมื่อว่างได้</div><div style="display:flex;gap:6px;"><input id="cf_'+x.id+'" type="number" inputmode="numeric" min="0" max="'+(+x.qty||0)+'" placeholder="กรอกได้กี่ถุง" style="flex:1;border:1.5px solid #fdba74;background:#fff7ed;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13.5px;text-align:center;"><button onclick="claimCemFill('+x.id+')" style="background:#0f766e;color:#fff;border:none;border-radius:9px;padding:9px 12px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🧱 กรอกปูนแล้ว</button></div>';}
     else h+='<div style="font-size:11.5px;color:#c2410c;font-weight:700;">⏳ รอสโตร์กรอกปูนลงถุงใหม่ (ทำเมื่อว่าง) แล้วบอกว่าได้กี่ถุง</div>';
   }else if(st==='liable'){
-    if(claimIsBuyer()||claimIsAcct()){h+='<div style="font-size:11.5px;font-weight:800;color:#475569;margin-bottom:4px;">ขาด '+claimShort(x)+' ถุง — เคลียร์แล้วใครรับผิดชอบ?</div><div style="display:flex;gap:6px;"><button onclick="claimLiable('+x.id+',\'factory\')" style="flex:1;background:#0f766e;color:#fff;border:none;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🏭 โรงงาน</button><button onclick="claimLiable('+x.id+',\'transport\')" style="flex:1;background:#c2410c;color:#fff;border:none;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🚛 ขนส่ง</button><button onclick="claimLiable('+x.id+',\'shop\')" style="flex:1;background:#fff;color:#475569;border:1.5px solid #cbd5e1;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:12px;font-weight:800;cursor:pointer;">🏬 ร้านรับเอง</button></div>';}
-    else h+='<div style="font-size:11.5px;color:#94a3b8;font-weight:700;">⏳ ขาด '+claimShort(x)+' ถุง — รอจัดซื้อ/บัญชีเคลียร์ว่าใครรับผิดชอบ</div>';
+    if(claimIsBuyer()){
+      window.__claimLiSel=window.__claimLiSel||{};var sel=window.__claimLiSel[x.id]||'';
+      function lb(v,txt,bg){var on=sel===v;return '<button onclick="claimLiPick('+x.id+',\''+v+'\')" style="flex:1;background:'+(on?bg:'#fff')+';color:'+(on?'#fff':'#475569')+';border:1.5px solid '+(on?bg:'#cbd5e1')+';border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:12.5px;font-weight:800;cursor:pointer;">'+txt+'</button>';}
+      h+='<div style="font-size:11.5px;font-weight:800;color:#475569;margin-bottom:4px;">ขาด '+claimShort(x)+' ถุง — ใครรับผิดชอบ?</div><div style="display:flex;gap:6px;margin-bottom:6px;">'+lb('factory','🏭 โรงงาน','#0f766e')+lb('transport','🚛 ขนส่ง','#c2410c')+((x.reason||'')==='ขนส่งโรงงาน'?'':lb('shop','🏬 ร้านรับเอง','#475569'))+'</div>';
+      if(sel==='shop'){h+='<button onclick="claimLiable('+x.id+',\'shop\')" style="width:100%;background:#475569;color:#fff;border:none;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">✓ ร้านรับเอง — จบรายการ</button>';}
+      else if(sel){h+='<div style="font-size:11.5px;font-weight:800;color:#475569;margin-bottom:4px;">'+CLAIM_LIABLE[sel]+' คืน '+claimShort(x)+' ถุง เป็นอะไร?</div><div style="display:flex;gap:6px;margin-bottom:5px;"><button onclick="claimLiableRet('+x.id+',\''+sel+'\',\'cn\')" style="flex:1;background:#1d4ed8;color:#fff;border:none;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💵 คืนเป็น CN</button><button onclick="claimLiableRet('+x.id+',\''+sel+'\',\'goods\')" style="flex:1;background:#7c3aed;color:#fff;border:none;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">📦 คืนเป็นของ</button></div>'
+        +'<button onclick="claimLiable('+x.id+',\''+sel+'\')" style="width:100%;background:#fff;color:#64748b;border:1.2px dashed #cbd5e1;border-radius:9px;padding:7px;font-family:Sarabun,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">บันทึกแค่ผู้รับผิดชอบก่อน ยังไม่รู้วิธีคืน</button>';}
+    }
+    else h+='<div style="font-size:11.5px;color:#94a3b8;font-weight:700;">⏳ ขาด '+claimShort(x)+' ถุง — รอจัดซื้อเคลียร์ว่าใครรับผิดชอบ</div>';
   }else if(st==='wh'){
     if(claimIsWh()){
       if(V.photo){h+='<label style="display:block;background:#0f766e;color:#fff;border-radius:9px;padding:10px;text-align:center;font-size:13px;font-weight:800;cursor:pointer;">'+V.wh+'<input type="file" accept="image/*" multiple onchange="claimWhPhoto(this,'+x.id+','+c.id+',\''+V.photo+'\')" style="display:none;"></label>';}
       else{h+='<button onclick="claimWhDone('+x.id+')" style="width:100%;background:#0f766e;color:#fff;border:none;border-radius:9px;padding:10px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">'+V.wh+' (สโตร์)</button>';}
     }else h+='<div style="font-size:11.5px;color:#c2410c;font-weight:700;">⏳ รอสโตร์: '+esc(V.wh||'ทำ')+'</div>';
   }else if(st==='pickret'){
-    if(claimIsBuyer()||claimIsAcct()){h+='<div style="font-size:11.5px;font-weight:800;color:#475569;margin-bottom:4px;">'+(V.fill?(CLAIM_LIABLE[x.liable]||'')+' คืน '+claimShort(x)+' ถุง เป็นอะไร?':'โรงงานคืนเป็นอะไร?')+'</div><div style="display:flex;gap:6px;"><button onclick="claimRet('+x.id+',\'cn\')" style="flex:1;background:#1d4ed8;color:#fff;border:none;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💵 คืนเป็น CN</button><button onclick="claimRet('+x.id+',\'goods\')" style="flex:1;background:#7c3aed;color:#fff;border:none;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">📦 คืนเป็นของ</button></div>';}
-    else h+='<div style="font-size:11.5px;color:#94a3b8;font-weight:700;">⏳ รอจัดซื้อ/บัญชีเลือกวิธีคืน</div>';
+    if(claimIsBuyer()){h+='<div style="font-size:11.5px;font-weight:800;color:#475569;margin-bottom:4px;">'+(V.fill?(CLAIM_LIABLE[x.liable]||'')+' คืน '+claimShort(x)+' ถุง เป็นอะไร?':'โรงงานคืนเป็นอะไร?')+'</div><div style="display:flex;gap:6px;"><button onclick="claimRet('+x.id+',\'cn\')" style="flex:1;background:#1d4ed8;color:#fff;border:none;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💵 คืนเป็น CN</button><button onclick="claimRet('+x.id+',\'goods\')" style="flex:1;background:#7c3aed;color:#fff;border:none;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">📦 คืนเป็นของ</button></div>';}
+    else h+='<div style="font-size:11.5px;color:#94a3b8;font-weight:700;">⏳ รอจัดซื้อเลือกวิธีคืน</div>';
   }else if(st==='cn'){
     if(claimIsAcct()){h+='<div style="display:flex;gap:6px;"><input id="ca_'+x.id+'" type="number" inputmode="decimal" placeholder="จำนวนเงิน CN (บาท)" style="flex:1;border:1.5px solid #93c5fd;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13.5px;"><button onclick="claimCnDone('+x.id+')" style="background:#1d4ed8;color:#fff;border:none;border-radius:9px;padding:9px 12px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">✓ คืน CN แล้ว</button></div>';}
     else h+='<div style="font-size:11.5px;color:#1d4ed8;font-weight:700;">💵 คืนเป็น CN — รอบัญชีบันทึกยอด</div>';
@@ -4082,7 +4177,7 @@ function claimItemHtml(c,x,phs){
     else h+='<div style="font-size:11.5px;color:#7c3aed;font-weight:700;">📦 คืนเป็นของ — รอสโตร์รับของ</div>';
   }else{
     var fin='✅ จบ';
-    if(x.return_type==='cn')fin='✅ จบ · CN '+(x.cn_amount!=null?(+x.cn_amount).toLocaleString():'-')+' บาท ('+esc(x.settled_by||'')+')';
+    if(x.return_type==='cn')fin='✅ จบ · คืนเป็น CN'+(claimSeeMoney()?(' '+(x.cn_amount!=null?(+x.cn_amount).toLocaleString():'-')+' บาท'):'')+' ('+esc(x.settled_by||'')+')';
     else if(x.return_type==='goods')fin='✅ จบ · รับของคืนแล้ว ('+esc(x.settled_by||'')+')';
     else if(V.close)fin='⛔ จบ · เคลมไม่ได้ ('+esc(x.verdict_by||'')+')';
     else if(V.fill&&x.liable==='shop')fin='✅ จบ · ร้านรับเอง ('+esc(x.liable_by||'')+')';
@@ -4097,10 +4192,14 @@ function claimRender(){
   var claims=window.__claims||[],items=window.__claimItems||[],photos=window.__claimPhotos||[];
   if(window.__claimView==='hist'){claimHistRender();return;}
   if(!claims.length){L.innerHTML='<div style="font-size:13px;color:#9aa5a1;padding:8px 2px;">ยังไม่มีใบเคลม</div>';return;}
-  var h='';var _lastD='';
-  claims.forEach(function(c){
-    var _dk=signDay(c.requested_at);
-    if(_dk!==_lastD){_lastD=_dk;var _n=claims.filter(function(y){return signDay(y.requested_at)===_dk;}).length;h+='<div style="font-size:12.5px;font-weight:800;color:#64748b;margin:10px 0 6px;">📅 '+_dk+' · '+_n+' ใบ</div>';}
+  var h='';window.__claimDayOpen=window.__claimDayOpen||{};
+  var _dmap={},_dord=[];claims.forEach(function(c){var k=(c.requested_at||'').slice(0,10)||signDay(c.requested_at);if(!_dmap[k]){_dmap[k]={lb:signDay(c.requested_at),rows:[]};_dord.push(k);}_dmap[k].rows.push(c);});
+  _dord.forEach(function(_dk){
+    var grp=_dmap[_dk].rows,_lb=_dmap[_dk].lb;var pend=grp.filter(function(c){return !c.closed_at;}).length;
+    if(!(_dk in window.__claimDayOpen))window.__claimDayOpen[_dk]=(pend>0);var dopen=!!window.__claimDayOpen[_dk];
+    h+='<div onclick="window.__claimDayOpen[\''+_dk+'\']=!window.__claimDayOpen[\''+_dk+'\'];claimRender();" style="background:'+(pend>0?'#fff7ed':'#f1f5f9')+';border:1.5px solid '+(pend>0?'#fdba74':'#e2e8f0')+';border-radius:10px;padding:9px 12px;margin:10px 0 6px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;"><span style="font-weight:800;font-size:14px;color:#1b2420;">'+(dopen?'▾':'▸')+' 📅 '+_lb+' · '+grp.length+' ใบ</span>'+(pend>0?'<span style="background:#fed7aa;color:#9a3412;border-radius:20px;padding:2px 10px;font-size:11.5px;font-weight:800;">ค้าง '+pend+'</span>':'<span style="background:#dcfce7;color:#166534;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">เสร็จหมด · แตะดู</span>')+'</div>';
+    if(!dopen)return;
+    grp.forEach(function(c){
     var its=items.filter(function(x){return x.claim_id===c.id;});
     var phs=photos.filter(function(x){return x.claim_id===c.id;});
     var gen=phs.filter(function(p){return !p.item_id&&p.kind==='damage';});
@@ -4111,18 +4210,37 @@ function claimRender(){
       +(done?'<span style="background:#f1f5f9;color:#64748b;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:800;">✅ จบแล้ว</span>':c.factory_notified_at?'<span style="background:#ecfdf5;color:#065f46;border:1px solid #6ee7b7;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:800;">📞 แจ้งโรงงานแล้ว</span>':'<span style="background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:800;">รอจัดซื้อแจ้งโรงงาน</span>')
       +'</div><div style="font-size:11px;color:#94a3b8;margin:3px 0 8px;">ลงโดย '+esc(c.requested_by||'-')+' · '+claimFmtD(c.requested_at)+' · รวม '+totalQty+' ชิ้น'+(c.note?(' · '+esc(c.note)):'')+(c.factory_notified_at?(' · แจ้งโรงงานโดย '+esc(c.factory_notified_by||'')):'')+'</div>';
     if(gen.length){h+='<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:8px;">';gen.forEach(function(p){if(p.thumb)h+='<img src="'+p.thumb+'" onclick="claimZoom('+p.id+')" style="height:88px;width:88px;object-fit:cover;border-radius:9px;border:1.5px solid #e5e7eb;flex:none;cursor:pointer;">';});h+='</div>';}
+    if(c.factory_notified_at&&claimIsBuyer()){
+      var pendIts=its.filter(function(x){var st=claimItemState(x);return st==='await'||st==='hold';});
+      var allCem=pendIts.length&&pendIts.every(claimIsCem),noneCem=pendIts.length&&!pendIts.some(claimIsCem);
+      if(pendIts.length>=2&&(allCem||noneCem)){
+        var keys=allCem?CLAIM_CEM_KEYS:Object.keys(CLAIM_V).filter(function(k){return !CLAIM_V[k].cem;});
+        h+='<div style="background:#f0fdfa;border:1.5px solid #5eead4;border-radius:11px;padding:9px 10px;margin-bottom:8px;"><div style="font-size:12px;font-weight:800;color:#0f766e;margin-bottom:5px;">⚡ เลือกผลทั้งใบทีเดียว ('+pendIts.length+' รายการที่ยังรอ) — หรือเลือกทีละรายการด้านล่างก็ได้</div>'
+          +'<select id="cva_'+c.id+'" onchange="claimVAllChg('+c.id+')" style="width:100%;box-sizing:border-box;border:1.5px solid #cbd5e1;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13px;margin-bottom:5px;"><option value="">— เลือกผลใช้กับทุกรายการ —</option>';
+        keys.forEach(function(k){h+='<option value="'+k+'">'+CLAIM_V[k].l+'</option>';});
+        h+='</select><input id="cna_'+c.id+'" placeholder="หมายเหตุถึงสโตร์ (ถ้ามี)" style="width:100%;box-sizing:border-box;border:1.5px solid #cbd5e1;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13px;margin-bottom:5px;">'
+          +'<button onclick="claimVSaveAll('+c.id+')" style="width:100%;background:#0f766e;color:#fff;border:none;border-radius:9px;padding:9px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💾 บันทึกผลทั้งใบ</button></div>';
+      }
+    }
     its.forEach(function(x){h+=claimItemHtml(c,x,phs);});
     if(!c.factory_notified_at&&claimIsBuyer()){h+='<button onclick="claimNotify('+c.id+')" style="width:100%;background:#0f766e;color:#fff;border:none;border-radius:10px;padding:11px;font-family:Sarabun,sans-serif;font-size:13px;font-weight:800;cursor:pointer;margin-top:4px;">📞 แจ้งโรงงานแล้ว (จัดซื้อ)</button>';}
     if(currentRole==='owner'||currentRole==='manager'){h+='<button onclick="claimDelete('+c.id+')" style="margin-top:7px;background:#fff;border:1.2px solid #fca5a5;color:#b91c1c;border-radius:8px;padding:5px 12px;font-family:Sarabun,sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;">ลบใบนี้</button>';}
     h+='</div>';
+    });
   });
   L.innerHTML=h;
 }
 function claimUpdItem(id,upd,msg){
+  /* อัปเดตหน้าจอทันที ไม่รอโหลดใหม่ */
+  var its=window.__claimItems||[];var x=its.find(function(i){return i.id===id;});var _bak=x?JSON.parse(JSON.stringify(x)):null;
+  if(x){Object.keys(upd).forEach(function(k){x[k]=upd[k];});
+    var cl=(window.__claims||[]).find(function(c){return c.id===x.claim_id;});
+    if(cl){var sib=its.filter(function(i){return i.claim_id===cl.id;});var all=sib.length&&sib.every(function(i){return !!i.closed_at;});cl.closed_at=all?new Date().toISOString():null;cl.status=all?'done':'open';}
+    try{claimRender();}catch(e){}}
   sb.from('store_claim_items').update(upd).eq('id',id).then(function(r){
-    if(r&&r.error){showToast('ไม่สำเร็จ','err');return;}
+    if(r&&r.error){showToast('ไม่สำเร็จ'+(r.error.message?(' · '+r.error.message):''),'err');if(x&&_bak){Object.keys(_bak).forEach(function(k){x[k]=_bak[k];});try{claimRender();}catch(e){}}claimLoad();return;}
     showToast(msg||'✓ บันทึกแล้ว','ok');claimCheckClose(id);
-  },function(){showToast('ไม่สำเร็จ','err');});
+  },function(){showToast('ไม่สำเร็จ','err');claimLoad();});
 }
 function claimCheckClose(itemId){
   sb.from('store_claim_items').select('claim_id').eq('id',itemId).maybeSingle().then(function(r){
@@ -4134,6 +4252,25 @@ function claimCheckClose(itemId){
   },function(){claimLoad();});
 }
 window.claimVChg=function(id){var v=(document.getElementById('cv_'+id)||{}).value||'';var n=document.getElementById('cn_'+id);var V=CLAIM_V[v]||{};if(n){n.placeholder=V.needNote?(V.close?'เหตุผล * ทำไมถึงเกิดแบบนี้ (บังคับ)':v==='need_photo'?'ต้องการภาพตรงไหนเพิ่ม * (บังคับ)':'ระบุ * (บังคับ)'):'หมายเหตุถึงสโตร์ (ถ้ามี)';n.style.borderColor=V.needNote?'#fdba74':'#cbd5e1';}};
+window.claimVAllChg=function(cid){var v=(document.getElementById('cva_'+cid)||{}).value||'';var n=document.getElementById('cna_'+cid);var V=CLAIM_V[v]||{};if(n){n.placeholder=V.needNote?(V.close?'เหตุผล * ทำไมถึงเคลมไม่ได้ (บังคับ)':v==='need_photo'?'ต้องการภาพตรงไหนเพิ่ม * (บังคับ)':'ระบุ * (บังคับ)'):'หมายเหตุถึงสโตร์ (ถ้ามี)';n.style.borderColor=V.needNote?'#fdba74':'#cbd5e1';}};
+window.claimVSaveAll=function(cid){
+  if(!claimIsBuyer()){showToast('เฉพาะจัดซื้อ','err');return;}
+  var v=(document.getElementById('cva_'+cid)||{}).value||'';var note=((document.getElementById('cna_'+cid)||{}).value||'').trim();
+  if(!v){showToast('เลือกผลก่อน','err');return;}
+  var V=CLAIM_V[v];if(V.needNote&&!note){showToast(V.close?'ต้องเขียนเหตุผลก่อนจบงาน':'ต้องระบุรายละเอียดก่อน','err');return;}
+  var its=(window.__claimItems||[]).filter(function(x){if(x.claim_id!==cid)return false;var st=claimItemState(x);return st==='await'||st==='hold';});
+  if(!its.length){showToast('ไม่มีรายการที่รออยู่','err');return;}
+  if(!confirm('ใช้ "'+V.l+'" กับ '+its.length+' รายการในใบนี้?'))return;
+  var now=new Date().toISOString(),who=claimMe();
+  var upd={verdict:v,verdict_by:who,verdict_at:now,wh_done_by:null,wh_done_at:null};
+  if(V.close){upd.close_reason=note;upd.closed_at=now;upd.verdict_note=null;}else{upd.verdict_note=note||null;}
+  its.forEach(function(x){Object.keys(upd).forEach(function(k){x[k]=upd[k];});});
+  try{claimRender();}catch(e){}
+  sb.from('store_claim_items').update(upd).in('id',its.map(function(x){return x.id;})).then(function(r){
+    if(r&&r.error){showToast('ไม่สำเร็จ'+(r.error.message?(' · '+r.error.message):''),'err');claimLoad();return;}
+    showToast('✓ บันทึกผล '+its.length+' รายการแล้ว','ok');claimCheckClose(its[0].id);
+  },function(){showToast('ไม่สำเร็จ','err');claimLoad();});
+};
 window.claimVSave=function(id){
   if(!claimIsBuyer()){showToast('เฉพาะจัดซื้อ','err');return;}
   var v=(document.getElementById('cv_'+id)||{}).value||'';var note=((document.getElementById('cn_'+id)||{}).value||'').trim();
@@ -4167,14 +4304,20 @@ window.claimCemFill=function(id){
   if(n>q){showToast('กรอกได้ไม่เกิน '+q+' ถุงที่แตก','err');return;}
   var now=new Date().toISOString(),who=claimMe();var sh=q-n;
   var upd={filled_qty:n,wh_done_by:who,wh_done_at:now};if(sh<=0)upd.closed_at=now;
-  claimUpdItem(id,upd,sh<=0?'✅ กรอกได้ครบ ไม่ขาด — จบรายการ':'🧱 กรอกได้ '+n+' ถุง ขาด '+sh+' ถุง — ส่งให้จัดซื้อ/บัญชีเคลียร์');
+  claimUpdItem(id,upd,sh<=0?'✅ กรอกได้ครบ ไม่ขาด — จบรายการ':'🧱 กรอกได้ '+n+' ถุง ขาด '+sh+' ถุง — ส่งให้จัดซื้อเคลียร์');
+};
+window.claimLiPick=function(id,who){window.__claimLiSel=window.__claimLiSel||{};window.__claimLiSel[id]=who;claimRender();};
+window.claimLiableRet=function(id,who,typ){
+  if(!(claimIsBuyer())){showToast('เฉพาะจัดซื้อ','err');return;}
+  var now=new Date().toISOString(),me=claimMe();
+  claimUpdItem(id,{liable:who,liable_by:me,liable_at:now,return_type:typ,return_by:me,return_at:now},'👉 '+(CLAIM_LIABLE[who]||who)+' · '+(typ==='cn'?'คืนเป็น CN — รอบัญชีใส่ยอด':'คืนเป็นของ — รอสโตร์รับ'));
 };
 window.claimLiable=function(id,who){
-  if(!(claimIsBuyer()||claimIsAcct())){showToast('เฉพาะจัดซื้อ/บัญชี','err');return;}
+  if(!(claimIsBuyer())){showToast('เฉพาะจัดซื้อ','err');return;}
   var now=new Date().toISOString();var upd={liable:who,liable_by:claimMe(),liable_at:now};if(who==='shop')upd.closed_at=now;
   claimUpdItem(id,upd,who==='shop'?'✅ ร้านรับเอง — จบรายการ':'👉 '+(CLAIM_LIABLE[who]||who)+' รับผิดชอบ — เลือกวิธีคืนต่อ');
 };
-window.claimRet=function(id,typ){if(!(claimIsBuyer()||claimIsAcct())){showToast('เฉพาะจัดซื้อ/บัญชี','err');return;}claimUpdItem(id,{return_type:typ,return_by:claimMe(),return_at:new Date().toISOString()},typ==='cn'?'💵 คืนเป็น CN — รอบัญชี':'📦 คืนเป็นของ — รอสโตร์รับ');};
+window.claimRet=function(id,typ){if(!(claimIsBuyer())){showToast('เฉพาะจัดซื้อ','err');return;}claimUpdItem(id,{return_type:typ,return_by:claimMe(),return_at:new Date().toISOString()},typ==='cn'?'💵 คืนเป็น CN — รอบัญชี':'📦 คืนเป็นของ — รอสโตร์รับ');};
 window.claimCnDone=function(id){if(!claimIsAcct()){showToast('เฉพาะบัญชี','err');return;}var a=parseFloat((document.getElementById('ca_'+id)||{}).value);if(!(a>0)){showToast('กรอกจำนวนเงิน CN','err');return;}var now=new Date().toISOString();claimUpdItem(id,{cn_amount:a,settled_by:claimMe(),settled_at:now,closed_at:now},'✅ บันทึก CN '+a.toLocaleString()+' บาท — จบรายการ');};
 window.claimGoodsDone=function(id){if(!claimIsWh()){showToast('เฉพาะสโตร์','err');return;}var now=new Date().toISOString();claimUpdItem(id,{settled_by:claimMe(),settled_at:now,closed_at:now},'✅ รับของคืนแล้ว — จบรายการ');};
 /* ---- ย้อนหลัง ---- */
@@ -4200,9 +4343,9 @@ window.claimHistRender=function(){
   if(!rows.length){box.innerHTML='<div style="font-size:13px;color:#9aa5a1;padding:8px 2px;">ไม่พบรายการ</div>';return;}
   var h='';var lastK='';var sum=0,cnt=0;
   rows.forEach(function(r){
-    if(r.k!==lastK){lastK=r.k;var mrows=rows.filter(function(z){return z.k===r.k;});var s=0;mrows.forEach(function(z){s+=(+z.x.cn_amount||0);});var p=r.k.split('-');h+='<div style="font-size:13px;font-weight:800;color:#1b2420;margin:12px 0 6px;">📆 '+['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][+p[1]-1]+' '+(+p[0]+543)+' · '+mrows.length+' รายการ'+(s?(' · CN รวม <span style="color:#1d4ed8;">'+s.toLocaleString()+' บาท</span>'):'')+'</div>';}
+    if(r.k!==lastK){lastK=r.k;var mrows=rows.filter(function(z){return z.k===r.k;});var s=0;mrows.forEach(function(z){s+=(+z.x.cn_amount||0);});var p=r.k.split('-');h+='<div style="font-size:13px;font-weight:800;color:#1b2420;margin:12px 0 6px;">📆 '+['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][+p[1]-1]+' '+(+p[0]+543)+' · '+mrows.length+' รายการ'+(s&&claimSeeMoney()?(' · CN รวม <span style="color:#1d4ed8;">'+s.toLocaleString()+' บาท</span>'):'')+'</div>';}
     var x=r.x,c=r.c;var st=claimItemState(x);var V=CLAIM_V[x.verdict]||{};
-    var res=st==='closed'?(x.return_type==='cn'?('CN '+(+x.cn_amount||0).toLocaleString()+' บาท'):x.return_type==='goods'?'รับของคืนแล้ว':V.close?'เคลมไม่ได้':'จบ'):'⏳ ยังไม่จบ';
+    var res=st==='closed'?(x.return_type==='cn'?(claimSeeMoney()?('CN '+(+x.cn_amount||0).toLocaleString()+' บาท'):'คืนเป็น CN'):x.return_type==='goods'?'รับของคืนแล้ว':V.close?'เคลมไม่ได้':'จบ'):'⏳ ยังไม่จบ';
     h+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:8px 10px;margin-bottom:5px;">'
       +'<div style="display:flex;gap:8px;align-items:center;"><span style="flex:1;font-size:13px;font-weight:800;color:#1b2420;">'+esc(x.name||'-')+' <span style="color:#b91c1c;">×'+(+x.qty||0)+'</span></span><span style="font-size:11px;color:#94a3b8;flex:none;">'+claimFmtD(c.requested_at)+'</span></div>'
       +'<div style="font-size:11px;color:#6b7280;">'+esc(c.brand||'')+' · '+esc(x.category||'')+(x.lot_no?(' · ล็อต '+esc(x.lot_no)):'')+(x.reason?(' · '+esc(x.reason)):'')+(x.truck_plate?(' · รถ '+esc(x.truck_plate)):'')+(x.filled_qty!=null?(' · กรอกได้ '+(+x.filled_qty)+' ขาด '+claimShort(x)+' ถุง'):'')+(x.liable?(' · '+(CLAIM_LIABLE[x.liable]||x.liable)):'')+'</div>'
@@ -4220,15 +4363,19 @@ window.claimZoom=function(pid){
 window.claimNotify=function(id){
   if(!claimIsBuyer()){showToast('เฉพาะจัดซื้อ/หัวหน้า','err');return;}
   var who=(typeof dispMe==='function')?dispMe():(currentUser||'');
-  sb.from('store_claims').update({factory_notified_by:who,factory_notified_at:new Date().toISOString()}).eq('id',id).then(function(r){
-    if(r&&r.error){showToast('ไม่สำเร็จ','err');return;}
-    showToast('📞 บันทึกแจ้งโรงงานแล้ว','ok');claimLoad();
-  },function(){showToast('ไม่สำเร็จ','err');});
+  var now=new Date().toISOString();var c=(window.__claims||[]).find(function(z){return z.id===id;});
+  if(c){c.factory_notified_by=who;c.factory_notified_at=now;try{claimRender();}catch(e){}}
+  sb.from('store_claims').update({factory_notified_by:who,factory_notified_at:now}).eq('id',id).then(function(r){
+    if(r&&r.error){showToast('ไม่สำเร็จ'+(r.error.message?(' · '+r.error.message):''),'err');if(c){c.factory_notified_by=null;c.factory_notified_at=null;}claimLoad();return;}
+    showToast('📞 บันทึกแจ้งโรงงานแล้ว','ok');
+  },function(){showToast('ไม่สำเร็จ','err');claimLoad();});
 };
 window.claimDelete=function(id){
   if(!confirm('ลบใบเคลมนี้ทั้งใบ? (รวมรูปและรายการทั้งหมด)'))return;
   sb.from('store_claim_photos').delete().eq('claim_id',id).then(function(){
-    sb.from('store_claims').delete().eq('id',id).then(function(){showToast('ลบแล้ว','ok');claimLoad();},function(){showToast('ไม่สำเร็จ','err');});
+    sb.from('store_claim_items').delete().eq('claim_id',id).then(function(){
+      sb.from('store_claims').delete().eq('id',id).then(function(r){if(r&&r.error){showToast('ไม่สำเร็จ · '+(r.error.message||''),'err');return;}showToast('ลบแล้ว','ok');claimLoad();},function(){showToast('ไม่สำเร็จ','err');});
+    },function(){showToast('ไม่สำเร็จ','err');});
   },function(){showToast('ไม่สำเร็จ','err');});
 };
 /* ---- ฟอร์มลงใบเคลม ---- */
@@ -4440,8 +4587,8 @@ window.whBadgeRefresh=function(){
           if(st==='await'&&buyer&&c.factory_notified_at)n++;
           else if(st==='wh'&&wh)n++;
           else if(st==='hold'&&buyer)n++;
-          else if(st==='liable'&&(buyer||acct))n++;
-          else if(st==='pickret'&&(buyer||acct))n++;
+          else if(st==='liable'&&buyer)n++;
+          else if(st==='pickret'&&buyer)n++;
           else if(st==='cn'&&acct)n++;
           else if(st==='goods'&&wh)n++;
         });
