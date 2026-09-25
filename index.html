@@ -4654,9 +4654,7 @@ function claimShareText(c,its){
   if(c.note)L.push('หมายเหตุ: '+c.note);
   var plates=[];its.forEach(function(x){if(x.truck_plate&&plates.indexOf(x.truck_plate)<0)plates.push(x.truck_plate);});
   if(plates.length)L.push('ทะเบียนรถ: '+plates.join(', '));
-  var reasons=[];its.forEach(function(x){if(x.reason&&reasons.indexOf(x.reason)<0)reasons.push(x.reason);});
-  if(reasons.length)L.push('สาเหตุ: '+reasons.join(', '));
-  L.push('JR Store · ลงวันที่ '+th+(c.requested_by?(' โดย '+c.requested_by):''));
+  L.push('JR Store · '+th);
   return L.join('\n');
 }
 window.claimShare=function(cid){
